@@ -22,6 +22,7 @@ _$AccountGroupImpl _$$AccountGroupImplFromJson(Map<String, dynamic> json) =>
     _$AccountGroupImpl(
       iconName: json['icon'] as String,
       name: json['name'] as String,
+      color: json['color'] as int,
       accounts: (json['accounts'] as List<dynamic>)
           .map((e) => Account.fromJson(e as Map<String, dynamic>))
           .toList(),
@@ -31,6 +32,7 @@ Map<String, dynamic> _$$AccountGroupImplToJson(_$AccountGroupImpl instance) =>
     <String, dynamic>{
       'icon': instance.iconName,
       'name': instance.name,
+      'color': instance.color,
       'accounts': instance.accounts,
     };
 

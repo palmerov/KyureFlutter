@@ -87,7 +87,10 @@ class AccountItemMolecule extends StatelessWidget {
                 children: [
                   Text(
                     name,
-                    style: Theme.of(context).textTheme.titleMedium,
+                    style: TextStyle(
+                        color: kyTheme.colorOnBackground,
+                        fontWeight: FontWeight.w400,
+                        fontSize: 18),
                   ),
                   const SizedBox(height: 8),
                   Text(
@@ -105,12 +108,14 @@ class AccountItemMolecule extends StatelessWidget {
                 Icons.person,
                 color: kyTheme.colorAccount,
               ),
+              padding: const EdgeInsets.all(10),
               color: kyTheme.colorAccount,
               onTap: (details) => copyUser(context, details.globalPosition),
             ),
             const SizedBox(width: 6),
             CopyAreaMolecule(
               icon: Icon(Icons.key_rounded, color: kyTheme.colorPassword),
+              padding: const EdgeInsets.all(10),
               color: kyTheme.colorPassword,
               onTap: (details) => copyPassword(context, details.globalPosition),
             )

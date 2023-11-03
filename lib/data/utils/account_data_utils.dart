@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:kyure/data/models/accounts_data.dart';
 
 class AccountDataUtils {
@@ -5,6 +6,7 @@ class AccountDataUtils {
     if (accountsData.accountGroups.length > 1) {
       AccountGroup groupAll = AccountGroup(
           iconName: 'assets/group_icons/widgets_black_24dp.svg',
+          color: Colors.blue.shade700.value,
           name: 'Todos',
           accounts: []);
       for (AccountGroup group in accountsData.accountGroups) {

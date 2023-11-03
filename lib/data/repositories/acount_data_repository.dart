@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:kyure/data/models/accounts_data.dart';
 import 'package:kyure/data/models/user_data.dart';
@@ -42,6 +43,7 @@ class AccountDataRepositoryMocked implements AccountDataRepository {
         accountsData: AccountsData(accountGroups: [
           AccountGroup(
               name: 'Social',
+              color: const Color.fromARGB(255, 44, 124, 44).value,
               iconName: 'assets/group_icons/groups_black_24dp.svg',
               accounts: [
                 Account(
@@ -169,6 +171,7 @@ class AccountDataRepositoryMocked implements AccountDataRepository {
               iconName:
                   'assets/group_icons/account_balance_wallet_black_24dp.svg',
               name: 'Pagos',
+              color: const Color.fromARGB(255, 189, 109, 11).value,
               accounts: [
                 Account(
                     id: 3,

@@ -163,6 +163,10 @@ mixin _$AccountGroup {
   String get name => throw _privateConstructorUsedError;
   @JsonKey(name: 'name')
   set name(String value) => throw _privateConstructorUsedError;
+  @JsonKey(name: 'color')
+  int get color => throw _privateConstructorUsedError;
+  @JsonKey(name: 'color')
+  set color(int value) => throw _privateConstructorUsedError;
   @JsonKey(name: 'accounts')
   List<Account> get accounts => throw _privateConstructorUsedError;
   @JsonKey(name: 'accounts')
@@ -183,6 +187,7 @@ abstract class $AccountGroupCopyWith<$Res> {
   $Res call(
       {@JsonKey(name: 'icon') String iconName,
       @JsonKey(name: 'name') String name,
+      @JsonKey(name: 'color') int color,
       @JsonKey(name: 'accounts') List<Account> accounts});
 }
 
@@ -201,6 +206,7 @@ class _$AccountGroupCopyWithImpl<$Res, $Val extends AccountGroup>
   $Res call({
     Object? iconName = null,
     Object? name = null,
+    Object? color = null,
     Object? accounts = null,
   }) {
     return _then(_value.copyWith(
@@ -212,6 +218,10 @@ class _$AccountGroupCopyWithImpl<$Res, $Val extends AccountGroup>
           ? _value.name
           : name // ignore: cast_nullable_to_non_nullable
               as String,
+      color: null == color
+          ? _value.color
+          : color // ignore: cast_nullable_to_non_nullable
+              as int,
       accounts: null == accounts
           ? _value.accounts
           : accounts // ignore: cast_nullable_to_non_nullable
@@ -231,6 +241,7 @@ abstract class _$$AccountGroupImplCopyWith<$Res>
   $Res call(
       {@JsonKey(name: 'icon') String iconName,
       @JsonKey(name: 'name') String name,
+      @JsonKey(name: 'color') int color,
       @JsonKey(name: 'accounts') List<Account> accounts});
 }
 
@@ -247,6 +258,7 @@ class __$$AccountGroupImplCopyWithImpl<$Res>
   $Res call({
     Object? iconName = null,
     Object? name = null,
+    Object? color = null,
     Object? accounts = null,
   }) {
     return _then(_$AccountGroupImpl(
@@ -258,6 +270,10 @@ class __$$AccountGroupImplCopyWithImpl<$Res>
           ? _value.name
           : name // ignore: cast_nullable_to_non_nullable
               as String,
+      color: null == color
+          ? _value.color
+          : color // ignore: cast_nullable_to_non_nullable
+              as int,
       accounts: null == accounts
           ? _value.accounts
           : accounts // ignore: cast_nullable_to_non_nullable
@@ -272,6 +288,7 @@ class _$AccountGroupImpl implements _AccountGroup {
   _$AccountGroupImpl(
       {@JsonKey(name: 'icon') required this.iconName,
       @JsonKey(name: 'name') required this.name,
+      @JsonKey(name: 'color') required this.color,
       @JsonKey(name: 'accounts') required this.accounts});
 
   factory _$AccountGroupImpl.fromJson(Map<String, dynamic> json) =>
@@ -284,12 +301,15 @@ class _$AccountGroupImpl implements _AccountGroup {
   @JsonKey(name: 'name')
   String name;
   @override
+  @JsonKey(name: 'color')
+  int color;
+  @override
   @JsonKey(name: 'accounts')
   List<Account> accounts;
 
   @override
   String toString() {
-    return 'AccountGroup(iconName: $iconName, name: $name, accounts: $accounts)';
+    return 'AccountGroup(iconName: $iconName, name: $name, color: $color, accounts: $accounts)';
   }
 
   @JsonKey(ignore: true)
@@ -310,6 +330,7 @@ abstract class _AccountGroup implements AccountGroup {
   factory _AccountGroup(
           {@JsonKey(name: 'icon') required String iconName,
           @JsonKey(name: 'name') required String name,
+          @JsonKey(name: 'color') required int color,
           @JsonKey(name: 'accounts') required List<Account> accounts}) =
       _$AccountGroupImpl;
 
@@ -326,6 +347,11 @@ abstract class _AccountGroup implements AccountGroup {
   String get name;
   @JsonKey(name: 'name')
   set name(String value);
+  @override
+  @JsonKey(name: 'color')
+  int get color;
+  @JsonKey(name: 'color')
+  set color(int value);
   @override
   @JsonKey(name: 'accounts')
   List<Account> get accounts;

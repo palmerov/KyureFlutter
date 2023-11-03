@@ -35,7 +35,7 @@ class _AccountListView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final wsize = MediaQuery.of(context).size;
+    final wsizeP = MediaQuery.of(context).size;
     final kyTheme = KyTheme.of(context)!;
     AccountListPageBloc bloc = BlocProvider.of<AccountListPageBloc>(context);
     return Scaffold(
@@ -49,8 +49,10 @@ class _AccountListView extends StatelessWidget {
           title: Padding(
             padding: const EdgeInsets.symmetric(vertical: 8),
             child: BlocBuilder<AccountListPageBloc, AccountListPageState>(
-              buildWhen: (previous, current) => previous != current &&
-                  previous is AccountListPageStateLoading|| previous is AccountListPageStateInitial,
+              buildWhen: (previous, current) =>
+                  previous != current &&
+                      previous is AccountListPageStateLoading ||
+                  previous is AccountListPageStateInitial,
               builder: (context, state) {
                 return SearchBarMolecule(
                   enabled: state is! AccountListPageStateLoading,
@@ -86,10 +88,11 @@ class _AccountListView extends StatelessWidget {
                           final group = state.accountGroups[groupIndex];
                           return AccountGroupMolecule(
                               text: group.name,
+                              color: Color(group.color),
                               icon: SvgPicture.asset(
                                 group.iconName,
                                 colorFilter: ColorFilter.mode(
-                                    kyTheme.colorOnBackground, BlendMode.srcIn),
+                                    Color(group.color), BlendMode.srcIn),
                               ),
                               onTap: () => bloc.selectGroup(groupIndex),
                               selected: state.selectedGroupIndex == groupIndex);
@@ -121,19 +124,21 @@ class _AccountListView extends StatelessWidget {
                       listenWhen: (previous, current) =>
                           previous != current &&
                           current is AccountListPageSelectedGroupState,
-                      listener: (context, state) {
+                      listener: (context, state) async {
                         if (state is AccountListPageSelectedGroupState) {
-                          pageController.animateToPage(state.selectedGroupIndex,
+                          bloc.listenPageView = false;
+                          await pageController.animateToPage(
+                              state.selectedGroupIndex,
                               duration: const Duration(milliseconds: 300),
                               curve: Curves.easeInOut);
+                          bloc.listenPageView = true;
                         }
                       },
                       child: PageView.builder(
                         itemCount: state.accountGroups.length,
                         controller: pageController,
-                        onPageChanged: (value) {
-                          bloc.selectGroup(value);
-                        },
+                        onPageChanged: (value) =>
+                            {if (bloc.listenPageView) bloc.selectGroup(value)},
                         itemBuilder: (context, groupIndex) => Center(
                           child: ListView.separated(
                             physics: const BouncingScrollPhysics(),

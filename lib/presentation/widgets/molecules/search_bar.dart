@@ -46,6 +46,7 @@ class _SearchBarMoleculeState extends State<SearchBarMolecule> {
             borderRadius: kyTheme.searchViewRadius,
             border: Border.all(color: kyTheme.colorSeparatorLine, width: 1)),
         child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Padding(
                 padding: const EdgeInsets.only(right: 8, left: 12),
@@ -54,14 +55,17 @@ class _SearchBarMoleculeState extends State<SearchBarMolecule> {
                     onTap: widget.enabled ? widget.onLeadingTap : null,
                     child: Icon(Icons.menu_rounded, color: kyTheme.colorHint))),
             Expanded(
-              child: TextField(
-                enabled: widget.enabled,
-                decoration: InputDecoration(
-                  border: InputBorder.none,
-                  hintText: widget.hintText ?? 'Filter',
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: TextField(
+                  enabled: widget.enabled,
+                  decoration: InputDecoration(
+                    border: InputBorder.none,
+                    hintText: widget.hintText ?? 'Filter',
+                  ),
+                  onChanged: changedText,
+                  controller: textEditingController,
                 ),
-                onChanged: changedText,
-                controller: textEditingController,
               ),
             ),
             Padding(

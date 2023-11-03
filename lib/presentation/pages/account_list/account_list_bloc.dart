@@ -5,6 +5,7 @@ import 'package:equatable/equatable.dart';
 
 class AccountListPageBloc extends Cubit<AccountListPageState> {
   final UserDataService userDataService;
+  bool listenPageView=true;
 
   AccountListPageBloc(this.userDataService)
       : super(const AccountListPageStateInitial());
@@ -39,15 +40,20 @@ class AccountListPageBloc extends Cubit<AccountListPageState> {
         }
         if (accounts.isNotEmpty) {
           groups.add(AccountGroup(
-              iconName: group.iconName, name: group.name, accounts: accounts));
+              iconName: group.iconName,
+              color: group.color,
+              name: group.name,
+              accounts: accounts));
         }
       }
       bool equal = true;
-      for (int i = 0; i < groups.length; i++) {
-        if (groups[i].accounts.length !=
-            state.accountGroups[i].accounts.length) {
-          equal = false;
-          break;
+      if (groups.length != state.accountGroups.length) {
+        for (int i = 0; i < groups.length; i++) {
+          if (groups[i].accounts.length !=
+              state.accountGroups[i].accounts.length) {
+            equal = false;
+            break;
+          }
         }
       }
       if (!equal) emit(AccountListPageFilteredState(groups, filter));
@@ -62,6 +68,7 @@ class AccountListPageBloc extends Cubit<AccountListPageState> {
     emit(AccountListPageSelectedGroupState(
         userDataService.accountsData!.accountGroups, index));
   }
+
 }
 
 class AccountListPageState extends Equatable {

@@ -7,8 +7,10 @@ class AccountGroupMolecule extends StatelessWidget {
       required this.text,
       this.icon,
       required this.onTap,
-      required this.selected});
+      required this.selected,
+      required this.color});
   final String text;
+  final Color color;
   final Widget? icon;
   final Function() onTap;
   final bool selected;
@@ -20,7 +22,7 @@ class AccountGroupMolecule extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 4),
       child: Container(
         decoration: BoxDecoration(
-            color: selected ? kyTheme.colorSeparatorLine : null,
+            color: selected ? color.withOpacity(0.1) : null,
             border: Border.all(color: kyTheme.colorSeparatorLine, width: 1),
             borderRadius: const BorderRadius.all(Radius.circular(16))),
         child: InkWell(

@@ -18,6 +18,7 @@ class AccountGroup with _$AccountGroup {
   factory AccountGroup(
           {@JsonKey(name: 'icon') required String iconName,
           @JsonKey(name: 'name') required String name,
+          @JsonKey(name: 'color') required int color,
           @JsonKey(name: 'accounts') required List<Account> accounts}) =
       _AccountGroup;
 

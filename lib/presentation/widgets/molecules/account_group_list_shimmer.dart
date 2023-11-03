@@ -20,7 +20,8 @@ class AccountGroupListShimmerMolecule extends StatelessWidget {
           highlightColor: kyTheme.colorBackground,
           child: AccountGroupMolecule(
             text: 'Loading',
-            icon: const Icon(Icons.square),
+            color: kyTheme.colorSeparatorLine,
+            icon: const Icon(Icons.square_rounded),
             onTap: () {},
             selected: index == 0,
           ),
