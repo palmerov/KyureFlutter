@@ -31,7 +31,7 @@ class KyTheme extends InheritedWidget {
 
   bool get light => theme.brightness == Brightness.light;
 
-  final double listItemSeparatorHeight = 1;
+  final double listItemSeparatorHeight = 0.5;
 
   final BorderRadius searchViewRadius = BorderRadius.all(Radius.circular(16));
 
@@ -50,6 +50,7 @@ class KyTheme extends InheritedWidget {
   final Color _colorDarkAccount = const Color.fromARGB(255, 35, 131, 51);
   final Color _colorDarkToastBackground = const Color.fromARGB(127, 0, 0, 0);
   final Color _colorDarkToastText = const Color.fromARGB(255, 24, 24, 24);
+
 
   //Getter
   get colorSeparatorLine =>
@@ -75,4 +76,6 @@ class KyTheme extends InheritedWidget {
 
   Color get colorPrimary =>
       light ? lightTheme.colorScheme.primary : Colors.black;
+
+      
 }

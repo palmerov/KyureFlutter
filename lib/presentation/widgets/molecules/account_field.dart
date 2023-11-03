@@ -1,7 +1,7 @@
 import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:kyure/clipboard_utils.dart';
-import 'package:kyure/data/models/account_field.dart';
+import 'package:kyure/data/models/accounts_data.dart';
 import 'package:kyure/presentation/theme/ky_theme.dart';
 import 'package:kyure/presentation/widgets/molecules/copy_area.dart';
 import 'package:kyure/presentation/widgets/molecules/toast_widget.dart';

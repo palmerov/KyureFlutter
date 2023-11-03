@@ -40,7 +40,7 @@ class _CopyAreaMoleculeState extends State<CopyAreaMolecule> {
           ]);
         });
       });
-      await Future.delayed(10.seconds);
+      await Future.delayed(20.seconds);
       copied = false;
       if (mounted) {
         setState(() {

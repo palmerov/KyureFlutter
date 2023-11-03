@@ -66,7 +66,7 @@ class AccountItemMolecule extends StatelessWidget {
     return InkWell(
       onTap: onTap ?? () {},
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 20),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [

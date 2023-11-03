@@ -28,6 +28,10 @@ mixin _$UserData {
   String get datacrypt => throw _privateConstructorUsedError;
   @JsonKey(name: 'datacrypt')
   set datacrypt(String value) => throw _privateConstructorUsedError;
+  @JsonKey(includeToJson: false, includeFromJson: false)
+  AccountsData? get accountsData => throw _privateConstructorUsedError;
+  @JsonKey(includeToJson: false, includeFromJson: false)
+  set accountsData(AccountsData? value) => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
@@ -42,7 +46,11 @@ abstract class $UserDataCopyWith<$Res> {
   @useResult
   $Res call(
       {@JsonKey(name: 'version') int version,
-      @JsonKey(name: 'datacrypt') String datacrypt});
+      @JsonKey(name: 'datacrypt') String datacrypt,
+      @JsonKey(includeToJson: false, includeFromJson: false)
+      AccountsData? accountsData});
+
+  $AccountsDataCopyWith<$Res>? get accountsData;
 }
 
 /// @nodoc
@@ -60,6 +68,7 @@ class _$UserDataCopyWithImpl<$Res, $Val extends UserData>
   $Res call({
     Object? version = null,
     Object? datacrypt = null,
+    Object? accountsData = freezed,
   }) {
     return _then(_value.copyWith(
       version: null == version
@@ -70,7 +79,23 @@ class _$UserDataCopyWithImpl<$Res, $Val extends UserData>
           ? _value.datacrypt
           : datacrypt // ignore: cast_nullable_to_non_nullable
               as String,
+      accountsData: freezed == accountsData
+          ? _value.accountsData
+          : accountsData // ignore: cast_nullable_to_non_nullable
+              as AccountsData?,
     ) as $Val);
+  }
+
+  @override
+  @pragma('vm:prefer-inline')
+  $AccountsDataCopyWith<$Res>? get accountsData {
+    if (_value.accountsData == null) {
+      return null;
+    }
+
+    return $AccountsDataCopyWith<$Res>(_value.accountsData!, (value) {
+      return _then(_value.copyWith(accountsData: value) as $Val);
+    });
   }
 }
 
@@ -84,7 +109,12 @@ abstract class _$$UserDataImplCopyWith<$Res>
   @useResult
   $Res call(
       {@JsonKey(name: 'version') int version,
-      @JsonKey(name: 'datacrypt') String datacrypt});
+      @JsonKey(name: 'datacrypt') String datacrypt,
+      @JsonKey(includeToJson: false, includeFromJson: false)
+      AccountsData? accountsData});
+
+  @override
+  $AccountsDataCopyWith<$Res>? get accountsData;
 }
 
 /// @nodoc
@@ -100,6 +130,7 @@ class __$$UserDataImplCopyWithImpl<$Res>
   $Res call({
     Object? version = null,
     Object? datacrypt = null,
+    Object? accountsData = freezed,
   }) {
     return _then(_$UserDataImpl(
       version: null == version
@@ -110,6 +141,10 @@ class __$$UserDataImplCopyWithImpl<$Res>
           ? _value.datacrypt
           : datacrypt // ignore: cast_nullable_to_non_nullable
               as String,
+      accountsData: freezed == accountsData
+          ? _value.accountsData
+          : accountsData // ignore: cast_nullable_to_non_nullable
+              as AccountsData?,
     ));
   }
 }
@@ -119,7 +154,9 @@ class __$$UserDataImplCopyWithImpl<$Res>
 class _$UserDataImpl implements _UserData {
   _$UserDataImpl(
       {@JsonKey(name: 'version') required this.version,
-      @JsonKey(name: 'datacrypt') required this.datacrypt});
+      @JsonKey(name: 'datacrypt') required this.datacrypt,
+      @JsonKey(includeToJson: false, includeFromJson: false)
+      this.accountsData});
 
   factory _$UserDataImpl.fromJson(Map<String, dynamic> json) =>
       _$$UserDataImplFromJson(json);
@@ -130,10 +167,13 @@ class _$UserDataImpl implements _UserData {
   @override
   @JsonKey(name: 'datacrypt')
   String datacrypt;
+  @override
+  @JsonKey(includeToJson: false, includeFromJson: false)
+  AccountsData? accountsData;
 
   @override
   String toString() {
-    return 'UserData(version: $version, datacrypt: $datacrypt)';
+    return 'UserData(version: $version, datacrypt: $datacrypt, accountsData: $accountsData)';
   }
 
   @JsonKey(ignore: true)
@@ -153,7 +193,9 @@ class _$UserDataImpl implements _UserData {
 abstract class _UserData implements UserData {
   factory _UserData(
       {@JsonKey(name: 'version') required int version,
-      @JsonKey(name: 'datacrypt') required String datacrypt}) = _$UserDataImpl;
+      @JsonKey(name: 'datacrypt') required String datacrypt,
+      @JsonKey(includeToJson: false, includeFromJson: false)
+      AccountsData? accountsData}) = _$UserDataImpl;
 
   factory _UserData.fromJson(Map<String, dynamic> json) =
       _$UserDataImpl.fromJson;
@@ -168,6 +210,11 @@ abstract class _UserData implements UserData {
   String get datacrypt;
   @JsonKey(name: 'datacrypt')
   set datacrypt(String value);
+  @override
+  @JsonKey(includeToJson: false, includeFromJson: false)
+  AccountsData? get accountsData;
+  @JsonKey(includeToJson: false, includeFromJson: false)
+  set accountsData(AccountsData? value);
   @override
   @JsonKey(ignore: true)
   _$$UserDataImplCopyWith<_$UserDataImpl> get copyWith =>
