@@ -1,5 +1,6 @@
 import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/material.dart';
+import 'package:kyure/config/router_config.dart';
 import 'package:kyure/presentation/pages/account_list/account_list_page.dart';
 import 'package:kyure/presentation/theme/ky_theme.dart';
 import 'package:kyure/services/service_locator.dart';
@@ -15,13 +16,15 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      builder: BotToastInit(),
-      navigatorObservers: [BotToastNavigatorObserver()],
-      theme: KyTheme.lightTheme,
-      debugShowCheckedModeBanner: false,
-      home: KyTheme(theme: Theme.of(context), child: const AccountListPage()),
+    return KyTheme(
+      theme: ThemeData.light(),
+      child: MaterialApp.router(
+        title: 'Flutter Demo',
+        builder: BotToastInit(),
+        theme: KyTheme.lightTheme,
+        routerConfig: routerConfig,
+        debugShowCheckedModeBanner: false,
+      ),
     );
   }
 }

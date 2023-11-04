@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:kyure/presentation/theme/ky_theme.dart';
 
 class CopyAreaMolecule extends StatefulWidget {
@@ -31,10 +32,11 @@ class _CopyAreaMoleculeState extends State<CopyAreaMolecule> {
       setState(() {
         icon = widget.icon.animate().fadeOut(duration: 50.ms).swap(
             builder: (context, child) {
-          return Icon(
-            Icons.library_add_check_outlined,
-            color: widget.color,
-          ).animate(effects: [
+          return SvgPicture.asset('assets/svg_icons/copy_checked.svg',
+                  height: 30,
+                  width: 30,
+                  colorFilter: ColorFilter.mode(widget.color, BlendMode.srcIn))
+              .animate(effects: [
             FadeEffect(duration: 200.ms),
             ScaleEffect(duration: 200.ms, curve: Curves.elasticOut)
           ]);
@@ -44,13 +46,16 @@ class _CopyAreaMoleculeState extends State<CopyAreaMolecule> {
       copied = false;
       if (mounted) {
         setState(() {
-          icon = Icon(
-            Icons.library_add_check_outlined,
-            color: widget.color,
-          ).animate().fadeOut(duration: 200.ms).swap(
-              builder: (context, child) => widget.icon.animate(effects: [
-                    FadeEffect(duration: 200.ms),
-                  ]));
+          icon = SvgPicture.asset('assets/svg_icons/copy_checked.svg',
+                  height: 30,
+                  width: 30,
+                  colorFilter: ColorFilter.mode(widget.color, BlendMode.srcIn))
+              .animate()
+              .fadeOut(duration: 200.ms)
+              .swap(
+                  builder: (context, child) => widget.icon.animate(effects: [
+                        FadeEffect(duration: 200.ms),
+                      ]));
         });
       }
     }

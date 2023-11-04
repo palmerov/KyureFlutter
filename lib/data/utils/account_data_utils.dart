@@ -5,7 +5,7 @@ class AccountDataUtils {
   static void createAllGroupIfMoreThan1(AccountsData accountsData) {
     if (accountsData.accountGroups.length > 1) {
       AccountGroup groupAll = AccountGroup(
-          iconName: 'assets/group_icons/widgets_black_24dp.svg',
+          iconName: 'assets/svg_icons/widgets.svg',
           color: Colors.blue.shade700.value,
           name: 'Todos',
           accounts: []);

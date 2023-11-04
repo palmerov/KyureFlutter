@@ -42,9 +42,12 @@ class _SearchBarMoleculeState extends State<SearchBarMolecule> {
       height: 44,
       child: Container(
         decoration: BoxDecoration(
+            color: kyTheme.colorBackground,
             shape: BoxShape.rectangle,
             borderRadius: kyTheme.searchViewRadius,
-            border: Border.all(color: kyTheme.colorSeparatorLine, width: 1)),
+            border: Border.all(
+                color: kyTheme.colorOnBackgroundOpacity50,
+                width: kyTheme.borderWidth)),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
@@ -56,7 +59,7 @@ class _SearchBarMoleculeState extends State<SearchBarMolecule> {
                     child: Icon(Icons.menu_rounded, color: kyTheme.colorHint))),
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.only(bottom: 10),
+                padding: const EdgeInsets.only(bottom: 1),
                 child: TextField(
                   enabled: widget.enabled,
                   decoration: InputDecoration(

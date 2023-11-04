@@ -1,7 +1,9 @@
 import 'dart:io';
 
 import 'package:bot_toast/bot_toast.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:kyure/clipboard_utils.dart';
 import 'package:kyure/presentation/widgets/molecules/copy_area.dart';
 import 'package:kyure/presentation/theme/ky_theme.dart';
@@ -65,6 +67,8 @@ class AccountItemMolecule extends StatelessWidget {
 
     return InkWell(
       onTap: onTap ?? () {},
+      splashColor: kyTheme.colorPrimarySmooth,
+      highlightColor: kyTheme.colorPrimarySmooth,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 20),
         child: Row(
@@ -89,7 +93,7 @@ class AccountItemMolecule extends StatelessWidget {
                     name,
                     style: TextStyle(
                         color: kyTheme.colorOnBackground,
-                        fontWeight: FontWeight.w400,
+                        fontWeight: FontWeight.w300,
                         fontSize: 18),
                   ),
                   const SizedBox(height: 8),
@@ -104,18 +108,25 @@ class AccountItemMolecule extends StatelessWidget {
               ),
             ),
             CopyAreaMolecule(
-              icon: Icon(
-                Icons.person,
-                color: kyTheme.colorAccount,
-              ),
-              padding: const EdgeInsets.all(10),
+              icon: SvgPicture.asset(
+                  'assets/svg_icons/person.svg',
+                  height: 30,
+                  width: 30,
+                  colorFilter:
+                      ColorFilter.mode(kyTheme.colorAccount, BlendMode.srcIn)),
+              padding: const EdgeInsets.all(8),
               color: kyTheme.colorAccount,
               onTap: (details) => copyUser(context, details.globalPosition),
             ),
             const SizedBox(width: 6),
             CopyAreaMolecule(
-              icon: Icon(Icons.key_rounded, color: kyTheme.colorPassword),
-              padding: const EdgeInsets.all(10),
+              icon: SvgPicture.asset(
+                  'assets/svg_icons/key.svg',
+                  height: 30,
+                  width: 30,
+                  colorFilter:
+                      ColorFilter.mode(kyTheme.colorPassword, BlendMode.srcIn)),
+              padding: const EdgeInsets.all(8),
               color: kyTheme.colorPassword,
               onTap: (details) => copyPassword(context, details.globalPosition),
             )

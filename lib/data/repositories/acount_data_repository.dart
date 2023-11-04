@@ -44,7 +44,7 @@ class AccountDataRepositoryMocked implements AccountDataRepository {
           AccountGroup(
               name: 'Social',
               color: const Color.fromARGB(255, 44, 124, 44).value,
-              iconName: 'assets/group_icons/groups_black_24dp.svg',
+              iconName: 'assets/svg_icons/groups_FILL0_wght300_GRAD-25_opsz24.svg',
               accounts: [
                 Account(
                     id: 1,
@@ -169,7 +169,7 @@ class AccountDataRepositoryMocked implements AccountDataRepository {
               ]),
           AccountGroup(
               iconName:
-                  'assets/group_icons/account_balance_wallet_black_24dp.svg',
+                  'assets/svg_icons/account_balance_wallet_FILL0_wght300_GRAD-25_opsz24.svg',
               name: 'Pagos',
               color: const Color.fromARGB(255, 189, 109, 11).value,
               accounts: [
@@ -195,7 +195,7 @@ class AccountDataRepositoryMocked implements AccountDataRepository {
                         AccountField(name: 'Password', data: 'uihE1-iu23{gd8'))
               ])
         ]));
-    await Future.delayed(10.seconds);
+    await Future.delayed(3.seconds);
     return Future.value(userData);
   }
 

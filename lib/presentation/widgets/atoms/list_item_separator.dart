@@ -9,10 +9,10 @@ class ListItemSeparatorAtom extends StatelessWidget {
   Widget build(BuildContext context) {
     final kyTheme = KyTheme.of(context)!;
     return Padding(
-      padding: margin ?? const EdgeInsets.only(left: 66, right: 8),
+      padding: margin ?? const EdgeInsets.only(left: 16, right: 16),
       child: SizedBox(
-          height: kyTheme.listItemSeparatorHeight,
-          child: ColoredBox(color: kyTheme.colorSeparatorLine)),
+          height: kyTheme.borderWidth,
+          child: ColoredBox(color: kyTheme.colorOnBackgroundOpacity30)),
     );
   }
 }

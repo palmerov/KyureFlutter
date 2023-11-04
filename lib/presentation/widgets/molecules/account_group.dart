@@ -22,8 +22,12 @@ class AccountGroupMolecule extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 4),
       child: Container(
         decoration: BoxDecoration(
-            color: selected ? color.withOpacity(0.1) : null,
-            border: Border.all(color: kyTheme.colorSeparatorLine, width: 1),
+            color: selected
+                ? kyTheme.colorBackground.withOpacity(0.4)
+                : kyTheme.colorBackground,
+            border: Border.all(
+                color: selected ? color : kyTheme.colorOnBackgroundOpacity50,
+                width: selected ? 1 : kyTheme.borderWidth),
             borderRadius: const BorderRadius.all(Radius.circular(16))),
         child: InkWell(
           onTap: onTap,

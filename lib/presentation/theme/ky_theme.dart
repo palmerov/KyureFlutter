@@ -31,15 +31,20 @@ class KyTheme extends InheritedWidget {
 
   bool get light => theme.brightness == Brightness.light;
 
-  final double listItemSeparatorHeight = 0.5;
+  final double borderWidth = 0.5;
 
-  final BorderRadius searchViewRadius = BorderRadius.all(Radius.circular(16));
+  final BorderRadius searchViewRadius =
+      const BorderRadius.all(Radius.circular(20));
+
+  final Color _colorPrimaryLight = lightTheme.colorScheme.primary;
+  final Color _colorPrimarySmoothLight = const Color.fromARGB(255, 204, 230, 255);
+  final double blurOpacity=0.3;
 
   //Light
   final Color _colorLightSeparatorLine =
       const Color.fromARGB(255, 207, 207, 207);
-  final Color _colorLighPassword = const Color.fromARGB(255, 51, 110, 179);
-  final Color _colorLighAccount = const Color.fromARGB(255, 66, 143, 79);
+  final Color _colorLighPassword = const Color.fromARGB(255, 83, 132, 187);
+  final Color _colorLighAccount = const Color.fromARGB(255, 97, 151, 106);
   final Color _colorLighToastBackground =
       const Color.fromARGB(255, 255, 255, 255);
   final Color _colorLighToastText = const Color.fromARGB(255, 24, 24, 24);
@@ -51,25 +56,30 @@ class KyTheme extends InheritedWidget {
   final Color _colorDarkToastBackground = const Color.fromARGB(127, 0, 0, 0);
   final Color _colorDarkToastText = const Color.fromARGB(255, 24, 24, 24);
 
-
   //Getter
-  get colorSeparatorLine =>
+  Color get colorSeparatorLine =>
       light ? _colorLightSeparatorLine : _colorDarkSeparatorLine;
 
-  get colorAccount => light ? _colorLighAccount : _colorDarkAccount;
+  Color get colorAccount => light ? _colorLighAccount : _colorDarkAccount;
 
-  get colorPassword => light ? _colorLighPassword : _colorDarkPassword;
+  Color get colorPassword => light ? _colorLighPassword : _colorDarkPassword;
 
-  get colorToastBackground =>
+  Color get colorToastBackground =>
       light ? _colorLighToastBackground : _colorDarkToastBackground;
 
-  get colorToastText => light ? _colorLighToastText : _colorDarkToastText;
+  Color get colorToastText => light ? _colorLighToastText : _colorDarkToastText;
 
-  get colorBackground =>
+  Color get colorBackground =>
       light ? lightTheme.colorScheme.background : Colors.black;
 
-  get colorOnBackground =>
+  Color get colorOnBackground =>
       light ? lightTheme.colorScheme.onBackground : Colors.white;
+
+  Color get colorOnBackgroundOpacity30 => colorOnBackground.withOpacity(0.3);
+
+  Color get colorOnBackgroundOpacity50 => colorOnBackground.withOpacity(0.5);
+
+  Color get colorOnBackgroundOpacity60 => colorOnBackground.withOpacity(0.6);
 
   Color get colorHint =>
       light ? lightTheme.colorScheme.onBackground.withAlpha(180) : Colors.white;
@@ -77,5 +87,6 @@ class KyTheme extends InheritedWidget {
   Color get colorPrimary =>
       light ? lightTheme.colorScheme.primary : Colors.black;
 
-      
+  Color get colorPrimarySmooth =>
+      light ? _colorPrimarySmoothLight : Colors.black;
 }
