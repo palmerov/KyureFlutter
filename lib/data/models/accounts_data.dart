@@ -31,7 +31,7 @@ class Account with _$Account {
   factory Account({
     @JsonKey(name: 'id') required int id,
     @JsonKey(name: 'name') required final String name,
-    @JsonKey(name: 'image') AccountImage? image,
+    @JsonKey(name: 'image') AccountImage image,
     @JsonKey(name: 'username') required AccountField fieldUsername,
     @JsonKey(name: 'password') required AccountField fieldPassword,
     @JsonKey(name: 'fields') List<AccountField>? fieldList,

@@ -8,26 +8,27 @@ class AccountGroupMolecule extends StatelessWidget {
       this.icon,
       required this.onTap,
       required this.selected,
-      required this.color});
+      required this.color, this.paddingHorizontal});
   final String text;
   final Color color;
   final Widget? icon;
   final Function() onTap;
   final bool selected;
+  final double? paddingHorizontal;
 
   @override
   Widget build(BuildContext context) {
     final kyTheme = KyTheme.of(context)!;
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4),
+      padding: EdgeInsets.symmetric(horizontal: paddingHorizontal?? 4),
       child: Container(
         decoration: BoxDecoration(
             color: selected
-                ? kyTheme.colorBackground.withOpacity(0.4)
+                ? kyTheme.colorBackground.withOpacity(0.8)
                 : kyTheme.colorBackground,
             border: Border.all(
-                color: selected ? color : kyTheme.colorOnBackgroundOpacity50,
-                width: selected ? 1 : kyTheme.borderWidth),
+                color: selected ? color.withOpacity(0.5) : kyTheme.colorOnBackgroundOpacity30,
+                width: selected ? 1 : kyTheme.borderWidth05),
             borderRadius: const BorderRadius.all(Radius.circular(16))),
         child: InkWell(
           onTap: onTap,

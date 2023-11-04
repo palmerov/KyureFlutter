@@ -11,8 +11,8 @@ class ListItemSeparatorAtom extends StatelessWidget {
     return Padding(
       padding: margin ?? const EdgeInsets.only(left: 16, right: 16),
       child: SizedBox(
-          height: kyTheme.borderWidth,
-          child: ColoredBox(color: kyTheme.colorOnBackgroundOpacity30)),
+          height: kyTheme.borderWidth05,
+          child: ColoredBox(color: kyTheme.colorOnBackgroundOpacity30.withOpacity(0.1))),
     );
   }
 }

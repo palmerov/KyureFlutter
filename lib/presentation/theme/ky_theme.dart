@@ -18,27 +18,28 @@ class KyTheme extends InheritedWidget {
   static final lightTheme = ThemeData.light().copyWith(
       colorScheme: const ColorScheme(
           brightness: Brightness.light,
-          primary: Color.fromARGB(255, 67, 100, 190),
+          primary: Colors.blueGrey,
           onPrimary: Colors.white,
           secondary: Colors.deepOrangeAccent,
           onSecondary: Colors.white,
           error: Colors.red,
           onError: Colors.white,
           background: Colors.white,
-          onBackground: Color.fromARGB(255, 43, 43, 43),
+          onBackground: Color.fromARGB(255, 53, 53, 53),
           surface: Colors.white,
           onSurface: Color.fromARGB(255, 54, 54, 54)));
 
   bool get light => theme.brightness == Brightness.light;
 
-  final double borderWidth = 0.5;
+  final double borderWidth05 = 0.5;
+  final double borderWidth03 = 0.3;
 
   final BorderRadius searchViewRadius =
       const BorderRadius.all(Radius.circular(20));
 
   final Color _colorPrimaryLight = lightTheme.colorScheme.primary;
-  final Color _colorPrimarySmoothLight = const Color.fromARGB(255, 204, 230, 255);
-  final double blurOpacity=0.3;
+  final Color _colorPrimarySmoothLight = Color.fromARGB(255, 192, 214, 226);
+  final double blurOpacity=0.6;
 
   //Light
   final Color _colorLightSeparatorLine =

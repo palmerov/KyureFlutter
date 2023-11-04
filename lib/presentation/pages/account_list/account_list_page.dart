@@ -15,6 +15,7 @@ import 'package:kyure/presentation/widgets/molecules/account_item.dart';
 import 'package:kyure/presentation/widgets/molecules/account_list_shimmer.dart';
 import 'package:kyure/presentation/widgets/molecules/search_bar.dart';
 import 'package:kyure/presentation/theme/ky_theme.dart';
+import 'package:kyure/presentation/widgets/molecules/svg_icon.dart';
 import 'package:kyure/services/service_locator.dart';
 import 'package:blur/blur.dart';
 
@@ -53,7 +54,7 @@ class _AccountListView extends StatelessWidget {
         systemOverlayStyle: SystemUiOverlayStyle(
             statusBarIconBrightness:
                 kyTheme.light ? Brightness.dark : Brightness.light,
-            statusBarColor: kyTheme.colorPrimarySmooth.withOpacity(0.2)),
+            statusBarColor: kyTheme.colorBackground),
       ),
       body: Stack(
         children: [
@@ -91,23 +92,22 @@ class _AccountListView extends StatelessWidget {
                       onPageChanged: (value) =>
                           {if (bloc.listenPageView) bloc.selectGroup(value)},
                       itemBuilder: (context, groupIndex) => Center(
-                        child: ListView.separated(
+                        child: ListView.builder(
                           physics: const BouncingScrollPhysics(),
                           padding: const EdgeInsets.only(top: 100, bottom: 60),
                           itemBuilder: (context, accountIndex) {
                             Account account = state.accountGroups[groupIndex]
                                 .accounts[accountIndex];
                             return AccountItemMolecule(
-                                name: account.name,
-                                username: account.fieldUsername.data,
-                                password: account.fieldPassword.data,
-                                imageAsset: account.image!.path);
+                              account: account,
+                              onTap: () => context.pushNamed(
+                                  KyRoutes.accountEditor.name,
+                                  queryParameters: {'id': '${account.id}'}),
+                            );
                           },
                           itemCount: state.accountGroups.isEmpty
                               ? 0
                               : state.accountGroups[groupIndex].accounts.length,
-                          separatorBuilder: (BuildContext context, int index) =>
-                              const ListItemSeparatorAtom(),
                         ),
                       ),
                     ),
@@ -125,7 +125,7 @@ class _AccountListView extends StatelessWidget {
                 Positioned.fill(
                     child: Blur(
                         colorOpacity: kyTheme.blurOpacity,
-                        blurColor: kyTheme.colorPrimarySmooth,
+                        blurColor: kyTheme.colorBackground,
                         child: const SizedBox.shrink())),
                 Column(
                   children: [
@@ -174,14 +174,7 @@ class _AccountListView extends StatelessWidget {
                                   return AccountGroupMolecule(
                                       text: group.name,
                                       color: Color(group.color),
-                                      icon: SvgPicture.asset(
-                                        group.iconName,
-                                        height: 20,
-                                        width: 20,
-                                        colorFilter: ColorFilter.mode(
-                                            Color(group.color),
-                                            BlendMode.srcIn),
-                                      ),
+                                      icon: SvgIcon(svgAsset: group.iconName),
                                       onTap: () => bloc.selectGroup(groupIndex),
                                       selected: state.selectedGroupIndex ==
                                           groupIndex);
@@ -198,7 +191,7 @@ class _AccountListView extends StatelessWidget {
                   left: 0,
                   right: 0,
                   child: SizedBox(
-                    height: kyTheme.borderWidth,
+                    height: kyTheme.borderWidth03,
                     child:
                         ColoredBox(color: kyTheme.colorOnBackgroundOpacity30),
                   ),
@@ -218,7 +211,7 @@ class _AccountListView extends StatelessWidget {
                     Positioned.fill(
                       child: Blur(
                         colorOpacity: kyTheme.blurOpacity,
-                        blurColor: kyTheme.colorPrimarySmooth,
+                        blurColor: kyTheme.colorBackground,
                         child: const SizedBox.shrink(),
                       ),
                     ),
@@ -264,7 +257,7 @@ class _AccountListView extends StatelessWidget {
                       left: 0,
                       right: 0,
                       child: SizedBox(
-                        height: kyTheme.borderWidth,
+                        height: kyTheme.borderWidth03,
                         child: ColoredBox(
                             color: kyTheme.colorOnBackgroundOpacity30),
                       ),

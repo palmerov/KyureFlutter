@@ -39,15 +39,15 @@ class _SearchBarMoleculeState extends State<SearchBarMolecule> {
   Widget build(BuildContext context) {
     final kyTheme = KyTheme.of(context)!;
     return SizedBox(
-      height: 44,
+      height: 40,
       child: Container(
         decoration: BoxDecoration(
             color: kyTheme.colorBackground,
             shape: BoxShape.rectangle,
             borderRadius: kyTheme.searchViewRadius,
             border: Border.all(
-                color: kyTheme.colorOnBackgroundOpacity50,
-                width: kyTheme.borderWidth)),
+                color: kyTheme.colorOnBackgroundOpacity30,
+                width: kyTheme.borderWidth05)),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
@@ -62,7 +62,9 @@ class _SearchBarMoleculeState extends State<SearchBarMolecule> {
                 padding: const EdgeInsets.only(bottom: 1),
                 child: TextField(
                   enabled: widget.enabled,
+                  expands: false,
                   decoration: InputDecoration(
+                    isDense: true,
                     border: InputBorder.none,
                     hintText: widget.hintText ?? 'Filter',
                   ),

@@ -38,4 +38,14 @@ class UserDataService {
       rethrow;
     }
   }
+
+  Account? findAccountById(int id) {
+    try {
+      for (var group in accountsData!.accountGroups) {
+        return group.accounts.firstWhere((element) => element.id == id);
+      }
+    } catch (exception) {
+      return null;
+    }
+  }
 }
