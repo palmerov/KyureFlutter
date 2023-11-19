@@ -7,11 +7,13 @@ class SearchBarMolecule extends StatefulWidget {
       required this.onSearchChanged,
       this.hintText,
       required this.onLeadingTap,
-      required this.enabled});
+      required this.enabled,
+      required this.showLeading});
   final Function(String text) onSearchChanged;
   final Function() onLeadingTap;
   final String? hintText;
   final bool enabled;
+  final bool showLeading;
   @override
   State<SearchBarMolecule> createState() => _SearchBarMoleculeState();
 }
@@ -51,12 +53,18 @@ class _SearchBarMoleculeState extends State<SearchBarMolecule> {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Padding(
-                padding: const EdgeInsets.only(right: 8, left: 12),
-                child: InkWell(
-                    borderRadius: kyTheme.searchViewRadius,
-                    onTap: widget.enabled ? widget.onLeadingTap : null,
-                    child: Icon(Icons.menu_rounded, color: kyTheme.colorHint))),
+            if (widget.showLeading)
+              Padding(
+                  padding: const EdgeInsets.only(right: 8, left: 12),
+                  child: InkWell(
+                      borderRadius: kyTheme.searchViewRadius,
+                      onTap: widget.enabled ? widget.onLeadingTap : null,
+                      child:
+                          Icon(Icons.menu_rounded, color: kyTheme.colorHint))),
+            if (!widget.showLeading)
+              const SizedBox(
+                width: 16,
+              ),
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.only(bottom: 1),

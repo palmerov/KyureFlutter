@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kyure/data/models/accounts_data.dart';
 import 'package:kyure/presentation/pages/account_details/account_details_page.dart';
@@ -13,8 +14,10 @@ final routerConfig = GoRouter(routes: [
   GoRoute(
       path: KyRoutes.main.routePath,
       name: KyRoutes.main.name,
-      pageBuilder: (context, state) =>
-          const MaterialPage(child: AccountListPage()),
+      pageBuilder: (context, state) => const MaterialPage(
+              child: Scaffold(
+            body: Center(child: AccountListPage()),
+          )),
       routes: [
         GoRoute(
             path: KyRoutes.accountEditor.name,

@@ -72,7 +72,7 @@ class _AccountDetailsView extends StatelessWidget {
                             size: 82,
                             radius: 14,
                             image: Image.asset(
-                              account.image!.path,
+                              account.image?.path??'assets/web_icons/squared.png',
                               fit: BoxFit.fill,
                             )),
                       ),
