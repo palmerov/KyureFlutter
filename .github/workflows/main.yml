@@ -8,12 +8,8 @@ jobs:
 
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macOS-latest]
+        os: [windows-latest]
         include:
-          - os: ubuntu-latest
-            output-name: kyure-linux
-          - os: macOS-latest
-            output-name: kyure-mac
           - os: windows-latest
             output-name: kyure-windows.exe
 
