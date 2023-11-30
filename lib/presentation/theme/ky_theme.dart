@@ -43,9 +43,9 @@ class KyTheme extends InheritedWidget {
 
   //Light
   final Color _colorLightSeparatorLine =
-      const Color.fromARGB(255, 207, 207, 207);
-  final Color _colorLighPassword = const Color.fromARGB(255, 83, 132, 187);
-  final Color _colorLighAccount = const Color.fromARGB(255, 97, 151, 106);
+      const Color.fromARGB(255, 196, 196, 196);
+  final Color _colorLighPassword = const Color.fromARGB(255, 59, 120, 190);
+  final Color _colorLighAccount = const Color.fromARGB(255, 71, 150, 84);
   final Color _colorLighToastBackground =
       const Color.fromARGB(255, 255, 255, 255);
   final Color _colorLighToastText = const Color.fromARGB(255, 24, 24, 24);
@@ -81,6 +81,8 @@ class KyTheme extends InheritedWidget {
   Color get colorOnBackgroundOpacity50 => colorOnBackground.withOpacity(0.5);
 
   Color get colorOnBackgroundOpacity60 => colorOnBackground.withOpacity(0.6);
+
+  Color get colorOnBackgroundOpacity80 => colorOnBackground.withOpacity(0.8);
 
   Color get colorHint =>
       light ? lightTheme.colorScheme.onBackground.withAlpha(180) : Colors.white;

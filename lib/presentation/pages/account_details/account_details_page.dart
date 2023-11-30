@@ -1,11 +1,15 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kyure/data/models/accounts_data.dart';
+import 'package:kyure/presentation/pages/account_details/bloc/account_details_bloc.dart';
 import 'package:kyure/presentation/theme/ky_theme.dart';
 import 'package:kyure/presentation/widgets/molecules/account_group.dart';
 import 'package:kyure/presentation/widgets/molecules/image_rounded.dart';
 import 'package:kyure/presentation/widgets/molecules/svg_icon.dart';
+import 'package:kyure/presentation/widgets/organisms/account_form_data.dart';
+import 'package:kyure/services/service_locator.dart';
 
 class AccountDetailsPage extends StatelessWidget {
   const AccountDetailsPage({
@@ -18,9 +22,12 @@ class AccountDetailsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _AccountDetailsView(
-      editing: editing,
-      account: account,
+    return BlocProvider(
+      create: (context) => AccountDetailsBloc(),
+      child: _AccountDetailsView(
+        editing: editing,
+        account: account,
+      ),
     );
   }
 }
@@ -37,6 +44,8 @@ class _AccountDetailsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final kyTheme = KyTheme.of(context)!;
+    final bloc = BlocProvider.of<AccountDetailsBloc>(context);
+    final wsize = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(
         elevation: 0.5,
@@ -52,7 +61,7 @@ class _AccountDetailsView extends StatelessWidget {
       ),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.all(16),
           child: Column(
             children: [
               Row(
@@ -63,22 +72,23 @@ class _AccountDetailsView extends StatelessWidget {
                         border: Border.all(
                             color: kyTheme.colorOnBackgroundOpacity50),
                         borderRadius:
-                            const BorderRadius.all(Radius.circular(16))),
+                            const BorderRadius.all(Radius.circular(12))),
                     child: InkWell(
                       onTap: () {},
                       child: Hero(
                         tag: '@${account.id}:${account.name}',
                         child: ImageRounded(
-                            size: 82,
-                            radius: 14,
+                            size: 86,
+                            radius: 12,
                             image: Image.asset(
-                              account.image?.path??'assets/web_icons/squared.png',
+                              account.image?.path ??
+                                  'assets/web_icons/squared.png',
                               fit: BoxFit.fill,
                             )),
                       ),
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: 10),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -91,21 +101,56 @@ class _AccountDetailsView extends StatelessWidget {
                               label: Text('Nombre del sitio'),
                               border: OutlineInputBorder(
                                   borderRadius:
-                                      BorderRadius.all(Radius.circular(16)))),
+                                      BorderRadius.all(Radius.circular(12)))),
                         ),
                         const SizedBox(
-                          height: 8,
+                          height: 10,
                         ),
                         SizedBox(
-                          height: 34,
-                          child: AccountGroupMolecule(
-                            icon: const SvgIcon(
-                                svgAsset: 'assets/svg_icons/widgets.svg'),
-                            text: 'Variados',
-                            color: Colors.blue,
-                            onTap: () {},
-                            paddingHorizontal: 0,
-                            selected: false,
+                          height: 36,
+                          child: PopupMenuButton(
+                            onSelected: (value) => bloc.selectGroup(value),
+                            offset: const Offset(0, 36),
+                            shape: const RoundedRectangleBorder(
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(16))),
+                            itemBuilder: (context) {
+                              return serviceLocator
+                                  .getUserDataService()
+                                  .accountsData!
+                                  .accountGroups
+                                  .map((e) => PopupMenuItem(
+                                      value: e,
+                                      height: 36,
+                                      child: SizedBox(
+                                        height: 36,
+                                        width: 140,
+                                        child: Row(children: [
+                                          SvgIcon(svgAsset: e.iconName),
+                                          const SizedBox(
+                                            width: 12,
+                                          ),
+                                          Text(e.name),
+                                        ]),
+                                      )))
+                                  .toList();
+                            },
+                            child: BlocBuilder<AccountDetailsBloc,
+                                AccountDetailsState>(
+                              buildWhen: (previous, current) =>
+                                  previous.selectedGroup.name !=
+                                  current.selectedGroup.name,
+                              builder: (context, state) {
+                                return AccountGroupMolecule(
+                                  icon: SvgIcon(
+                                      svgAsset: state.selectedGroup.iconName),
+                                  text: state.selectedGroup.name,
+                                  color: Color(state.selectedGroup.color),
+                                  paddingHorizontal: 0,
+                                  selected: true,
+                                );
+                              },
+                            ),
                           ),
                         )
                       ],
@@ -113,6 +158,10 @@ class _AccountDetailsView extends StatelessWidget {
                   ),
                 ],
               ),
+              const SizedBox(
+                height: 16,
+              ),
+              AccountFormDataOrganism(account: account, editting: false,)
             ],
           ),
         ),
