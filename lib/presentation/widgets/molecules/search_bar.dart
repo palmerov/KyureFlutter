@@ -41,7 +41,7 @@ class _SearchBarMoleculeState extends State<SearchBarMolecule> {
   Widget build(BuildContext context) {
     final kyTheme = KyTheme.of(context)!;
     return SizedBox(
-      height: 40,
+      height: 44,
       child: Container(
         decoration: BoxDecoration(
             color: kyTheme.colorBackground,

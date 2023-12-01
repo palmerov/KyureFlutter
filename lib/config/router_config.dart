@@ -24,17 +24,21 @@ final routerConfig = GoRouter(routes: [
             name: KyRoutes.accountEditor.name,
             pageBuilder: (context, state) => MaterialPage(
                 child: AccountDetailsPage(
-                    editing: state.uri.queryParameters['id'] != null,
+                    group: serviceLocator
+                            .getUserDataService()
+                            .getGroupByAccountId(int.parse(
+                                (state.uri.queryParameters['id'] ?? '-1')
+                                    .toString())) ??
+                        serviceLocator.getUserDataService().getFirstRealGroup(),
+                    editing: state.uri.queryParameters['id'] == null,
                     account: state.uri.queryParameters['id'] != null
                         ? serviceLocator.getUserDataService().findAccountById(
                             int.parse(state.uri.queryParameters['id']!))!
                         : Account(
                             id: -1,
                             name: '',
-                            fieldUsername: AccountField(
-                                name: 'Nombre de usuario', data: ''),
-                            fieldPassword:
-                                AccountField(name: 'Contraseña', data: '')))))
+                            fieldUsername: AccountField(name: 'Nombre de usuario', data: ''),
+                            fieldPassword: AccountField(name: 'Contraseña', data: '')))))
       ]),
 ]);
 

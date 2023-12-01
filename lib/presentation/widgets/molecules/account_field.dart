@@ -103,7 +103,6 @@ class AccountFieldMolecule extends StatelessWidget {
                 isDense: true),
           ),
         ),
-        const SizedBox(height: 2),
         Row(
           children: [
             Expanded(child: field),

@@ -48,4 +48,30 @@ class UserDataService {
       return null;
     }
   }
+
+  AccountGroup? getGroupByAccountId(int id) {
+    if (accountsData!.accountGroups.length == 1) {
+      return accountsData!.accountGroups.first;
+    } else {
+      int i = accountsData!.accountGroups.sublist(1).indexWhere((element) =>
+          element.accounts.indexWhere((element) => element.id == id) >= 0);
+      if (i >= 0) {
+        return accountsData!.accountGroups[i + 1];
+      }
+      return null;
+    }
+  }
+
+  AccountGroup getFirstRealGroup() {
+    if (accountsData!.accountGroups.length == 1) {
+      return accountsData!.accountGroups.first;
+    } else {
+      return accountsData!.accountGroups[1];
+    }
+  }
+
+  AccountGroup? findGroupByName(String name) {
+    return accountsData!.accountGroups
+        .firstWhere((element) => element.name == name);
+  }
 }

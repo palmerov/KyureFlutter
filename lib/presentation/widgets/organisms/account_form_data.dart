@@ -1,31 +1,21 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:kyure/data/models/accounts_data.dart';
 import 'package:kyure/presentation/theme/ky_theme.dart';
+import 'package:kyure/presentation/widgets/atoms/list_item_separator.dart';
 import 'package:kyure/presentation/widgets/molecules/account_field.dart';
 
-class AccountFormDataOrganism extends StatefulWidget {
+class AccountFormDataOrganism extends StatelessWidget {
   const AccountFormDataOrganism(
-      {super.key, required this.account, required this.editting});
+      {super.key,
+      required this.account,
+      required this.editting,
+      required this.onAccountDelete,
+      required this.keyList});
 
   final Account account;
   final bool editting;
-
-  @override
-  State<AccountFormDataOrganism> createState() =>
-      _AccountFormDataOrganismState();
-}
-
-class _AccountFormDataOrganismState extends State<AccountFormDataOrganism> {
-  late final Account account;
-  late bool editting;
-
-  @override
-  void initState() {
-    super.initState();
-    account = widget.account;
-    editting = widget.editting;
-  }
+  final GlobalKey<AnimatedListState> keyList;
+  final Function(int index) onAccountDelete;
 
   @override
   Widget build(BuildContext context) {
@@ -33,44 +23,48 @@ class _AccountFormDataOrganismState extends State<AccountFormDataOrganism> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _buildField(account.fieldUsername),
-        _buildField(account.fieldPassword),
-        ..._buildFieldList(account.fieldList ?? []),
-        FilledButton(
-            onPressed: () => setState(() => editting = !editting),
-            style: ButtonStyle(
-                shape: MaterialStateProperty.all(RoundedRectangleBorder(
-                    side:
-                        BorderSide(color: kTheme.colorSeparatorLine, width: 1),
-                    borderRadius: BorderRadius.circular(12)))),
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon((editting ? Icons.add : Icons.edit)),
-                  const SizedBox(
-                    width: 12,
-                  ),
-                  Text((editting ? 'Agregar campo' : 'Editar')),
-                ],
-              ),
-            ))
+        Expanded(
+          child: AnimatedList(
+              key: keyList,
+              itemBuilder: (context, index, animation) {
+                index = index - 2;
+                return switch (index) {
+                  -2 => _buildField(index - 2, account.fieldUsername),
+                  -1 => _buildField(index - 1, account.fieldPassword),
+                  _ => AnimatedBuilder(
+                      animation: animation,
+                      builder: (context, child) =>
+                          SizeTransition(sizeFactor: animation, child: child),
+                      child: _buildField(index - 2, account.fieldList![index]),
+                    )
+                };
+              },
+              initialItemCount: (account.fieldList?.length ?? 0) + 2),
+        ),
       ],
     );
   }
 
-  Widget _buildField(AccountField accountField) {
+  Widget _buildField(int index, AccountField accountField) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.only(bottom: 8),
       child: AccountFieldMolecule(
         editting: editting,
         accountField: accountField,
+        onTapDelete: () {
+          if (index >= 0) {
+            onAccountDelete(index);
+            keyList.currentState!.removeItem(
+                index,
+                (context, animation) => AnimatedBuilder(
+                    animation: animation,
+                    builder: (context, child) =>
+                        SizeTransition(sizeFactor: animation, child: child),
+                    child: _buildField(index, accountField)),
+                duration: const Duration(milliseconds: 300));
+          }
+        },
       ),
     );
-  }
-
-  List<Widget> _buildFieldList(List<AccountField> fields) {
-    return fields.map((e) => _buildField(e)).toList();
   }
 }

@@ -16,16 +16,18 @@ class AccountDetailsPage extends StatelessWidget {
     Key? key,
     required this.account,
     required this.editing,
+    required this.group,
   }) : super(key: key);
   final bool editing;
   final Account account;
+  final AccountGroup group;
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => AccountDetailsBloc(),
+      create: (context) =>
+          AccountDetailsBloc(account: account, group: group, editting: editing),
       child: _AccountDetailsView(
-        editing: editing,
         account: account,
       ),
     );
@@ -33,52 +35,50 @@ class AccountDetailsPage extends StatelessWidget {
 }
 
 class _AccountDetailsView extends StatelessWidget {
-  _AccountDetailsView(
-      {super.key, required this.editing, required this.account}) {
+  _AccountDetailsView({super.key, required this.account}) {
     tecName = TextEditingController(text: account.name);
   }
-  final bool editing;
   final Account account;
   late final TextEditingController tecName;
+  final GlobalKey<AnimatedListState> keyFormAnimatedList = GlobalKey();
 
   @override
   Widget build(BuildContext context) {
-    final kyTheme = KyTheme.of(context)!;
+    final kytheme = KyTheme.of(context)!;
     final bloc = BlocProvider.of<AccountDetailsBloc>(context);
     final wsize = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(
         elevation: 0.5,
-        backgroundColor: kyTheme.colorBackground,
+        backgroundColor: kytheme.colorBackground,
         leading: IconButton(
             onPressed: () => context.pop(),
             icon: Icon(CupertinoIcons.back,
-                color: kyTheme.colorOnBackgroundOpacity50)),
+                color: kytheme.colorOnBackgroundOpacity50)),
         title: Text(
           'Detalles de cuenta',
-          style: TextStyle(color: kyTheme.colorOnBackground),
+          style: TextStyle(color: kytheme.colorOnBackground),
         ),
       ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Row(
                 children: [
-                  Container(
+                  Card(
                     clipBehavior: Clip.antiAlias,
-                    decoration: BoxDecoration(
-                        border: Border.all(
-                            color: kyTheme.colorOnBackgroundOpacity50),
-                        borderRadius:
-                            const BorderRadius.all(Radius.circular(12))),
+                    elevation: 1,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
                     child: InkWell(
                       onTap: () {},
                       child: Hero(
                         tag: '@${account.id}:${account.name}',
                         child: ImageRounded(
-                            size: 86,
+                            size: 98,
                             radius: 12,
                             image: Image.asset(
                               account.image?.path ??
@@ -90,70 +90,81 @@ class _AccountDetailsView extends StatelessWidget {
                   ),
                   const SizedBox(width: 10),
                   Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        TextField(
-                          controller: tecName,
-                          decoration: const InputDecoration(
-                              alignLabelWithHint: true,
-                              isDense: true,
-                              label: Text('Nombre del sitio'),
-                              border: OutlineInputBorder(
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(12)))),
-                        ),
-                        const SizedBox(
-                          height: 10,
-                        ),
-                        SizedBox(
-                          height: 36,
-                          child: PopupMenuButton(
-                            onSelected: (value) => bloc.selectGroup(value),
-                            offset: const Offset(0, 36),
-                            shape: const RoundedRectangleBorder(
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(16))),
-                            itemBuilder: (context) {
-                              return serviceLocator
-                                  .getUserDataService()
-                                  .accountsData!
-                                  .accountGroups
-                                  .map((e) => PopupMenuItem(
-                                      value: e,
-                                      height: 36,
-                                      child: SizedBox(
-                                        height: 36,
-                                        width: 140,
-                                        child: Row(children: [
-                                          SvgIcon(svgAsset: e.iconName),
-                                          const SizedBox(
-                                            width: 12,
-                                          ),
-                                          Text(e.name),
-                                        ]),
-                                      )))
-                                  .toList();
-                            },
-                            child: BlocBuilder<AccountDetailsBloc,
-                                AccountDetailsState>(
-                              buildWhen: (previous, current) =>
-                                  previous.selectedGroup.name !=
-                                  current.selectedGroup.name,
-                              builder: (context, state) {
-                                return AccountGroupMolecule(
-                                  icon: SvgIcon(
-                                      svgAsset: state.selectedGroup.iconName),
-                                  text: state.selectedGroup.name,
-                                  color: Color(state.selectedGroup.color),
-                                  paddingHorizontal: 0,
-                                  selected: true,
-                                );
-                              },
+                    child: BlocBuilder<AccountDetailsBloc, AccountDetailsState>(
+                      buildWhen: (previous, current) =>
+                          previous.editting != current.editting,
+                      builder: (context, state) {
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            TextField(
+                              controller: tecName,
+                              readOnly: !state.editting,
+                              decoration: const InputDecoration(
+                                  alignLabelWithHint: true,
+                                  isDense: true,
+                                  label: Text('Nombre del sitio'),
+                                  border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.all(
+                                          Radius.circular(12)))),
                             ),
-                          ),
-                        )
-                      ],
+                            const SizedBox(
+                              height: 8,
+                            ),
+                            SizedBox(
+                              height: 36,
+                              child: PopupMenuButton(
+                                enabled: state.editting,
+                                onSelected: (value) => bloc.selectGroup(value),
+                                offset: const Offset(0, 36),
+                                shape: const RoundedRectangleBorder(
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(16))),
+                                itemBuilder: (context) {
+                                  return serviceLocator
+                                      .getUserDataService()
+                                      .accountsData!
+                                      .accountGroups
+                                      .map((e) => PopupMenuItem(
+                                          value: e,
+                                          height: 36,
+                                          child: SizedBox(
+                                            height: 36,
+                                            width: 140,
+                                            child: Row(children: [
+                                              SvgIcon(svgAsset: e.iconName),
+                                              const SizedBox(
+                                                width: 12,
+                                              ),
+                                              Text(e.name),
+                                            ]),
+                                          )))
+                                      .toList();
+                                },
+                                child: BlocBuilder<AccountDetailsBloc,
+                                    AccountDetailsState>(
+                                  buildWhen: (previous, current) =>
+                                      previous.selectedGroup.name !=
+                                      current.selectedGroup.name,
+                                  builder: (context, state) {
+                                    return AccountGroupMolecule(
+                                      icon: SvgIcon(
+                                          svgAsset:
+                                              state.selectedGroup.iconName),
+                                      text: state.selectedGroup.name,
+                                      color: state.editting
+                                          ? Color(state.selectedGroup.color)
+                                          : kytheme.colorSeparatorLine,
+                                      paddingHorizontal: 0,
+                                      selected: true,
+                                    );
+                                  },
+                                ),
+                              ),
+                            )
+                          ],
+                        );
+                      },
                     ),
                   ),
                 ],
@@ -161,7 +172,71 @@ class _AccountDetailsView extends StatelessWidget {
               const SizedBox(
                 height: 16,
               ),
-              AccountFormDataOrganism(account: account, editting: false,)
+              BlocBuilder<AccountDetailsBloc, AccountDetailsState>(
+                buildWhen: (previous, current) =>
+                    previous.editting != current.editting,
+                builder: (context, state) {
+                  return Expanded(
+                      child: AccountFormDataOrganism(
+                    keyList: keyFormAnimatedList,
+                    onAccountDelete: (index) {
+                      bloc.accountCopy!.fieldList!.removeAt(index);
+                    },
+                    account: state.editting ? bloc.accountCopy! : account,
+                    editting: state.editting,
+                  ));
+                },
+              ),
+              const SizedBox(
+                height: 8,
+              ),
+              BlocBuilder<AccountDetailsBloc, AccountDetailsState>(
+                buildWhen: (previous, current) =>
+                    previous.editting != current.editting,
+                builder: (context, state) {
+                  final editting = state.editting;
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      if (editting)
+                        OutlinedButton(
+                            onPressed: () {
+                              bloc.accountCopy!.fieldList ??= [];
+                              bloc.accountCopy!.fieldList!.add(AccountField(
+                                  name: 'Nombre del campo', data: ''));
+                              keyFormAnimatedList.currentState!.insertItem(
+                                  (bloc.accountCopy!.fieldList!.length - 1) +
+                                      2);
+                            },
+                            style: ButtonStyle(
+                                shape: MaterialStateProperty.all(
+                                    RoundedRectangleBorder(
+                                        side: BorderSide(
+                                            color: kytheme.colorSeparatorLine,
+                                            width: 1),
+                                        borderRadius:
+                                            BorderRadius.circular(12)))),
+                            child: const Padding(
+                              padding: EdgeInsets.all(8.0),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(Icons.add),
+                                  SizedBox(
+                                    width: 12,
+                                  ),
+                                  Text('Agregar campo'),
+                                ],
+                              ),
+                            )),
+                      FilledButton.icon(
+                          onPressed: () => editting ? bloc.save() : bloc.edit(),
+                          icon: Icon(editting ? Icons.save : Icons.edit),
+                          label: Text(editting ? 'Guardar cambios' : 'Editar')),
+                    ],
+                  );
+                },
+              )
             ],
           ),
         ),
