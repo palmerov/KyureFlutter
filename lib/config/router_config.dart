@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kyure/data/models/accounts_data.dart';
 import 'package:kyure/presentation/pages/account_details/account_details_page.dart';
 import 'package:kyure/presentation/pages/account_list/account_list_page.dart';
+import 'package:kyure/presentation/pages/group_details/group_details_page.dart';
 import 'package:kyure/services/service_locator.dart';
 
 final routerConfig = GoRouter(routes: [
@@ -35,7 +35,7 @@ final routerConfig = GoRouter(routes: [
                           : serviceLocator
                               .getUserDataService()
                               .getFirstRealGroup(),
-                      editing: editting?? id < 0,
+                      editing: editting ?? id < 0,
                       account: id >= 0
                           ? serviceLocator
                               .getUserDataService()
@@ -50,13 +50,32 @@ final routerConfig = GoRouter(routes: [
                                   name: 'Nombre de usuario', data: ''),
                               fieldPassword:
                                   AccountField(name: 'Contraseña', data: ''))));
+            }),
+        GoRoute(
+            path: KyRoutes.groupEditor.name,
+            name: KyRoutes.groupEditor.name,
+            pageBuilder: (context, state) {
+              String? name = state.uri.queryParameters['name'];
+              AccountGroup group = name != null
+                  ? serviceLocator.getUserDataService().findGroupByName(name)!
+                  : AccountGroup(
+                      iconName:
+                          'assets/svg_icons/palette_FILL0_wght300_GRAD-25_opsz24.svg',
+                      name: '',
+                      color: Colors.blue.shade700.value,
+                      accounts: []);
+              bool? editting =
+                  state.uri.queryParameters['editting'] == 'true' ? true : null;
+              return MaterialPage(
+                  child: GroupDetailsPage(group: group, isNew: name == null));
             })
       ]),
 ]);
 
 enum KyRoutes {
   main('/main', '/main'),
-  accountEditor('account-editor', '/main/account-editor');
+  accountEditor('account-editor', '/main/account-editor'),
+  groupEditor('group-editor', '/main/group-editor');
 
   const KyRoutes(this.name, this.routePath);
   final String name, routePath;

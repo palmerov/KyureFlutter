@@ -77,6 +77,11 @@ class AccountListPageBloc extends Cubit<AccountListPageState> {
     userDataService.deleteAccount(account);
     reload();
   }
+
+  void deleteGroup(AccountGroup group) {
+    userDataService.deleteGroup(group);
+    reload();
+  }
 }
 
 class AccountListPageState extends Equatable {

@@ -106,4 +106,8 @@ class UserDataService {
     group.accounts.removeWhere((element) => element.id == account.id);
     getAllGroup()?.accounts.removeWhere((element) => element.id == account.id);
   }
+
+  void deleteGroup(AccountGroup group) {
+    accountsData!.accountGroups.removeWhere((element) => element == group);
+  }
 }

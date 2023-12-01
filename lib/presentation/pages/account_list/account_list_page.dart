@@ -39,7 +39,7 @@ class _AccountListView extends StatelessWidget {
   late final GlobalKey<ScaffoldState> keyScaffold;
   late final PageController pageController;
 
-  _showContextMenuDialog(
+  _showAccountContextMenuDialog(
       AccountListPageBloc bloc, BuildContext context, Account account) {
     showDialog(
       context: context,
@@ -57,7 +57,7 @@ class _AccountListView extends StatelessWidget {
                       radius: 8,
                       image: Image.asset(account.image.path),
                       size: 24),
-                  SizedBox(
+                  const SizedBox(
                     width: 8,
                   ),
                   Text(
@@ -79,7 +79,60 @@ class _AccountListView extends StatelessWidget {
               ContextMenuTileMolecule(
                   onTap: () {
                     bloc.deleteAccount(account);
-                    Navigator.of(context).pop();
+                    context.pop();
+                  },
+                  label: 'Eliminar',
+                  icon: const Icon(CupertinoIcons.delete)),
+            ],
+          )),
+    );
+  }
+
+  _showGroupContextMenuDialog(
+      AccountListPageBloc bloc, BuildContext context, AccountGroup group) {
+    showDialog(
+      context: context,
+      useSafeArea: true,
+      builder: (context) => AlertDialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                children: [
+                  SvgIcon(svgAsset: group.iconName),
+                  const SizedBox(
+                    width: 8,
+                  ),
+                  Text(
+                    group.name,
+                    style: const TextStyle(fontSize: 18),
+                  ),
+                ],
+              ),
+              const SizedBox(
+                height: 16,
+              ),
+              ContextMenuTileMolecule(
+                  onTap: () async {
+                    context.pop();
+                    final edited = await context
+                        .pushNamed(KyRoutes.groupEditor.name, queryParameters: {
+                      'name': group.name,
+                      'editting': 'true'
+                    });
+                    if (edited != null && (edited as bool)) {
+                      bloc.reload();
+                    }
+                  },
+                  label: 'Editar',
+                  icon: const Icon(Icons.edit)),
+              ContextMenuTileMolecule(
+                  onTap: () {
+                    bloc.deleteGroup(group);
+                    context.pop();
                   },
                   label: 'Eliminar',
                   icon: const Icon(CupertinoIcons.delete)),
@@ -125,9 +178,10 @@ class _AccountListView extends StatelessWidget {
                     listener: (context, state) {},
                     buildWhen: (previous, current) =>
                         previous.runtimeType != current.runtimeType &&
-                        (previous is AccountListPageStateLoading ||
-                            current is AccountListPageStateLoaded ||
-                            current is AccountListPageFilteredState),
+                            (previous is AccountListPageStateLoading ||
+                                current is AccountListPageStateLoaded ||
+                                current is AccountListPageFilteredState) ||
+                        previous.version != current.version,
                     builder: (context, state) {
                       if (state is AccountListPageStateLoading ||
                           state is AccountListPageStateInitial) {
@@ -174,7 +228,7 @@ class _AccountListView extends StatelessWidget {
                                           onTap: () => _openAccountDetails(
                                               bloc, context, account, false),
                                           onLongTap: () =>
-                                              _showContextMenuDialog(
+                                              _showAccountContextMenuDialog(
                                                   bloc, context, account),
                                         );
                                       },
@@ -237,12 +291,14 @@ class _AccountListView extends StatelessWidget {
                                   child: BlocBuilder<AccountListPageBloc,
                                       AccountListPageState>(
                                     buildWhen: (previous, current) =>
-                                        previous != current &&
+                                        (previous != current &&
+                                                current
+                                                    is AccountListPageFilteredState ||
                                             current
-                                                is AccountListPageFilteredState ||
-                                        current
-                                            is AccountListPageSelectedGroupState ||
-                                        current is AccountListPageStateLoaded,
+                                                is AccountListPageSelectedGroupState ||
+                                            current
+                                                is AccountListPageStateLoaded) ||
+                                        previous.version != current.version,
                                     builder: (context, state) {
                                       if (state
                                               is AccountListPageStateLoading ||
@@ -263,6 +319,11 @@ class _AccountListView extends StatelessWidget {
                                                   svgAsset: group.iconName),
                                               onTap: () =>
                                                   bloc.selectGroup(groupIndex),
+                                              onLongTap: groupIndex != 0
+                                                  ? () =>
+                                                      _showGroupContextMenuDialog(
+                                                          bloc, context, group)
+                                                  : null,
                                               selected:
                                                   state.selectedGroupIndex ==
                                                       groupIndex);
@@ -332,7 +393,13 @@ class _AccountListView extends StatelessWidget {
                                           color: kyTheme
                                               .colorOnBackgroundOpacity60),
                                       text: '+ Grupo',
-                                      onTap: () {},
+                                      onTap: () async {
+                                        final saved = await context.pushNamed(
+                                            KyRoutes.groupEditor.name);
+                                        if (saved != null && (saved as bool)) {
+                                          bloc.reload();
+                                        }
+                                      },
                                     ),
                                     ItemAction(
                                       icon: Icon(CupertinoIcons.person,
