@@ -12,10 +12,18 @@ class AccountDetailsBloc extends Cubit<AccountDetailsState> {
   AccountDetailsBloc(
       {required this.account, required this.group, required bool editting})
       : isNewAccount = editting,
-        super(AccountDetailsInitial(selectedGroup: group, editting: editting)) {
+        super(AccountDetailsInitial(
+            selectedGroup: group,
+            editting: editting,
+            assetImage: account.image.path)) {
     if (editting) {
-      accountCopy = account.copyWith();
+      accountCopy = account;
     }
+  }
+
+  void selectImage(String image) {
+    accountCopy!.image = AccountImage(path: image, source: ImageSource.assets);
+    emit(state.copyWith(assetImage: image));
   }
 
   void selectGroup(AccountGroup group) {
@@ -26,59 +34,78 @@ class AccountDetailsBloc extends Cubit<AccountDetailsState> {
   }
 
   void edit() {
-    accountCopy = account.copyWith();
+    accountCopy = Account(
+        id: account.id,
+        name: account.name,
+        image: account.image,
+        fieldPassword: AccountField(
+            name: account.fieldPassword.name,
+            data: account.fieldPassword.data,
+            visible: account.fieldPassword.visible),
+        fieldUsername: AccountField(
+            name: account.fieldUsername.name,
+            data: account.fieldUsername.data,
+            visible: account.fieldUsername.visible),
+        fieldList: account.fieldList
+            ?.map((e) =>
+                AccountField(name: e.name, data: e.data, visible: e.visible))
+            .toList());
     emit(state.copyWith(editting: true));
   }
 
-  void save() {
-    account = accountCopy ?? account;
-    if (groupTo != null && !isNewAccount) {
-      group.accounts.removeWhere((element) => element.id == account.id);
-      groupTo!.accounts.add(account);
+  void save(String name, List<AccountField> fields) {
+    accountCopy!.name = name;
+    accountCopy!.fieldUsername = fields[0];
+    accountCopy!.fieldPassword = fields[1];
+    accountCopy!.fieldList = fields.isEmpty ? null : fields.sublist(2);
+    if (isNewAccount) {
+      groupTo ??= group;
+      groupTo!.accounts.add(accountCopy!);
+      isNewAccount = false;
     } else {
-      if (isNewAccount) {
-        group.accounts.add(account);
+      if (groupTo != null) {
+        group.accounts.removeWhere((element) => element.id == account.id);
+        groupTo!.accounts.add(accountCopy!);
+        account = accountCopy ?? account;
       } else {
-        int index =
-            group.accounts.indexWhere((element) => element.id == account.id);
-        if (index >= 0) {
-          group.accounts[index] = account;
-        }
+        account.name = accountCopy!.name;
+        account.image = accountCopy!.image;
+        account.fieldPassword = accountCopy!.fieldPassword;
+        account.fieldUsername = accountCopy!.fieldUsername;
+        account.fieldList = accountCopy!.fieldList;
       }
     }
     group = groupTo ?? group;
-    isNewAccount = false;
     emit(state.copyWith(editting: false));
-  }
-
-  void addField() {
-    accountCopy!.fieldList!.add(AccountField(name: '', data: ''));
-    emit(state.copyWith());
-  }
-
-  void deleteField(int index) {
-    accountCopy!.fieldList!.removeAt(index);
-    emit(state.copyWith());
   }
 }
 
 class AccountDetailsState extends Equatable {
-  const AccountDetailsState(
-      {required this.selectedGroup, required this.editting});
+  const AccountDetailsState({
+    required this.selectedGroup,
+    required this.editting,
+    required this.assetImage,
+  });
   final AccountGroup selectedGroup;
   final bool editting;
+  final String assetImage;
   @override
-  List<Object?> get props => [selectedGroup.name, editting];
+  List<Object?> get props => [selectedGroup.name, editting, assetImage];
 
   //copy with
-  AccountDetailsState copyWith({AccountGroup? selectedGroup, bool? editting}) {
+  AccountDetailsState copyWith(
+      {AccountGroup? selectedGroup, bool? editting, String? assetImage}) {
     return AccountDetailsState(
+        assetImage: assetImage ?? this.assetImage,
         selectedGroup: selectedGroup ?? this.selectedGroup,
         editting: editting ?? this.editting);
   }
 }
 
 class AccountDetailsInitial extends AccountDetailsState {
-  const AccountDetailsInitial(
-      {required super.selectedGroup, required super.editting});
+  const AccountDetailsInitial({
+    required super.selectedGroup,
+    required super.editting,
+    required super.assetImage,
+  });
 }

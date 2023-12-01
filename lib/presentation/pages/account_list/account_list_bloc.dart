@@ -5,7 +5,7 @@ import 'package:equatable/equatable.dart';
 
 class AccountListPageBloc extends Cubit<AccountListPageState> {
   final UserDataService userDataService;
-  bool listenPageView=true;
+  bool listenPageView = true;
 
   AccountListPageBloc(this.userDataService)
       : super(const AccountListPageStateInitial());
@@ -69,25 +69,34 @@ class AccountListPageBloc extends Cubit<AccountListPageState> {
         userDataService.accountsData!.accountGroups, index));
   }
 
+  void reload() {
+    emit(state.copyWith(version: state.version + 1));
+  }
 }
 
 class AccountListPageState extends Equatable {
   const AccountListPageState(
-      {required this.accountGroups, this.selectedGroupIndex = 0});
+      {required this.accountGroups,
+      this.selectedGroupIndex = 0,
+      this.version = 0});
   final List<AccountGroup> accountGroups;
   final int selectedGroupIndex;
+  final int version;
 
   AccountListPageState copyWith(
       {List<AccountGroup>? accountGroups,
       int? selectedGroupIndex,
+      int? version,
       String? filter}) {
     return AccountListPageState(
         accountGroups: accountGroups ?? this.accountGroups,
+        version: version ?? this.version,
         selectedGroupIndex: selectedGroupIndex ?? this.selectedGroupIndex);
   }
 
   @override
-  List<Object?> get props => [selectedGroupIndex, accountGroups?.length];
+  List<Object?> get props =>
+      [selectedGroupIndex, accountGroups.length, version];
 }
 
 class AccountListPageStateInitial extends AccountListPageState {

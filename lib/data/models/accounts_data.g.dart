@@ -40,9 +40,7 @@ _$AccountImpl _$$AccountImplFromJson(Map<String, dynamic> json) =>
     _$AccountImpl(
       id: json['id'] as int,
       name: json['name'] as String,
-      image: json['image'] == null
-          ? null
-          : AccountImage.fromJson(json['image'] as Map<String, dynamic>),
+      image: AccountImage.fromJson(json['image'] as Map<String, dynamic>),
       fieldUsername:
           AccountField.fromJson(json['username'] as Map<String, dynamic>),
       fieldPassword:

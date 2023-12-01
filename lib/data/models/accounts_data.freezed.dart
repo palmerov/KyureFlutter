@@ -375,10 +375,12 @@ mixin _$Account {
   set id(int value) => throw _privateConstructorUsedError;
   @JsonKey(name: 'name')
   String get name => throw _privateConstructorUsedError;
+  @JsonKey(name: 'name')
+  set name(String value) => throw _privateConstructorUsedError;
   @JsonKey(name: 'image')
-  AccountImage? get image => throw _privateConstructorUsedError;
+  AccountImage get image => throw _privateConstructorUsedError;
   @JsonKey(name: 'image')
-  set image(AccountImage? value) => throw _privateConstructorUsedError;
+  set image(AccountImage value) => throw _privateConstructorUsedError;
   @JsonKey(name: 'username')
   AccountField get fieldUsername => throw _privateConstructorUsedError;
   @JsonKey(name: 'username')
@@ -406,12 +408,12 @@ abstract class $AccountCopyWith<$Res> {
   $Res call(
       {@JsonKey(name: 'id') int id,
       @JsonKey(name: 'name') String name,
-      @JsonKey(name: 'image') AccountImage? image,
+      @JsonKey(name: 'image') AccountImage image,
       @JsonKey(name: 'username') AccountField fieldUsername,
       @JsonKey(name: 'password') AccountField fieldPassword,
       @JsonKey(name: 'fields') List<AccountField>? fieldList});
 
-  $AccountImageCopyWith<$Res>? get image;
+  $AccountImageCopyWith<$Res> get image;
   $AccountFieldCopyWith<$Res> get fieldUsername;
   $AccountFieldCopyWith<$Res> get fieldPassword;
 }
@@ -431,7 +433,7 @@ class _$AccountCopyWithImpl<$Res, $Val extends Account>
   $Res call({
     Object? id = null,
     Object? name = null,
-    Object? image = freezed,
+    Object? image = null,
     Object? fieldUsername = null,
     Object? fieldPassword = null,
     Object? fieldList = freezed,
@@ -445,10 +447,10 @@ class _$AccountCopyWithImpl<$Res, $Val extends Account>
           ? _value.name
           : name // ignore: cast_nullable_to_non_nullable
               as String,
-      image: freezed == image
+      image: null == image
           ? _value.image
           : image // ignore: cast_nullable_to_non_nullable
-              as AccountImage?,
+              as AccountImage,
       fieldUsername: null == fieldUsername
           ? _value.fieldUsername
           : fieldUsername // ignore: cast_nullable_to_non_nullable
@@ -466,12 +468,8 @@ class _$AccountCopyWithImpl<$Res, $Val extends Account>
 
   @override
   @pragma('vm:prefer-inline')
-  $AccountImageCopyWith<$Res>? get image {
-    if (_value.image == null) {
-      return null;
-    }
-
-    return $AccountImageCopyWith<$Res>(_value.image!, (value) {
+  $AccountImageCopyWith<$Res> get image {
+    return $AccountImageCopyWith<$Res>(_value.image, (value) {
       return _then(_value.copyWith(image: value) as $Val);
     });
   }
@@ -503,13 +501,13 @@ abstract class _$$AccountImplCopyWith<$Res> implements $AccountCopyWith<$Res> {
   $Res call(
       {@JsonKey(name: 'id') int id,
       @JsonKey(name: 'name') String name,
-      @JsonKey(name: 'image') AccountImage? image,
+      @JsonKey(name: 'image') AccountImage image,
       @JsonKey(name: 'username') AccountField fieldUsername,
       @JsonKey(name: 'password') AccountField fieldPassword,
       @JsonKey(name: 'fields') List<AccountField>? fieldList});
 
   @override
-  $AccountImageCopyWith<$Res>? get image;
+  $AccountImageCopyWith<$Res> get image;
   @override
   $AccountFieldCopyWith<$Res> get fieldUsername;
   @override
@@ -529,7 +527,7 @@ class __$$AccountImplCopyWithImpl<$Res>
   $Res call({
     Object? id = null,
     Object? name = null,
-    Object? image = freezed,
+    Object? image = null,
     Object? fieldUsername = null,
     Object? fieldPassword = null,
     Object? fieldList = freezed,
@@ -543,10 +541,10 @@ class __$$AccountImplCopyWithImpl<$Res>
           ? _value.name
           : name // ignore: cast_nullable_to_non_nullable
               as String,
-      image: freezed == image
+      image: null == image
           ? _value.image
           : image // ignore: cast_nullable_to_non_nullable
-              as AccountImage?,
+              as AccountImage,
       fieldUsername: null == fieldUsername
           ? _value.fieldUsername
           : fieldUsername // ignore: cast_nullable_to_non_nullable
@@ -569,7 +567,7 @@ class _$AccountImpl implements _Account {
   _$AccountImpl(
       {@JsonKey(name: 'id') required this.id,
       @JsonKey(name: 'name') required this.name,
-      @JsonKey(name: 'image') this.image,
+      @JsonKey(name: 'image') required this.image,
       @JsonKey(name: 'username') required this.fieldUsername,
       @JsonKey(name: 'password') required this.fieldPassword,
       @JsonKey(name: 'fields') this.fieldList});
@@ -582,10 +580,10 @@ class _$AccountImpl implements _Account {
   int id;
   @override
   @JsonKey(name: 'name')
-  final String name;
+  String name;
   @override
   @JsonKey(name: 'image')
-  AccountImage? image;
+  AccountImage image;
   @override
   @JsonKey(name: 'username')
   AccountField fieldUsername;
@@ -618,8 +616,8 @@ class _$AccountImpl implements _Account {
 abstract class _Account implements Account {
   factory _Account(
       {@JsonKey(name: 'id') required int id,
-      @JsonKey(name: 'name') required final String name,
-      @JsonKey(name: 'image') AccountImage? image,
+      @JsonKey(name: 'name') required String name,
+      @JsonKey(name: 'image') required AccountImage image,
       @JsonKey(name: 'username') required AccountField fieldUsername,
       @JsonKey(name: 'password') required AccountField fieldPassword,
       @JsonKey(name: 'fields') List<AccountField>? fieldList}) = _$AccountImpl;
@@ -634,11 +632,13 @@ abstract class _Account implements Account {
   @override
   @JsonKey(name: 'name')
   String get name;
+  @JsonKey(name: 'name')
+  set name(String value);
   @override
   @JsonKey(name: 'image')
-  AccountImage? get image;
+  AccountImage get image;
   @JsonKey(name: 'image')
-  set image(AccountImage? value);
+  set image(AccountImage value);
   @override
   @JsonKey(name: 'username')
   AccountField get fieldUsername;

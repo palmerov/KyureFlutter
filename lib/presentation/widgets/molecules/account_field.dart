@@ -13,18 +13,22 @@ class AccountFieldMolecule extends StatelessWidget {
       required this.editting,
       required this.accountField,
       this.nameEditable = true,
-      this.onTapDelete}) {
-    controllerField = TextEditingController();
-    controllerField.text = accountField.data;
-    controllerLabel = TextEditingController();
-    controllerLabel!.text = accountField.name;
+      this.onTapDelete,
+      TextEditingController? controllerField,
+      TextEditingController? controllerLabel,
+      this.onFieldChanged})
+      : controllerField = controllerField ?? TextEditingController(),
+        controllerLabel = controllerLabel ?? TextEditingController() {
+    this.controllerField!.text = accountField.data;
+    this.controllerLabel!.text = accountField.name;
   }
   final bool editting;
   final bool nameEditable;
   final AccountField accountField;
-  late final TextEditingController controllerField;
-  late final TextEditingController? controllerLabel;
+  final TextEditingController? controllerField;
+  final TextEditingController? controllerLabel;
   final Function()? onTapDelete;
+  final Function(String name, String data)? onFieldChanged;
 
   void _copyData(BuildContext context) {
     ClipboardUtils.copy(accountField.data);
@@ -39,7 +43,7 @@ class AccountFieldMolecule extends StatelessWidget {
   }
 
   AccountField getEditingData() {
-    String data = controllerField.text;
+    String data = controllerField!.text;
     String name = controllerLabel!.text;
     return AccountField(name: name, data: data, visible: accountField.visible);
   }
@@ -48,6 +52,8 @@ class AccountFieldMolecule extends StatelessWidget {
   Widget build(BuildContext context) {
     final kyTheme = KyTheme.of(context)!;
     final field = TextFormField(
+      onChanged: (value) => onFieldChanged?.call(
+          controllerLabel!.text, controllerField!.text),
       readOnly: !editting,
       controller: controllerField,
       minLines: 1,
@@ -63,7 +69,7 @@ class AccountFieldMolecule extends StatelessWidget {
         contentPadding: const EdgeInsets.all(14),
         focusedBorder: OutlineInputBorder(
             borderSide: BorderSide(
-              width: 1.5,
+                width: 1.5,
                 color: editting
                     ? kyTheme.colorPrimary
                     : kyTheme.colorSeparatorLine),
@@ -92,6 +98,8 @@ class AccountFieldMolecule extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.only(left: 8),
           child: TextFormField(
+            onChanged: (value) => onFieldChanged?.call(
+                controllerLabel!.text, controllerField!.text),
             controller: controllerLabel,
             textAlignVertical: TextAlignVertical.center,
             readOnly: !editting,
@@ -104,26 +112,34 @@ class AccountFieldMolecule extends StatelessWidget {
           ),
         ),
         Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(child: field),
-            Padding(
-              padding: const EdgeInsets.only(left: 8),
-              child: CopyAreaMolecule(
-                icon: Icon(editting ? CupertinoIcons.delete : Icons.copy,
-                    size: 20,
-                    color: editting ? Colors.red : kyTheme.colorPassword),
-                animate: !editting,
-                padding: const EdgeInsets.all(8),
-                color: kyTheme.colorPassword,
-                onTap: (_) {
-                  if (!editting) {
-                    _copyData(context);
-                  } else {
-                    if (onTapDelete != null) onTapDelete!();
-                  }
-                },
-              ),
-            )
+            if (!editting || onTapDelete != null)
+              Padding(
+                padding: const EdgeInsets.only(left: 8),
+                child: CopyAreaMolecule(
+                  icon: Icon(editting ? CupertinoIcons.delete : Icons.copy,
+                      size: 20,
+                      color: editting
+                          ? onTapDelete != null
+                              ? Colors.red
+                              : kyTheme.colorHint
+                          : kyTheme.colorPassword),
+                  animate: !editting,
+                  padding: const EdgeInsets.all(8),
+                  color: kyTheme.colorPassword,
+                  onTap: editting && onTapDelete == null
+                      ? null
+                      : (_) {
+                          if (!editting) {
+                            _copyData(context);
+                          } else {
+                            onTapDelete!();
+                          }
+                        },
+                ),
+              )
           ],
         )
       ],

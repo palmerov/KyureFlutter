@@ -22,23 +22,33 @@ final routerConfig = GoRouter(routes: [
         GoRoute(
             path: KyRoutes.accountEditor.name,
             name: KyRoutes.accountEditor.name,
-            pageBuilder: (context, state) => MaterialPage(
-                child: AccountDetailsPage(
-                    group: serviceLocator
-                            .getUserDataService()
-                            .getGroupByAccountId(int.parse(
-                                (state.uri.queryParameters['id'] ?? '-1')
-                                    .toString())) ??
-                        serviceLocator.getUserDataService().getFirstRealGroup(),
-                    editing: state.uri.queryParameters['id'] == null,
-                    account: state.uri.queryParameters['id'] != null
-                        ? serviceLocator.getUserDataService().findAccountById(
-                            int.parse(state.uri.queryParameters['id']!))!
-                        : Account(
-                            id: -1,
-                            name: '',
-                            fieldUsername: AccountField(name: 'Nombre de usuario', data: ''),
-                            fieldPassword: AccountField(name: 'Contraseña', data: '')))))
+            pageBuilder: (context, state) {
+              int id = int.parse(state.uri.queryParameters['id'] ?? '-1');
+              return MaterialPage(
+                  child: AccountDetailsPage(
+                      group: id >= 0
+                          ? serviceLocator
+                              .getUserDataService()
+                              .getGroupByAccountId(id)!
+                          : serviceLocator
+                              .getUserDataService()
+                              .getFirstRealGroup(),
+                      editing: id < 0,
+                      account: id >= 0
+                          ? serviceLocator
+                              .getUserDataService()
+                              .findAccountById(id)!
+                          : Account(
+                              id: -1,
+                              name: '',
+                              image: AccountImage(
+                                  source: ImageSource.assets,
+                                  path: 'assets/web_icons/squared.png'),
+                              fieldUsername: AccountField(
+                                  name: 'Nombre de usuario', data: ''),
+                              fieldPassword:
+                                  AccountField(name: 'Contraseña', data: ''))));
+            })
       ]),
 ]);
 

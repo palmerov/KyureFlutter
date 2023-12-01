@@ -96,27 +96,40 @@ class _AccountListView extends StatelessWidget {
                                 if (bloc.listenPageView) bloc.selectGroup(value)
                               },
                               itemBuilder: (context, groupIndex) => Center(
-                                child: ListView.builder(
-                                  physics: const BouncingScrollPhysics(),
-                                  padding: const EdgeInsets.only(
-                                      top: 100, bottom: 60),
-                                  itemBuilder: (context, accountIndex) {
-                                    Account account = state
-                                        .accountGroups[groupIndex]
-                                        .accounts[accountIndex];
-                                    return AccountItemMolecule(
-                                      account: account,
-                                      onTap: () => context.pushNamed(
-                                          KyRoutes.accountEditor.name,
-                                          queryParameters: {
-                                            'id': '${account.id}'
-                                          }),
+                                child: BlocBuilder<AccountListPageBloc,
+                                    AccountListPageState>(
+                                  buildWhen: (previous, current) =>
+                                      previous.version != current.version,
+                                  builder: (context, state) {
+                                    return ListView.builder(
+                                      physics: const BouncingScrollPhysics(),
+                                      padding: const EdgeInsets.only(
+                                          top: 100, bottom: 60),
+                                      itemBuilder: (context, accountIndex) {
+                                        Account account = state
+                                            .accountGroups[groupIndex]
+                                            .accounts[accountIndex];
+                                        return AccountItemMolecule(
+                                          account: account,
+                                          onTap: () async {
+                                            final updated = await context
+                                                .pushNamed(
+                                                    KyRoutes.accountEditor.name,
+                                                    queryParameters: {
+                                                  'id': '${account.id}'
+                                                });
+                                            if (updated != null) {
+                                              bloc.reload();
+                                            }
+                                          },
+                                        );
+                                      },
+                                      itemCount: state.accountGroups.isEmpty
+                                          ? 0
+                                          : state.accountGroups[groupIndex]
+                                              .accounts.length,
                                     );
                                   },
-                                  itemCount: state.accountGroups.isEmpty
-                                      ? 0
-                                      : state.accountGroups[groupIndex].accounts
-                                          .length,
                                 ),
                               ),
                             ),
@@ -323,10 +336,14 @@ class Drawer extends StatelessWidget {
           child: const Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-            Text('Kyure', style: TextStyle(fontSize: 18), ),
-            Text('Asegura tus cuentas'),
-            Text('TODO: opciones para la app :)')
-          ],),
+              Text(
+                'Kyure',
+                style: TextStyle(fontSize: 18),
+              ),
+              Text('Asegura tus cuentas'),
+              Text('TODO: opciones para la app :)')
+            ],
+          ),
         )
       ],
     );
