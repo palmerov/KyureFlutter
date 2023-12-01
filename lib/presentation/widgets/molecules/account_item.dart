@@ -12,10 +12,12 @@ import 'package:kyure/presentation/widgets/molecules/image_rounded.dart';
 import 'package:kyure/presentation/widgets/molecules/toast_widget.dart';
 
 class AccountItemMolecule extends StatelessWidget {
-  const AccountItemMolecule({super.key, required this.account, this.onTap});
+  const AccountItemMolecule(
+      {super.key, required this.account, this.onTap, this.onLongTap});
 
   final Account account;
   final Function()? onTap;
+  final Function()? onLongTap;
 
   copyUser(BuildContext context, Offset offset) {
     final kyTheme = KyTheme.of(context)!;
@@ -46,12 +48,12 @@ class AccountItemMolecule extends StatelessWidget {
   Widget build(BuildContext context) {
     final kyTheme = KyTheme.of(context)!;
     Image? image;
-    if (account.image?.path != null) {
-      image = Image.asset(account.image!.path);
-    }
+    image = Image.asset(account.image.path);
 
     return InkWell(
-      onTap: onTap ?? () {},
+      onTap: onTap,
+      onLongPress: onLongTap,
+      onSecondaryTap: onLongTap,
       splashColor: kyTheme.colorPrimarySmooth,
       highlightColor: kyTheme.colorPrimarySmooth,
       child: Padding(

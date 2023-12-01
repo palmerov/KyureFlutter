@@ -24,6 +24,8 @@ final routerConfig = GoRouter(routes: [
             name: KyRoutes.accountEditor.name,
             pageBuilder: (context, state) {
               int id = int.parse(state.uri.queryParameters['id'] ?? '-1');
+              bool? editting =
+                  state.uri.queryParameters['editting'] == 'true' ? true : null;
               return MaterialPage(
                   child: AccountDetailsPage(
                       group: id >= 0
@@ -33,7 +35,7 @@ final routerConfig = GoRouter(routes: [
                           : serviceLocator
                               .getUserDataService()
                               .getFirstRealGroup(),
-                      editing: id < 0,
+                      editing: editting?? id < 0,
                       account: id >= 0
                           ? serviceLocator
                               .getUserDataService()

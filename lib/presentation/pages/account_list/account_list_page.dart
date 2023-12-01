@@ -10,6 +10,8 @@ import 'package:kyure/presentation/widgets/molecules/account_group.dart';
 import 'package:kyure/presentation/widgets/molecules/account_group_list_shimmer.dart';
 import 'package:kyure/presentation/widgets/molecules/account_item.dart';
 import 'package:kyure/presentation/widgets/molecules/account_list_shimmer.dart';
+import 'package:kyure/presentation/widgets/molecules/contect_menu_tile.dart';
+import 'package:kyure/presentation/widgets/molecules/image_rounded.dart';
 import 'package:kyure/presentation/widgets/molecules/search_bar.dart';
 import 'package:kyure/presentation/theme/ky_theme.dart';
 import 'package:kyure/presentation/widgets/molecules/svg_icon.dart';
@@ -36,6 +38,64 @@ class _AccountListView extends StatelessWidget {
   }
   late final GlobalKey<ScaffoldState> keyScaffold;
   late final PageController pageController;
+
+  _showContextMenuDialog(
+      AccountListPageBloc bloc, BuildContext context, Account account) {
+    showDialog(
+      context: context,
+      useSafeArea: true,
+      builder: (context) => AlertDialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                children: [
+                  ImageRounded(
+                      radius: 8,
+                      image: Image.asset(account.image.path),
+                      size: 24),
+                  SizedBox(
+                    width: 8,
+                  ),
+                  Text(
+                    account.name,
+                    style: const TextStyle(fontSize: 18),
+                  ),
+                ],
+              ),
+              const SizedBox(
+                height: 16,
+              ),
+              ContextMenuTileMolecule(
+                  onTap: () {
+                    context.pop();
+                    _openAccountDetails(bloc, context, account, true);
+                  },
+                  label: 'Editar',
+                  icon: const Icon(Icons.edit)),
+              ContextMenuTileMolecule(
+                  onTap: () {
+                    bloc.deleteAccount(account);
+                    Navigator.of(context).pop();
+                  },
+                  label: 'Eliminar',
+                  icon: const Icon(CupertinoIcons.delete)),
+            ],
+          )),
+    );
+  }
+
+  _openAccountDetails(AccountListPageBloc bloc, BuildContext context,
+      Account account, bool editting) async {
+    final updated = await context.pushNamed(KyRoutes.accountEditor.name,
+        queryParameters: {'id': '${account.id}', 'editting': '$editting'});
+    if (updated != null) {
+      bloc.reload();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -111,17 +171,11 @@ class _AccountListView extends StatelessWidget {
                                             .accounts[accountIndex];
                                         return AccountItemMolecule(
                                           account: account,
-                                          onTap: () async {
-                                            final updated = await context
-                                                .pushNamed(
-                                                    KyRoutes.accountEditor.name,
-                                                    queryParameters: {
-                                                  'id': '${account.id}'
-                                                });
-                                            if (updated != null) {
-                                              bloc.reload();
-                                            }
-                                          },
+                                          onTap: () => _openAccountDetails(
+                                              bloc, context, account, false),
+                                          onLongTap: () =>
+                                              _showContextMenuDialog(
+                                                  bloc, context, account),
                                         );
                                       },
                                       itemCount: state.accountGroups.isEmpty

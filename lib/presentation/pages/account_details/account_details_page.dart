@@ -2,7 +2,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:kyure/config/router_config.dart';
 import 'package:kyure/data/models/accounts_data.dart';
 import 'package:kyure/presentation/pages/account_details/bloc/account_details_bloc.dart';
 import 'package:kyure/presentation/theme/ky_theme.dart';
@@ -75,7 +74,7 @@ class _AccountDetailsView extends StatelessWidget {
           elevation: 0.5,
           backgroundColor: kytheme.colorBackground,
           leading: IconButton(
-              onPressed: () => context.pop(),
+              onPressed: () => context.pop(bloc.accountCopy != null),
               icon: Icon(CupertinoIcons.back,
                   color: kytheme.colorOnBackgroundOpacity50)),
           title: Text(
@@ -164,8 +163,7 @@ class _AccountDetailsView extends StatelessWidget {
                                   itemBuilder: (context) {
                                     return serviceLocator
                                         .getUserDataService()
-                                        .accountsData!
-                                        .accountGroups
+                                        .getRealGroups()
                                         .map((e) => PopupMenuItem(
                                             value: e,
                                             height: 36,
@@ -241,35 +239,38 @@ class _AccountDetailsView extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         if (editting)
-                          OutlinedButton(
-                              onPressed: () {
-                                bloc.accountCopy!.fieldList ??= [];
-                                final field = AccountField(
-                                    name: 'Nombre del campo', data: '');
-                                bloc.accountCopy!.fieldList!.add(field);
-                                formController.addField!(field);
-                              },
-                              style: ButtonStyle(
-                                  shape: MaterialStateProperty.all(
-                                      RoundedRectangleBorder(
-                                          side: BorderSide(
-                                              color: kytheme.colorSeparatorLine,
-                                              width: 1),
-                                          borderRadius:
-                                              BorderRadius.circular(12)))),
-                              child: const Padding(
-                                padding: EdgeInsets.all(8.0),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(Icons.add),
-                                    SizedBox(
-                                      width: 12,
-                                    ),
-                                    Text('Agregar campo'),
-                                  ],
-                                ),
-                              )),
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 8),
+                            child: OutlinedButton(
+                                onPressed: () {
+                                  bloc.accountCopy!.fieldList ??= [];
+                                  final field = AccountField(
+                                      name: 'Nombre del campo', data: '');
+                                  bloc.accountCopy!.fieldList!.add(field);
+                                  formController.addField!(field);
+                                },
+                                style: ButtonStyle(
+                                    shape: MaterialStateProperty.all(
+                                        RoundedRectangleBorder(
+                                            side: BorderSide(
+                                                color: kytheme.colorSeparatorLine,
+                                                width: 1),
+                                            borderRadius:
+                                                BorderRadius.circular(12)))),
+                                child: const Padding(
+                                  padding: EdgeInsets.all(8.0),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(Icons.add),
+                                      SizedBox(
+                                        width: 12,
+                                      ),
+                                      Text('Agregar campo'),
+                                    ],
+                                  ),
+                                )),
+                          ),
                         FilledButton.icon(
                             onPressed: () => editting
                                 ? bloc.save(tecName.text,

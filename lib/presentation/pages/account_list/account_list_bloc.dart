@@ -72,6 +72,11 @@ class AccountListPageBloc extends Cubit<AccountListPageState> {
   void reload() {
     emit(state.copyWith(version: state.version + 1));
   }
+
+  void deleteAccount(Account account) {
+    userDataService.deleteAccount(account);
+    reload();
+  }
 }
 
 class AccountListPageState extends Equatable {

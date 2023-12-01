@@ -39,6 +39,12 @@ class UserDataService {
     }
   }
 
+  void addNewAccount(Account account, AccountGroup group) {
+    account.id = getMaxId() + 1;
+    getAllGroup()?.accounts.insert(0, account);
+    group.accounts.insert(0, account);
+  }
+
   Account? findAccountById(int id) {
     try {
       for (var group in accountsData!.accountGroups) {
@@ -47,6 +53,7 @@ class UserDataService {
     } catch (exception) {
       return null;
     }
+    return null;
   }
 
   AccountGroup? getGroupByAccountId(int id) {
@@ -70,8 +77,33 @@ class UserDataService {
     }
   }
 
+  AccountGroup? getAllGroup() {
+    if (accountsData!.accountGroups.length == 1) return null;
+    return accountsData!.accountGroups.first;
+  }
+
+  int getMaxId() {
+    final group = getAllGroup() ?? getFirstRealGroup();
+    return group.accounts.fold(
+        0,
+        (previousValue, element) =>
+            previousValue > element.id ? previousValue : element.id);
+  }
+
   AccountGroup? findGroupByName(String name) {
     return accountsData!.accountGroups
         .firstWhere((element) => element.name == name);
+  }
+
+  List<AccountGroup> getRealGroups() {
+    return accountsData!.accountGroups.length == 1
+        ? accountsData!.accountGroups
+        : accountsData!.accountGroups.sublist(1);
+  }
+
+  void deleteAccount(Account account) {
+    final group = getGroupByAccountId(account.id)!;
+    group.accounts.removeWhere((element) => element.id == account.id);
+    getAllGroup()?.accounts.removeWhere((element) => element.id == account.id);
   }
 }

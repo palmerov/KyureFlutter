@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kyure/data/models/accounts_data.dart';
+import 'package:kyure/services/service_locator.dart';
 
 class AccountDetailsBloc extends Cubit<AccountDetailsState> {
   AccountGroup group;
@@ -11,13 +12,13 @@ class AccountDetailsBloc extends Cubit<AccountDetailsState> {
 
   AccountDetailsBloc(
       {required this.account, required this.group, required bool editting})
-      : isNewAccount = editting,
+      : isNewAccount = account.id < 0,
         super(AccountDetailsInitial(
             selectedGroup: group,
             editting: editting,
             assetImage: account.image.path)) {
     if (editting) {
-      accountCopy = account;
+      edit();
     }
   }
 
@@ -60,7 +61,7 @@ class AccountDetailsBloc extends Cubit<AccountDetailsState> {
     accountCopy!.fieldList = fields.isEmpty ? null : fields.sublist(2);
     if (isNewAccount) {
       groupTo ??= group;
-      groupTo!.accounts.add(accountCopy!);
+      serviceLocator.getUserDataService().addNewAccount(accountCopy!, groupTo!);
       isNewAccount = false;
     } else {
       if (groupTo != null) {
