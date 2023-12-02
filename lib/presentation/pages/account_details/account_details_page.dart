@@ -166,9 +166,9 @@ class _AccountDetailsView extends StatelessWidget {
                                         .getRealGroups()
                                         .map((e) => PopupMenuItem(
                                             value: e,
-                                            height: 36,
+                                            height: 44,
                                             child: SizedBox(
-                                              height: 36,
+                                              height: 44,
                                               width: 140,
                                               child: Row(children: [
                                                 SvgIcon(svgAsset: e.iconName),
@@ -245,7 +245,7 @@ class _AccountDetailsView extends StatelessWidget {
                                 onPressed: () {
                                   bloc.accountCopy!.fieldList ??= [];
                                   final field = AccountField(
-                                      name: 'Nombre del campo', data: '');
+                                      name: 'Nombre del campo', data: '', visible: false);
                                   bloc.accountCopy!.fieldList!.add(field);
                                   formController.addField!(field);
                                 },

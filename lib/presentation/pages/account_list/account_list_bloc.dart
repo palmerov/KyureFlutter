@@ -11,13 +11,6 @@ class AccountListPageBloc extends Cubit<AccountListPageState> {
       : super(const AccountListPageStateInitial());
 
   void load() async {
-    emit(const AccountListPageStateLoading());
-    try {
-      await userDataService.readUserData();
-    } catch (exception) {
-      emit(AccountListPageStateError(exception.toString()));
-      return;
-    }
     emit(AccountListPageStateLoaded(
         userDataService.accountsData!.accountGroups));
   }
@@ -70,6 +63,7 @@ class AccountListPageBloc extends Cubit<AccountListPageState> {
   }
 
   void reload() {
+    userDataService.writeUserData();
     emit(state.copyWith(version: state.version + 1));
   }
 

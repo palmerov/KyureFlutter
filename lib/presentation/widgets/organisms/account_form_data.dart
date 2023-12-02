@@ -98,9 +98,10 @@ class _AccountFormDataOrganismState extends State<AccountFormDataOrganism> {
       child: AccountFieldMolecule(
         editting: widget.editting,
         accountField: accountField.accountField,
-        onFieldChanged: (String name, String data) {
+        onFieldChanged: (String name, String data, bool visible) {
           accountField.accountField.name = name;
           accountField.accountField.data = data;
+          accountField.accountField.visible = visible;
         },
         onTapDelete: index > 1
             ? () {

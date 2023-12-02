@@ -131,11 +131,64 @@ class _AccountListView extends StatelessWidget {
                   icon: const Icon(Icons.edit)),
               ContextMenuTileMolecule(
                   onTap: () {
-                    bloc.deleteGroup(group);
                     context.pop();
+                    _showYesOrNoDialog(
+                        context,
+                        'Eliminar grupo',
+                        'Si eliminas el grupo, se perderán todas las cuentas vinculadas. ¿Deseas eliminarlo?',
+                        () => bloc.deleteGroup(group),
+                        () => context.pop());
                   },
                   label: 'Eliminar',
                   icon: const Icon(CupertinoIcons.delete)),
+            ],
+          )),
+    );
+  }
+
+  _showYesOrNoDialog(BuildContext buildContext, String title, String message,
+      Function() onYes, Function() onNo) {
+    showDialog(
+      context: buildContext,
+      useSafeArea: true,
+      builder: (context) => AlertDialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(fontSize: 18),
+              ),
+              const SizedBox(
+                height: 16,
+              ),
+              Text(
+                message,
+                style: const TextStyle(fontSize: 16),
+              ),
+              const SizedBox(
+                height: 16,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                      onPressed: () {
+                        context.pop();
+                        onNo();
+                      },
+                      child: const Text('No')),
+                  TextButton(
+                      onPressed: () {
+                        context.pop();
+                        onYes();
+                      },
+                      child: const Text('Si')),
+                ],
+              )
             ],
           )),
     );
@@ -406,9 +459,33 @@ class _AccountListView extends StatelessWidget {
                                           color: kyTheme
                                               .colorOnBackgroundOpacity60),
                                       text: '+ Cuenta',
-                                      onTap: () {
-                                        context.push(
-                                            KyRoutes.accountEditor.routePath);
+                                      onTap: () async {
+                                        if (serviceLocator
+                                                .getUserDataService()
+                                                .accountsData!
+                                                .accountGroups
+                                                .length ==
+                                            1) {
+                                          _showYesOrNoDialog(
+                                              context,
+                                              'No hay grupos',
+                                              'Para crear una cuenta, debes tener al menos un grupo además de "Todos". ¿Continuar y crear uno?',
+                                              () async {
+                                            final saved =
+                                                await context.pushNamed(
+                                                    KyRoutes.groupEditor.name);
+                                            if (saved != null &&
+                                                (saved as bool)) {
+                                              bloc.reload();
+                                            }
+                                          }, () => null);
+                                        } else {
+                                          final result =
+                                              await context.pushNamed(
+                                                  KyRoutes.accountEditor.name);
+                                          if (result != null &&
+                                              (result as bool)) bloc.reload();
+                                        }
                                       },
                                     ),
                                   ],

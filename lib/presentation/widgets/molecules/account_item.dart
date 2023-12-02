@@ -1,7 +1,4 @@
-import 'dart:io';
-
 import 'package:bot_toast/bot_toast.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:kyure/clipboard_utils.dart';
@@ -63,7 +60,7 @@ class AccountItemMolecule extends StatelessWidget {
           children: [
             Hero(
                 tag: '@${account.id}:${account.name}',
-                child: ImageRounded(image: image!)),
+                child: ImageRounded(image: image)),
             const SizedBox(width: 10),
             Expanded(
               child: Column(

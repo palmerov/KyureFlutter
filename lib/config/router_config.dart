@@ -4,13 +4,20 @@ import 'package:kyure/data/models/accounts_data.dart';
 import 'package:kyure/presentation/pages/account_details/account_details_page.dart';
 import 'package:kyure/presentation/pages/account_list/account_list_page.dart';
 import 'package:kyure/presentation/pages/group_details/group_details_page.dart';
+import 'package:kyure/presentation/pages/lock_page/lock_page.dart';
 import 'package:kyure/services/service_locator.dart';
 
 final routerConfig = GoRouter(routes: [
   GoRoute(
     path: '/',
-    redirect: (context, state) => KyRoutes.main.routePath,
+    redirect: (context, state) => KyRoutes.lockPage.routePath,
   ),
+  GoRoute(
+      path: KyRoutes.lockPage.routePath,
+      name: KyRoutes.lockPage.name,
+      pageBuilder: (context, state) => const MaterialPage(
+            child: LockPage(),
+          )),
   GoRoute(
       path: KyRoutes.main.routePath,
       name: KyRoutes.main.name,
@@ -48,8 +55,10 @@ final routerConfig = GoRouter(routes: [
                                   path: 'assets/web_icons/squared.png'),
                               fieldUsername: AccountField(
                                   name: 'Nombre de usuario', data: ''),
-                              fieldPassword:
-                                  AccountField(name: 'Contraseña', data: ''))));
+                              fieldPassword: AccountField(
+                                  name: 'Contraseña',
+                                  data: '',
+                                  visible: false))));
             }),
         GoRoute(
             path: KyRoutes.groupEditor.name,
@@ -73,6 +82,7 @@ final routerConfig = GoRouter(routes: [
 ]);
 
 enum KyRoutes {
+  lockPage('/lock', '/lock'),
   main('/main', '/main'),
   accountEditor('account-editor', '/main/account-editor'),
   groupEditor('group-editor', '/main/group-editor');

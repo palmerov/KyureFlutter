@@ -37,7 +37,35 @@ class AccountDataRepositoryMocked implements AccountDataRepository {
   @override
   Future<UserData> readUserData(
       EncryptAlgorithm algorithm, String key, File file) async {
-    UserData userData = UserData(
+    String text = await file.readAsString();
+    Map<String, dynamic> json = jsonDecode(text);
+    UserData userData = UserData.fromJson(json);
+    userData.accountsData = AccountsData.fromJson(
+        jsonDecode(EncryptUtils.decrypt(algorithm, key, userData.datacrypt)));
+    return userData;
+  }
+
+  @override
+  Future<void> writeUserData(EncryptAlgorithm algorithm, String key, File file,
+      UserData userData) async {
+    userData.datacrypt = EncryptUtils.encrypt(
+        algorithm, key, jsonEncode(userData.accountsData!.toJson()));
+    userData.version++;
+    String strUserData = jsonEncode(userData);
+    await file.writeAsString(strUserData);
+  }
+}
+
+abstract class AccountDataRepository {
+  Future<UserData> readUserData(
+      EncryptAlgorithm algorithm, String key, File file);
+  Future<void> writeUserData(
+      EncryptAlgorithm algorithm, String key, File file, UserData userData);
+}
+
+
+/*
+UserData userData = UserData(
         version: 1,
         datacrypt: '',
         accountsData: AccountsData(accountGroups: [
@@ -55,7 +83,7 @@ class AccountDataRepositoryMocked implements AccountDataRepository {
                     fieldUsername:
                         AccountField(name: 'Username', data: 'palmero_valdes'),
                     fieldPassword:
-                        AccountField(name: 'Password', data: 'uihE1-iu23{gd8')),
+                        AccountField(name: 'Password', data: 'uihE1-iu23{gd8', visible: false)),
                 Account(
                     id: 2,
                     name: 'Facebook',
@@ -65,7 +93,7 @@ class AccountDataRepositoryMocked implements AccountDataRepository {
                     fieldUsername:
                         AccountField(name: 'Username', data: 'palmero_valdes'),
                     fieldPassword:
-                        AccountField(name: 'Password', data: 'uihE1-iu23{gd8')),
+                        AccountField(name: 'Password', data: 'uihE1-iu23{gd8', visible: false)),
                 Account(
                     id: 3,
                     name: 'Instagram',
@@ -75,7 +103,7 @@ class AccountDataRepositoryMocked implements AccountDataRepository {
                     fieldUsername:
                         AccountField(name: 'Username', data: 'palmero_valdes'),
                     fieldPassword:
-                        AccountField(name: 'Password', data: 'uihE1-iu23{gd8')),
+                        AccountField(name: 'Password', data: 'uihE1-iu23{gd8', visible: false)),
                 Account(
                     id: 4,
                     name: 'SnapChat',
@@ -85,7 +113,7 @@ class AccountDataRepositoryMocked implements AccountDataRepository {
                     fieldUsername:
                         AccountField(name: 'Username', data: 'palmero_valdes'),
                     fieldPassword:
-                        AccountField(name: 'Password', data: 'uihE1-iu23{gd8')),
+                        AccountField(name: 'Password', data: 'uihE1-iu23{gd8', visible: false)),
                 Account(
                     id: 5,
                     name: 'Youtube',
@@ -95,7 +123,7 @@ class AccountDataRepositoryMocked implements AccountDataRepository {
                     fieldUsername:
                         AccountField(name: 'Username', data: 'palmero_valdes'),
                     fieldPassword:
-                        AccountField(name: 'Password', data: 'uihE1-iu23{gd8')),
+                        AccountField(name: 'Password', data: 'uihE1-iu23{gd8', visible: false)),
                 Account(
                     id: 6,
                     name: 'Pinterest',
@@ -105,7 +133,7 @@ class AccountDataRepositoryMocked implements AccountDataRepository {
                     fieldUsername:
                         AccountField(name: 'Username', data: 'palmero_valdes'),
                     fieldPassword:
-                        AccountField(name: 'Password', data: 'uihE1-iu23{gd8')),
+                        AccountField(name: 'Password', data: 'uihE1-iu23{gd8', visible: false)),
                 Account(
                     id: 7,
                     name: 'Behance',
@@ -115,7 +143,7 @@ class AccountDataRepositoryMocked implements AccountDataRepository {
                     fieldUsername:
                         AccountField(name: 'Username', data: 'palmero_valdes'),
                     fieldPassword:
-                        AccountField(name: 'Password', data: 'uihE1-iu23{gd8')),
+                        AccountField(name: 'Password', data: 'uihE1-iu23{gd8', visible: false)),
                 Account(
                     id: 8,
                     name: 'VK',
@@ -125,7 +153,7 @@ class AccountDataRepositoryMocked implements AccountDataRepository {
                     fieldUsername:
                         AccountField(name: 'Username', data: 'palmero_valdes'),
                     fieldPassword:
-                        AccountField(name: 'Password', data: 'uihE1-iu23{gd8')),
+                        AccountField(name: 'Password', data: 'uihE1-iu23{gd8', visible: false)),
                 Account(
                     id: 9,
                     name: 'Xiaomi',
@@ -135,7 +163,7 @@ class AccountDataRepositoryMocked implements AccountDataRepository {
                     fieldUsername:
                         AccountField(name: 'Username', data: 'palmero_valdes'),
                     fieldPassword:
-                        AccountField(name: 'Password', data: 'uihE1-iu23{gd8')),
+                        AccountField(name: 'Password', data: 'uihE1-iu23{gd8', visible: false)),
                 Account(
                     id: 10,
                     name: 'Linkedin',
@@ -145,7 +173,7 @@ class AccountDataRepositoryMocked implements AccountDataRepository {
                     fieldUsername:
                         AccountField(name: 'Username', data: 'palmero_valdes'),
                     fieldPassword:
-                        AccountField(name: 'Password', data: 'uihE1-iu23{gd8')),
+                        AccountField(name: 'Password', data: 'uihE1-iu23{gd8', visible: false)),
                 Account(
                     id: 11,
                     name: 'Tiktok',
@@ -155,7 +183,7 @@ class AccountDataRepositoryMocked implements AccountDataRepository {
                     fieldUsername:
                         AccountField(name: 'Username', data: 'palmero_valdes'),
                     fieldPassword:
-                        AccountField(name: 'Password', data: 'uihE1-iu23{gd8')),
+                        AccountField(name: 'Password', data: 'uihE1-iu23{gd8', visible: false)),
                 Account(
                     id: 12,
                     name: 'Google',
@@ -165,7 +193,7 @@ class AccountDataRepositoryMocked implements AccountDataRepository {
                     fieldUsername: AccountField(
                         name: 'Username', data: 'palmerovaldes99@gmail.com'),
                     fieldPassword:
-                        AccountField(name: 'Password', data: 'uihE1-iu23{gd8')),
+                        AccountField(name: 'Password', data: 'uihE1-iu23{gd8', visible: false)),
               ]),
           AccountGroup(
               iconName:
@@ -182,7 +210,7 @@ class AccountDataRepositoryMocked implements AccountDataRepository {
                     fieldUsername: AccountField(
                         name: 'Username', data: 'palmerovaldes99@gmail.com'),
                     fieldPassword:
-                        AccountField(name: 'Password', data: 'uihE1-iu23{gd8')),
+                        AccountField(name: 'Password', data: 'uihE1-iu23{gd8', visible: false)),
                 Account(
                     id: 14,
                     name: 'Tropipay',
@@ -192,23 +220,10 @@ class AccountDataRepositoryMocked implements AccountDataRepository {
                     fieldUsername: AccountField(
                         name: 'Username', data: 'palmerovaldes99@gmail.com'),
                     fieldPassword:
-                        AccountField(name: 'Password', data: 'uihE1-iu23{gd8'))
+                        AccountField(name: 'Password', data: 'uihE1-iu23{gd8', visible: false))
               ])
         ]));
     await Future.delayed(3.seconds);
     return Future.value(userData);
-  }
 
-  @override
-  Future<void> writeUserData(EncryptAlgorithm algorithm, String key, File file,
-      UserData userData) async {
-    await Future.delayed(1.seconds);
-  }
-}
-
-abstract class AccountDataRepository {
-  Future<UserData> readUserData(
-      EncryptAlgorithm algorithm, String key, File file);
-  Future<void> writeUserData(
-      EncryptAlgorithm algorithm, String key, File file, UserData userData);
-}
+ */
