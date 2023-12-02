@@ -430,7 +430,10 @@ class _AccountListView extends StatelessWidget {
                                           color: kyTheme
                                               .colorOnBackgroundOpacity60),
                                       text: 'Bloquear',
-                                      onTap: () {},
+                                      onTap: () {
+                                        context.goNamed(KyRoutes.lockPage.name);
+                                        serviceLocator.getUserDataService().clear();
+                                      },
                                     ),
                                     ItemAction(
                                       icon: Icon(CupertinoIcons.list_number,
@@ -528,10 +531,10 @@ class Drawer extends StatelessWidget {
     final kyTheme = KyTheme.of(context)!;
     return NavigationDrawer(
       elevation: isPcScreen ? 2 : 8,
-      children: [
+      children: const [
         SizedBox(
           height: 100,
-          child: const Column(
+          child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(

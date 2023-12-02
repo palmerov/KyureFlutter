@@ -36,9 +36,9 @@ class GroupDetailsBloc extends Cubit<GroupDetailsState> {
     }
   }
 
-  void setColor() {
-    groupCopy.color = group.color;
-    emit(state.copyWith(color: Color(group.color)));
+  void setColor(Color color) {
+    groupCopy.color = color.value;
+    emit(state.copyWith(color: color));
   }
 
   void setIconName(String iconName) {

@@ -28,6 +28,12 @@ class UserDataService {
     }
   }
 
+  clear(){
+    userData = null;
+    accountsData = null;
+    key = null;
+  }
+
   Future<void> _processPath() async {
     await _initPrefs();
     if (Platform.isAndroid) {
@@ -62,7 +68,6 @@ class UserDataService {
   }
 
   Future<void> readUserData() async {
-    await _processPath();
     try {
       userData = await accountDataRepository.readUserData(
           EncryptAlgorithm.AES, key!, File(path!));
@@ -94,6 +99,7 @@ class UserDataService {
         datacrypt: '');
     AccountDataUtils.createAllGroup(userData!.accountsData!);
     accountsData = userData!.accountsData!;
+    await _processPath();
     writeUserData();
   }
 

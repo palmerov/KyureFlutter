@@ -144,10 +144,13 @@ class _InsertKeyViewState extends State<_InsertKeyView> {
                 current.error,
             builder: (context, state) {
               if (state is LockInsertKeyState && state.error) {
-                return Text(
-                  'Error, clave de cifrado incorrecta',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.red.shade200, fontSize: 14),
+                return Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    'Error: clave de cifrado incorrecta',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Colors.red.shade200, fontSize: 14),
+                  ),
                 );
               }
               return const SizedBox.shrink();
@@ -158,6 +161,7 @@ class _InsertKeyViewState extends State<_InsertKeyView> {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: TextFormField(
               controller: controller,
+              obscureText: true,
               textAlign: TextAlign.center,
               style: const TextStyle(color: Colors.white, fontSize: 18),
               canRequestFocus: keyboard,
@@ -191,71 +195,78 @@ class _InsertKeyViewState extends State<_InsertKeyView> {
               ),
             ),
           ),
-          const SizedBox(height: 16),
-          SizedBox(
-            height: 300,
-            child: GridView.builder(
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  mainAxisExtent: 60, crossAxisCount: 3),
-              itemBuilder: (context, index) {
-                if (index < 9) {
-                  return SizedBox(
-                    height: 20,
-                    child: InkWell(
-                      onTap: () => controller.text += '${index + 1}',
-                      child: Center(
-                        child: Text(
-                          '${index + 1}',
-                          style: const TextStyle(
-                              color: Colors.white, fontSize: 24),
-                        ),
-                      ),
-                    ),
-                  );
-                } else {
-                  if (index == 9) {
-                    return InkWell(
-                      onTap: () {
-                        if (controller.text.isNotEmpty) {
-                          controller.text = controller.text
-                              .substring(0, controller.text.length - 1);
-                        }
-                      },
-                      child: const Center(
-                        child: Icon(
-                          CupertinoIcons.delete_left_fill,
-                          color: Colors.white,
+          const SizedBox(height: 8),
+          Visibility(
+            maintainSize: false,
+            visible: !keyboard,
+            child: SizedBox(
+              height: 320,
+              child: GridView.builder(
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    mainAxisExtent: 66, crossAxisCount: 3),
+                itemBuilder: (context, index) {
+                  if (index < 9) {
+                    return SizedBox(
+                      height: 20,
+                      child: InkWell(
+                        onTap: () => controller.text += '${index + 1}',
+                        child: Center(
+                          child: Text(
+                            '${index + 1}',
+                            style: const TextStyle(
+                                color: Colors.white, fontSize: 24),
+                          ),
                         ),
                       ),
                     );
-                  }
-                  if (index == 10) {
-                    return InkWell(
-                      onTap: () => controller.text += '${0}',
-                      child: const Center(
-                        child: Text(
-                          '0',
-                          style: TextStyle(color: Colors.white, fontSize: 24),
+                  } else {
+                    if (index == 9) {
+                      return InkWell(
+                        onTap: () {
+                          if (controller.text.isNotEmpty) {
+                            controller.text = controller.text
+                                .substring(0, controller.text.length - 1);
+                          }
+                        },
+                        child: const Center(
+                          child: Icon(
+                            CupertinoIcons.delete_left_fill,
+                            color: Colors.white,
+                          ),
                         ),
-                      ),
-                    );
-                  }
-                  if (index == 11) {
-                    return InkWell(
-                      onTap: () => context
-                          .read<LockPageBloc>()
-                          .initWithKey(controller.text, widget.createKey),
-                      child: const Center(
-                        child: Icon(
-                          CupertinoIcons.check_mark,
-                          color: Colors.white,
+                      );
+                    }
+                    if (index == 10) {
+                      return InkWell(
+                        onTap: () => controller.text += '${0}',
+                        child: const Center(
+                          child: Text(
+                            '0',
+                            style: TextStyle(color: Colors.white, fontSize: 24),
+                          ),
                         ),
-                      ),
-                    );
+                      );
+                    }
+                    if (index == 11) {
+                      return InkWell(
+                        onTap: () {
+                          context
+                              .read<LockPageBloc>()
+                              .initWithKey(controller.text, widget.createKey);
+                          controller.text = '';
+                        },
+                        child: const Center(
+                          child: Icon(
+                            CupertinoIcons.check_mark,
+                            color: Colors.white,
+                          ),
+                        ),
+                      );
+                    }
                   }
-                }
-              },
-              itemCount: 12,
+                },
+                itemCount: 12,
+              ),
             ),
           )
         ],

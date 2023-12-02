@@ -15,7 +15,7 @@ class LockPageBloc extends Cubit<LockPageState> {
 
   pickFile() async {
     final result = await FilePicker.platform
-        .pickFiles(allowMultiple: false, allowedExtensions: ['kiure']);
+        .pickFiles(allowMultiple: false, type: FileType.any);
     if (result != null) {
       File file = File(result.files.single.path!);
       insertFile(file.path);
@@ -23,11 +23,20 @@ class LockPageBloc extends Cubit<LockPageState> {
   }
 
   createFile() async {
-    final result =
-        await FilePicker.platform.saveFile(allowedExtensions: ['kiure']);
-    if (result != null) {
-      File file = File(result);
-      insertFile(file.path);
+    if (!Platform.isAndroid) {
+      final result = await FilePicker.platform.saveFile(
+        fileName: 'mi_accounts.kiure',
+      );
+      if (result != null) {
+        File file = File(result);
+        insertFile(file.path);
+      }
+    } else {
+      userDataService.path = null;
+      emit(LockInsertKeyState(
+          createKey: userDataService.path == null ||
+              (await File(userDataService.path!).length()) < 10,
+          error: false));
     }
   }
 

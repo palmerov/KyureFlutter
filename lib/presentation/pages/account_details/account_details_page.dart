@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kyure/data/models/accounts_data.dart';
@@ -44,11 +47,16 @@ class _AccountDetailsView extends StatelessWidget {
   final GlobalKey<AnimatedListState> keyFormAnimatedList = GlobalKey();
   final AccountFormController formController = AccountFormController();
 
-  _showImageSelectorDialog(AccountDetailsBloc bloc, BuildContext context) {
+  _showImageSelectorDialog(
+      AccountDetailsBloc bloc, BuildContext context) async {
+    final json =
+        jsonDecode(await rootBundle.loadString('assets/web_icons.json'));
+    final assetImages = json['icons'].cast<String>();
     showDialog(
       context: context,
       builder: (context) {
         return AssetImageSelectorOrganism(
+          assetImages: assetImages,
           onAssetImageSelected: (assetImage) {
             account.image =
                 AccountImage(path: assetImage, source: ImageSource.assets);
@@ -245,7 +253,9 @@ class _AccountDetailsView extends StatelessWidget {
                                 onPressed: () {
                                   bloc.accountCopy!.fieldList ??= [];
                                   final field = AccountField(
-                                      name: 'Nombre del campo', data: '', visible: false);
+                                      name: 'Nombre del campo',
+                                      data: '',
+                                      visible: false);
                                   bloc.accountCopy!.fieldList!.add(field);
                                   formController.addField!(field);
                                 },
@@ -253,7 +263,8 @@ class _AccountDetailsView extends StatelessWidget {
                                     shape: MaterialStateProperty.all(
                                         RoundedRectangleBorder(
                                             side: BorderSide(
-                                                color: kytheme.colorSeparatorLine,
+                                                color:
+                                                    kytheme.colorSeparatorLine,
                                                 width: 1),
                                             borderRadius:
                                                 BorderRadius.circular(12)))),
