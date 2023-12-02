@@ -20,6 +20,7 @@ import 'package:kyure/presentation/theme/ky_theme.dart';
 import 'package:kyure/presentation/widgets/molecules/svg_icon.dart';
 import 'package:kyure/services/service_locator.dart';
 import 'package:blur/blur.dart';
+import 'package:kyure/services/user_data_service.dart';
 
 class AccountListPage extends StatelessWidget {
   const AccountListPage({super.key});
@@ -206,7 +207,57 @@ class _AccountListView extends StatelessWidget {
     }
   }
 
-  void _showOrderDialog() {}
+  void _showSortDialog(BuildContext context) {
+    final bloc = BlocProvider.of<AccountListPageBloc>(context);
+    showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ContextMenuTileMolecule(
+                    onTap: () {
+                      bloc.sort(SortMethod.nameDesc);
+                      context.pop();
+                    },
+                    label: 'Nombre: A -> Z',
+                    icon: const Icon(Icons.sort_by_alpha_rounded)),
+                ContextMenuTileMolecule(
+                    onTap: () {
+                      bloc.sort(SortMethod.nameAsc);
+                      context.pop();
+                    },
+                    label: 'Nombre: A -> Z',
+                    icon: const Icon(Icons.sort_by_alpha_rounded)),
+                ContextMenuTileMolecule(
+                    onTap: () {
+                      bloc.sort(SortMethod.creationDesc);
+                      context.pop();
+                    },
+                    label: 'Creación: anterior -> reciente',
+                    icon: const Icon(Icons.sort_rounded)),
+                ContextMenuTileMolecule(
+                    onTap: () {
+                      bloc.sort(SortMethod.creationAsc);
+                      context.pop();
+                    },
+                    label: 'Creación: anterior -> reciente',
+                    icon: const Icon(Icons.sort_rounded)),
+                ContextMenuTileMolecule(
+                    onTap: () {
+                      bloc.sort(SortMethod.noOrder);
+                      context.pop();
+                    },
+                    label: 'Sin orden',
+                    icon: const Icon(Icons.sort_rounded))
+              ],
+            ),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          );
+        });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -271,7 +322,8 @@ class _AccountListView extends StatelessWidget {
                                 child: BlocBuilder<AccountListPageBloc,
                                     AccountListPageState>(
                                   buildWhen: (previous, current) =>
-                                      previous.version != current.version || current is AccountListPageFilteredState,
+                                      previous.version != current.version ||
+                                      current is AccountListPageFilteredState,
                                   builder: (context, state) {
                                     return ListView.builder(
                                       physics: const BouncingScrollPhysics(),
@@ -451,7 +503,7 @@ class _AccountListView extends StatelessWidget {
                                               .colorOnBackgroundOpacity60),
                                       text: 'Orden',
                                       onTap: () {
-                                        _showOrderDialog();
+                                        _showSortDialog(context);
                                       },
                                     ),
                                     ItemAction(
@@ -553,13 +605,16 @@ class Drawer extends StatelessWidget {
       elevation: isPcScreen ? 2 : 8,
       children: [
         const SizedBox(
-          height: 100,
+          height: 140,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                'Kyure',
-                style: TextStyle(fontSize: 18),
+                'Kiure',
+                style: TextStyle(fontSize: 20),
+              ),
+              SizedBox(
+                height: 8,
               ),
               Text('Asegura tus cuentas'),
             ],
@@ -567,9 +622,9 @@ class Drawer extends StatelessWidget {
         ),
         _buildDrawerItem(
             kyTheme: kyTheme,
-            onTap: () {},
-            label: 'Configuraciones',
-            icon: const Icon(CupertinoIcons.settings)),
+            onTap: () => context.pushNamed(KyRoutes.keyEditor.name),
+            label: 'Cambiar clave',
+            icon: const Icon(CupertinoIcons.lock)),
         _buildDrawerItem(
             kyTheme: kyTheme,
             label: 'Exportar cuentas',

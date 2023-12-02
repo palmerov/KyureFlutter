@@ -100,20 +100,20 @@ class _AccountFieldMoleculeState extends State<AccountFieldMolecule> {
         controllerField = textEditingController;
         controllerField!.text = widget.accountField.data;
         return _buildTextField(kyTheme, focusNode);
-      }, displayStringForOption: (option) {
+      }, optionsBuilder: (textEditingValue) {
+        return textEditingValue.text.isEmpty
+            ? ['Generar contraseña segura']
+            : [];
+      }, onSelected: (option) {
         final text = passwordGenerator.randomPassword(
             letters: true,
             numbers: true,
             specialChar: true,
             uppercase: true,
             passwordLength: 16);
+        controllerField!.text = text;
         widget.onFieldChanged?.call(controllerLabel!.text, text, visible);
-        return text;
-      }, optionsBuilder: (textEditingValue) {
-        return textEditingValue.text.isEmpty
-            ? ['Generar contraseña segura']
-            : [];
-      });
+      },);
     } else {
       controllerField = TextEditingController(text: widget.accountField.data);
       controllerField!.text = widget.accountField.data;

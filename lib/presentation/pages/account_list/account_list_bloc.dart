@@ -77,10 +77,14 @@ class AccountListPageBloc extends Cubit<AccountListPageState> {
     reload();
   }
 
-  Future<String> exportFile()async{
+  Future<String> exportFile() async {
     return await userDataService.exportFile();
   }
 
+  void sort(SortMethod method) {
+    userDataService.sort(state.selectedGroupIndex, method);
+    reload();
+  }
 }
 
 class AccountListPageState extends Equatable {

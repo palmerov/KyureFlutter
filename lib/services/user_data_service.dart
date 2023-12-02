@@ -8,6 +8,8 @@ import 'package:kyure/services/service_locator.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+enum SortMethod { nameAsc, nameDesc, noOrder, creationAsc, creationDesc }
+
 class UserDataService {
   late final AccountDataRepository accountDataRepository;
   UserData? userData;
@@ -39,15 +41,19 @@ class UserDataService {
     if (Platform.isAndroid) {
       if (path == null) {
         path =
-            '${(await getExternalStorageDirectories())!.first.path}/my_accounts.kiure';
+            '${(await getExternalStorageDirectories())!.first.path}my_accounts.kiure';
       } else {
         path = (await File(path!).copy(
-                '${(await getApplicationDocumentsDirectory()).path}/${path!.split('/').last}'))
+                '${(await getApplicationDocumentsDirectory()).path}${path!.split('/').last}'))
             .path;
       }
     } else if (Platform.isLinux || Platform.isWindows || Platform.isMacOS) {
-      path ??=
-          '${(await getApplicationDocumentsDirectory()).path}/my_accounts.kiure';
+      if (path == null) {
+        String parentPath =
+            '${(await getApplicationDocumentsDirectory()).path}kiure';
+        Directory(parentPath).createSync(recursive: true);
+        path = '$parentPath/my_accounts.kiure';
+      }
     }
     prefs.setString('kiureFile', path!);
   }
@@ -146,8 +152,12 @@ class UserDataService {
   }
 
   AccountGroup? findGroupByName(String name) {
-    return accountsData!.accountGroups
-        .firstWhere((element) => element.name == name);
+    int index = accountsData!.accountGroups
+        .indexWhere((element) => element.name == name);
+    if (index >= 0) {
+      return accountsData!.accountGroups[index];
+    }
+    return null;
   }
 
   List<AccountGroup> getRealGroups() {
@@ -173,5 +183,41 @@ class UserDataService {
     String savePath = '${dir.path}exp_accounts_${DateTime.now()}.kiure';
     await File(path!).copy(savePath);
     return savePath;
+  }
+
+  void sort(int groupIndex, SortMethod method) {
+    final group = accountsData!.accountGroups[groupIndex];
+    switch (method) {
+      case SortMethod.nameDesc:
+        {
+          group.accounts.sort((a, b) => a.name.compareTo(b.name));
+          break;
+        }
+      case SortMethod.nameAsc:
+        {
+          group.accounts.sort((a, b) => b.name.compareTo(a.name));
+          break;
+        }
+      case SortMethod.noOrder:
+        {
+          if (groupIndex==0) {
+            accountsData!.accountGroups.removeAt(0);
+            AccountDataUtils.createAllGroup(accountsData!);
+          } else {}
+          break;
+        }
+      case SortMethod.creationAsc:
+        {
+          group.accounts.sort((a, b) => a.id.compareTo(b.id));
+          break;
+        }
+      case SortMethod.creationDesc:
+        {
+          {
+            group.accounts.sort((a, b) => b.id.compareTo(a.id));
+            break;
+          }
+        }
+    }
   }
 }

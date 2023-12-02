@@ -27,8 +27,7 @@ class LockPageBloc extends Cubit<LockPageState> {
     userDataService.path = null;
     emit(LockInsertKeyState(
         createKey: userDataService.path == null ||
-            (await File(userDataService.path!).length()) < 10,
-        error: false));
+            (await File(userDataService.path!).length()) < 10));
   }
 
   loadPrefs() async {
@@ -40,8 +39,7 @@ class LockPageBloc extends Cubit<LockPageState> {
     bool existFile = await userDataService.evaluateFile();
     if (existFile) {
       emit(LockInsertKeyState(
-          createKey: (await File(userDataService.path!).length()) < 10,
-          error: false));
+          createKey: (await File(userDataService.path!).length()) < 10));
     } else {
       emit(LockInsertFileState());
     }
@@ -58,7 +56,7 @@ class LockPageBloc extends Cubit<LockPageState> {
     emit(LockPageInitial());
   }
 
-  initWithKey(String key, bool newFile) async {
+  Future<String?> initWithKey(String key, bool newFile) async {
     userDataService.key = key;
     if (newFile) {
       await userDataService.createNewFile();
@@ -69,9 +67,10 @@ class LockPageBloc extends Cubit<LockPageState> {
         emit(LockPageLogin());
       } catch (exception) {
         print(exception.toString());
-        emit(const LockInsertKeyState(createKey: false, error: true));
+        return 'Llave incorrecta';
       }
     }
+    return null;
   }
 }
 
@@ -83,16 +82,18 @@ class LockPageState extends Equatable {
 }
 
 class LockInsertKeyState extends LockPageState {
-  const LockInsertKeyState({required this.createKey, required this.error});
+  const LockInsertKeyState({required this.createKey, this.error});
   final bool createKey;
-  final bool error;
+  final String? error;
 
   @override
-  List<Object> get props => [createKey, error];
+  List<Object> get props => [createKey, error ?? ''];
 }
 
 class LockInsertFileState extends LockPageState {}
 
 class LockPageInitial extends LockPageState {}
+
+class LockPageLoading extends LockPageState {}
 
 class LockPageLogin extends LockPageState {}

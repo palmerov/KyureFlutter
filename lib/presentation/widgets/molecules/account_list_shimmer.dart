@@ -1,9 +1,6 @@
 //shimmer for account list
 import 'package:flutter/material.dart';
-import 'package:kyure/data/models/accounts_data.dart';
 import 'package:kyure/presentation/theme/ky_theme.dart';
-import 'package:kyure/presentation/widgets/atoms/list_item_separator.dart';
-import 'package:kyure/presentation/widgets/molecules/account_item.dart';
 import 'package:shimmer/shimmer.dart';
 
 class AccountListShimmerMolecule extends StatelessWidget {

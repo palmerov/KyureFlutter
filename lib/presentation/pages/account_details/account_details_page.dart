@@ -45,6 +45,7 @@ class _AccountDetailsView extends StatelessWidget {
   final Account account;
   late final TextEditingController tecName;
   final GlobalKey<AnimatedListState> keyFormAnimatedList = GlobalKey();
+  final GlobalKey<FormState> keyNameField = GlobalKey();
   final AccountFormController formController = AccountFormController();
 
   _showImageSelectorDialog(
@@ -143,9 +144,16 @@ class _AccountDetailsView extends StatelessWidget {
                             children: [
                               SizedBox(
                                 height: 48,
-                                child: TextField(
+                                child: TextFormField(
+                                  key: keyNameField,
                                   controller: tecName,
                                   readOnly: !state.editting,
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return 'El nombre no puede estar vacío';
+                                    }
+                                    return null;
+                                  },
                                   decoration: const InputDecoration(
                                       alignLabelWithHint: true,
                                       isDense: true,
@@ -283,10 +291,16 @@ class _AccountDetailsView extends StatelessWidget {
                                 )),
                           ),
                         FilledButton.icon(
-                            onPressed: () => editting
-                                ? bloc.save(tecName.text,
-                                    formController.getAccountFields!())
-                                : bloc.edit(),
+                            onPressed: () {
+                              if (editting) {
+                                if (tecName.text.isNotEmpty) {
+                                  bloc.save(tecName.text,
+                                      formController.getAccountFields!());
+                                }
+                              } else {
+                                bloc.edit();
+                              }
+                            },
                             icon: Icon(editting ? Icons.save : Icons.edit),
                             label:
                                 Text(editting ? 'Guardar cambios' : 'Editar')),

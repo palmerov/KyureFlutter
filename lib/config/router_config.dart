@@ -4,6 +4,7 @@ import 'package:kyure/data/models/accounts_data.dart';
 import 'package:kyure/presentation/pages/account_details/account_details_page.dart';
 import 'package:kyure/presentation/pages/account_list/account_list_page.dart';
 import 'package:kyure/presentation/pages/group_details/group_details_page.dart';
+import 'package:kyure/presentation/pages/key_updater/key_updater_page.dart';
 import 'package:kyure/presentation/pages/lock_page/lock_page.dart';
 import 'package:kyure/services/service_locator.dart';
 
@@ -80,7 +81,13 @@ final routerConfig = GoRouter(routes: [
                   state.uri.queryParameters['editting'] == 'true' ? true : null;
               return MaterialPage(
                   child: GroupDetailsPage(group: group, isNew: name == null));
-            })
+            }),
+        GoRoute(
+            path: KyRoutes.keyEditor.name,
+            name: KyRoutes.keyEditor.name,
+            pageBuilder: (context, state) {
+              return const MaterialPage(child: KeyUpdaterPage());
+            }),
       ]),
 ]);
 
@@ -88,7 +95,8 @@ enum KyRoutes {
   lockPage('/lock', '/lock'),
   main('/main', '/main'),
   accountEditor('account-editor', '/main/account-editor'),
-  groupEditor('group-editor', '/main/group-editor');
+  groupEditor('group-editor', '/main/group-editor'),
+  keyEditor('key-editor', '/main/key-editor');
 
   const KyRoutes(this.name, this.routePath);
   final String name, routePath;

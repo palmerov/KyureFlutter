@@ -12,6 +12,7 @@ import 'package:kyure/presentation/theme/ky_theme.dart';
 import 'package:kyure/presentation/widgets/molecules/image_rounded.dart';
 import 'package:kyure/presentation/widgets/molecules/svg_icon.dart';
 import 'package:kyure/presentation/widgets/organisms/asset_image_selector.dart';
+import 'package:kyure/services/service_locator.dart';
 
 class GroupDetailsPage extends StatelessWidget {
   const GroupDetailsPage({super.key, required this.group, required this.isNew});
@@ -32,6 +33,7 @@ class _GroupDetailsView extends StatelessWidget {
 
   final double imgSize = 64;
   final TextEditingController _nameController = TextEditingController();
+  final GlobalKey<FormState> _formKey = GlobalKey();
 
   _showImageSelectorDialog(GroupDetailsBloc bloc, BuildContext context) async {
     final json =
@@ -54,7 +56,7 @@ class _GroupDetailsView extends StatelessWidget {
   }
 
   _showColorPickerDialog(BuildContext context, Color color) async {
-    GroupDetailsBloc bloc= BlocProvider.of<GroupDetailsBloc>(context);
+    GroupDetailsBloc bloc = BlocProvider.of<GroupDetailsBloc>(context);
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -76,7 +78,7 @@ class _GroupDetailsView extends StatelessWidget {
     final kytheme = KyTheme.of(context)!;
     final bloc = BlocProvider.of<GroupDetailsBloc>(context);
     final wsize = MediaQuery.of(context).size;
-    _nameController.text = bloc.group.name;
+    _nameController.text = bloc.groupCopy.name;
     return Scaffold(
       appBar: AppBar(
         elevation: 0.5,
@@ -146,7 +148,20 @@ class _GroupDetailsView extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                   TextFormField(
+                    key: _formKey,
                     controller: _nameController,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'El nombre no puede estar vacío';
+                      }
+                      if (serviceLocator
+                              .getUserDataService()
+                              .findGroupByName(value) !=
+                          null) {
+                        return 'Ya existe un grupo con ese nombre';
+                      }
+                      return null;
+                    },
                     onChanged: (value) => bloc.setName(value),
                     decoration: InputDecoration(
                         labelText: 'Nombre',
@@ -157,8 +172,14 @@ class _GroupDetailsView extends StatelessWidget {
               ),
               FilledButton.icon(
                   onPressed: () {
-                    bloc.save();
-                    context.pop(bloc.saved);
+                    if (_nameController.text.isNotEmpty &&
+                        serviceLocator
+                                .getUserDataService()
+                                .findGroupByName(_nameController.text) ==
+                            null) {
+                      bloc.save();
+                      context.pop(bloc.saved);
+                    }
                   },
                   icon: const Icon(Icons.save),
                   label: const Text('Guardar'))
