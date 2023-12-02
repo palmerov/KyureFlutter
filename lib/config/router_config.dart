@@ -15,8 +15,11 @@ final routerConfig = GoRouter(routes: [
   GoRoute(
       path: KyRoutes.lockPage.routePath,
       name: KyRoutes.lockPage.name,
-      pageBuilder: (context, state) => const MaterialPage(
-            child: LockPage(),
+      pageBuilder: (context, state) => MaterialPage(
+            child: LockPage(
+                blockedByUser:
+                    (state.uri.queryParameters['blockedByUser'] ?? 'false') ==
+                        'true'),
           )),
   GoRoute(
       path: KyRoutes.main.routePath,

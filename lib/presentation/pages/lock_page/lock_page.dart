@@ -3,18 +3,21 @@ import 'dart:io';
 import 'package:blur/blur.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kyure/config/router_config.dart';
 import 'package:kyure/presentation/pages/lock_page/lock_page_bloc.dart';
+import 'package:vibration/vibration.dart';
 
 class LockPage extends StatelessWidget {
-  const LockPage({super.key});
+  const LockPage({super.key, required this.blockedByUser});
+  final bool blockedByUser;
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => LockPageBloc()..loadPrefs(),
+      create: (context) => LockPageBloc(blockedByUser)..loadPrefs(),
       child: const _LockView(),
     );
   }
@@ -27,6 +30,15 @@ class _LockView extends StatelessWidget {
   Widget build(BuildContext context) {
     final bloc = BlocProvider.of<LockPageBloc>(context);
     return Scaffold(
+      extendBody: true,
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        systemOverlayStyle: const SystemUiOverlayStyle(
+            statusBarColor: Colors.transparent,
+            statusBarIconBrightness: Brightness.light),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+      ),
       body: Stack(
         children: [
           Positioned.fill(
@@ -44,7 +56,7 @@ class _LockView extends StatelessWidget {
                   listenWhen: (previous, current) =>
                       previous != current && current is LockPageLogin,
                   listener: (context, state) =>
-                      context.pushNamed(KyRoutes.main.name),
+                      context.goNamed(KyRoutes.main.name),
                   buildWhen: (previous, current) =>
                       previous != current &&
                       previous.runtimeType != current.runtimeType &&
@@ -130,6 +142,12 @@ class _InsertKeyViewState extends State<_InsertKeyView> {
         mainAxisAlignment: MainAxisAlignment.end,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          Row(
+            children: [],
+          ),
+          const SizedBox(
+            height: 20,
+          ),
           Text(
             widget.createKey
                 ? 'Inserte la nueva llave de cifrado'
@@ -139,9 +157,7 @@ class _InsertKeyViewState extends State<_InsertKeyView> {
           ),
           BlocBuilder<LockPageBloc, LockPageState>(
             buildWhen: (previous, current) =>
-                previous != current &&
-                current is LockInsertKeyState &&
-                current.error,
+                current is LockInsertKeyState && current.error,
             builder: (context, state) {
               if (state is LockInsertKeyState && state.error) {
                 return Padding(
@@ -164,20 +180,26 @@ class _InsertKeyViewState extends State<_InsertKeyView> {
               obscureText: true,
               textAlign: TextAlign.center,
               style: const TextStyle(color: Colors.white, fontSize: 18),
-              canRequestFocus: keyboard,
+              canRequestFocus: Platform.isLinux ||
+                  Platform.isWindows ||
+                  Platform.isMacOS ||
+                  keyboard,
+              cursorColor: Colors.white,
               decoration: InputDecoration(
-                suffixIcon: Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: InkWell(
-                    onTap: () => setState(() => keyboard = !keyboard),
-                    child: Icon(
-                      keyboard
-                          ? CupertinoIcons.keyboard
-                          : CupertinoIcons.number,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
+                suffixIcon: Platform.isAndroid || Platform.isMacOS
+                    ? Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: InkWell(
+                          onTap: () => setState(() => keyboard = !keyboard),
+                          child: Icon(
+                            keyboard
+                                ? CupertinoIcons.keyboard
+                                : CupertinoIcons.number,
+                            color: Colors.white,
+                          ),
+                        ),
+                      )
+                    : null,
                 hintText: 'Llave de cifrado',
                 hintStyle: TextStyle(color: Colors.white.withOpacity(0.4)),
                 border: OutlineInputBorder(
@@ -200,8 +222,10 @@ class _InsertKeyViewState extends State<_InsertKeyView> {
             maintainSize: false,
             visible: !keyboard,
             child: SizedBox(
-              height: 320,
+              height: 300,
               child: GridView.builder(
+                padding: const EdgeInsets.all(0),
+                physics: const NeverScrollableScrollPhysics(),
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     mainAxisExtent: 66, crossAxisCount: 3),
                 itemBuilder: (context, index) {
@@ -209,7 +233,10 @@ class _InsertKeyViewState extends State<_InsertKeyView> {
                     return SizedBox(
                       height: 20,
                       child: InkWell(
-                        onTap: () => controller.text += '${index + 1}',
+                        onTap: () {
+                          controller.text += '${index + 1}';
+                          Vibration.vibrate(amplitude: 1, duration: 80);
+                        },
                         child: Center(
                           child: Text(
                             '${index + 1}',
@@ -226,6 +253,7 @@ class _InsertKeyViewState extends State<_InsertKeyView> {
                           if (controller.text.isNotEmpty) {
                             controller.text = controller.text
                                 .substring(0, controller.text.length - 1);
+                            Vibration.vibrate(amplitude: 1, duration: 80);
                           }
                         },
                         child: const Center(
@@ -238,7 +266,10 @@ class _InsertKeyViewState extends State<_InsertKeyView> {
                     }
                     if (index == 10) {
                       return InkWell(
-                        onTap: () => controller.text += '${0}',
+                        onTap: () {
+                          controller.text += '${0}';
+                          Vibration.vibrate(amplitude: 1, duration: 80);
+                        },
                         child: const Center(
                           child: Text(
                             '0',
@@ -254,6 +285,7 @@ class _InsertKeyViewState extends State<_InsertKeyView> {
                               .read<LockPageBloc>()
                               .initWithKey(controller.text, widget.createKey);
                           controller.text = '';
+                          Vibration.vibrate(amplitude: 1, duration: 80);
                         },
                         child: const Center(
                           child: Icon(

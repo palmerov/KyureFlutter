@@ -76,6 +76,11 @@ class AccountListPageBloc extends Cubit<AccountListPageState> {
     userDataService.deleteGroup(group);
     reload();
   }
+
+  Future<String> exportFile()async{
+    return await userDataService.exportFile();
+  }
+
 }
 
 class AccountListPageState extends Equatable {

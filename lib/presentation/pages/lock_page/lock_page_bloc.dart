@@ -8,8 +8,9 @@ import 'package:kyure/services/user_data_service.dart';
 
 class LockPageBloc extends Cubit<LockPageState> {
   late UserDataService userDataService;
+  final bool blockedByUser;
 
-  LockPageBloc() : super(LockPageInitial()) {
+  LockPageBloc(this.blockedByUser) : super(LockPageInitial()) {
     userDataService = serviceLocator.getUserDataService();
   }
 
@@ -23,21 +24,11 @@ class LockPageBloc extends Cubit<LockPageState> {
   }
 
   createFile() async {
-    if (!Platform.isAndroid) {
-      final result = await FilePicker.platform.saveFile(
-        fileName: 'mi_accounts.kiure',
-      );
-      if (result != null) {
-        File file = File(result);
-        insertFile(file.path);
-      }
-    } else {
-      userDataService.path = null;
-      emit(LockInsertKeyState(
-          createKey: userDataService.path == null ||
-              (await File(userDataService.path!).length()) < 10,
-          error: false));
-    }
+    userDataService.path = null;
+    emit(LockInsertKeyState(
+        createKey: userDataService.path == null ||
+            (await File(userDataService.path!).length()) < 10,
+        error: false));
   }
 
   loadPrefs() async {
@@ -95,6 +86,9 @@ class LockInsertKeyState extends LockPageState {
   const LockInsertKeyState({required this.createKey, required this.error});
   final bool createKey;
   final bool error;
+
+  @override
+  List<Object> get props => [createKey, error];
 }
 
 class LockInsertFileState extends LockPageState {}

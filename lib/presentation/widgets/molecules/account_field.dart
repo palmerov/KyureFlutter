@@ -208,16 +208,19 @@ class _AccountFieldMoleculeState extends State<AccountFieldMolecule> {
                     }
                   });
                 },
-                child: Icon(
-                    size: 20,
-                    widget.editting
-                        ? (visible
-                            ? CupertinoIcons.lock_open
-                            : CupertinoIcons.lock)
-                        : (visible
-                            ? CupertinoIcons.eye
-                            : CupertinoIcons.eye_slash),
-                    color: kyTheme.colorOnBackgroundOpacity60),
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 4),
+                  child: Icon(
+                      size: 20,
+                      widget.editting
+                          ? (visible
+                              ? CupertinoIcons.lock_open
+                              : CupertinoIcons.lock)
+                          : (visible
+                              ? CupertinoIcons.eye
+                              : CupertinoIcons.eye_slash),
+                      color: kyTheme.colorOnBackgroundOpacity60),
+                ),
               )
             : null,
         contentPadding: const EdgeInsets.all(14),

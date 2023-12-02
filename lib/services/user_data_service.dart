@@ -28,7 +28,7 @@ class UserDataService {
     }
   }
 
-  clear(){
+  clear() {
     userData = null;
     accountsData = null;
     key = null;
@@ -164,5 +164,14 @@ class UserDataService {
     accountsData!.accountGroups.removeWhere((element) => element == group);
     accountsData!.accountGroups.removeAt(0);
     AccountDataUtils.createAllGroup(accountsData!);
+  }
+
+  Future<String> exportFile() async {
+    Directory dir = Platform.isAndroid
+        ? (await getExternalStorageDirectory())!
+        : await getApplicationDocumentsDirectory();
+    String savePath = '${dir.path}exp_accounts_${DateTime.now()}.kiure';
+    await File(path!).copy(savePath);
+    return savePath;
   }
 }

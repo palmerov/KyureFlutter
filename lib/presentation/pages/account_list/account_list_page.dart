@@ -1,7 +1,10 @@
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_share/flutter_share.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kyure/config/router_config.dart';
 import 'package:kyure/data/models/accounts_data.dart';
@@ -10,7 +13,7 @@ import 'package:kyure/presentation/widgets/molecules/account_group.dart';
 import 'package:kyure/presentation/widgets/molecules/account_group_list_shimmer.dart';
 import 'package:kyure/presentation/widgets/molecules/account_item.dart';
 import 'package:kyure/presentation/widgets/molecules/account_list_shimmer.dart';
-import 'package:kyure/presentation/widgets/molecules/contect_menu_tile.dart';
+import 'package:kyure/presentation/widgets/molecules/context_menu_tile.dart';
 import 'package:kyure/presentation/widgets/molecules/image_rounded.dart';
 import 'package:kyure/presentation/widgets/molecules/search_bar.dart';
 import 'package:kyure/presentation/theme/ky_theme.dart';
@@ -203,6 +206,8 @@ class _AccountListView extends StatelessWidget {
     }
   }
 
+  void _showOrderDialog() {}
+
   @override
   Widget build(BuildContext context) {
     final wsizeP = MediaQuery.of(context).size;
@@ -266,7 +271,7 @@ class _AccountListView extends StatelessWidget {
                                 child: BlocBuilder<AccountListPageBloc,
                                     AccountListPageState>(
                                   buildWhen: (previous, current) =>
-                                      previous.version != current.version,
+                                      previous.version != current.version || current is AccountListPageFilteredState,
                                   builder: (context, state) {
                                     return ListView.builder(
                                       physics: const BouncingScrollPhysics(),
@@ -431,8 +436,13 @@ class _AccountListView extends StatelessWidget {
                                               .colorOnBackgroundOpacity60),
                                       text: 'Bloquear',
                                       onTap: () {
-                                        context.goNamed(KyRoutes.lockPage.name);
-                                        serviceLocator.getUserDataService().clear();
+                                        context.goNamed(KyRoutes.lockPage.name,
+                                            queryParameters: {
+                                              'blockedByUser': 'true'
+                                            });
+                                        serviceLocator
+                                            .getUserDataService()
+                                            .clear();
                                       },
                                     ),
                                     ItemAction(
@@ -440,7 +450,9 @@ class _AccountListView extends StatelessWidget {
                                           color: kyTheme
                                               .colorOnBackgroundOpacity60),
                                       text: 'Orden',
-                                      onTap: () {},
+                                      onTap: () {
+                                        _showOrderDialog();
+                                      },
                                     ),
                                     ItemAction(
                                       icon: Icon(
@@ -519,6 +531,14 @@ class _AccountListView extends StatelessWidget {
   }
 }
 
+Future<void> shareFile(String filePath, String title, String shareText) async {
+  await FlutterShare.shareFile(
+    title: title,
+    text: shareText,
+    filePath: filePath,
+  );
+}
+
 class Drawer extends StatelessWidget {
   const Drawer({
     super.key,
@@ -531,8 +551,8 @@ class Drawer extends StatelessWidget {
     final kyTheme = KyTheme.of(context)!;
     return NavigationDrawer(
       elevation: isPcScreen ? 2 : 8,
-      children: const [
-        SizedBox(
+      children: [
+        const SizedBox(
           height: 100,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -542,12 +562,77 @@ class Drawer extends StatelessWidget {
                 style: TextStyle(fontSize: 18),
               ),
               Text('Asegura tus cuentas'),
-              Text('TODO: opciones para la app :)')
             ],
           ),
-        )
+        ),
+        _buildDrawerItem(
+            kyTheme: kyTheme,
+            onTap: () {},
+            label: 'Configuraciones',
+            icon: const Icon(CupertinoIcons.settings)),
+        _buildDrawerItem(
+            kyTheme: kyTheme,
+            label: 'Exportar cuentas',
+            icon: const Icon(CupertinoIcons.share),
+            onTap: () async {
+              String path =
+                  await context.read<AccountListPageBloc>().exportFile();
+              // ignore: use_build_context_synchronously
+              showDialog(
+                context: context,
+                builder: (context) => AlertDialog(
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16)),
+                  content:
+                      Text('Tu archivo de cuentas ha sido exportado a: $path'),
+                  actions: [
+                    InkWell(
+                      borderRadius: BorderRadius.circular(16),
+                      child: const Padding(
+                        padding: EdgeInsets.all(12),
+                        child: Text('Copiar directorio'),
+                      ),
+                      onTap: () {
+                        Clipboard.setData(
+                            ClipboardData(text: File(path).parent.path));
+                      },
+                    ),
+                    InkWell(
+                      borderRadius: BorderRadius.circular(16),
+                      child: const Padding(
+                        padding: EdgeInsets.all(12),
+                        child: Text('Compartir'),
+                      ),
+                      onTap: () {
+                        shareFile(path, 'Cuentas Kiure',
+                            'Archivo Encriptado de cuentas de Kiure');
+                      },
+                    )
+                  ],
+                ),
+              );
+            }),
+        _buildDrawerItem(
+            kyTheme: kyTheme,
+            label: 'Donar :)',
+            icon: const Icon(CupertinoIcons.heart),
+            onTap: () {}),
       ],
     );
+  }
+
+  ContextMenuTileMolecule _buildDrawerItem(
+      {required KyTheme kyTheme,
+      required String label,
+      required Widget icon,
+      required Function() onTap}) {
+    return ContextMenuTileMolecule(
+        onTap: onTap,
+        label: label,
+        textStyle: TextStyle(color: kyTheme.colorToastText, fontSize: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+        separation: 16,
+        icon: icon);
   }
 }
 
