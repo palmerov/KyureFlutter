@@ -11,7 +11,7 @@ class LockPageBloc extends Cubit<LockPageState> {
   final bool blockedByUser;
   String? vaultNameCreated;
 
-  LockPageBloc(this.blockedByUser) : super(const LockPageInitialState()) {
+  LockPageBloc(this.blockedByUser) : super(LockPageInitialState()) {
     vaultService = serviceLocator.getKiureService();
   }
 
@@ -49,7 +49,7 @@ Detalles del error ${exception.toString()}."""));
     vaultService.key = key;
     try {
       await vaultService.readVaultData();
-      emit(const LockPageLoginState());
+      emit(LockPageLoginState());
     } catch (exception) {
       print(exception.toString());
       return 'Llave incorrecta';
@@ -71,16 +71,16 @@ Detalles del error ${exception.toString()}."""));
   }
 
   createVault() {
-    emit(const LockPageCreatingVaultState(message: null, valid: false));
+    emit(LockPageCreatingVaultState(message: null, valid: false));
   }
 
   validateName(String vaultName) {
     vaultNameCreated = vaultName;
     if (vaultService.existVault(vaultName)) {
-      emit(const LockPageCreatingVaultState(
+      emit(LockPageCreatingVaultState(
           message: 'Ya existe una bóveda con ese nombre', valid: false));
     } else {
-      emit(const LockPageCreatingVaultState(message: null, valid: true));
+      emit(LockPageCreatingVaultState(message: null, valid: true));
     }
   }
 
@@ -88,7 +88,7 @@ Detalles del error ${exception.toString()}."""));
     try {
       vaultService.key = key;
       await vaultService.createNewVault(vaultNameCreated!);
-      emit(const LockPageLoginState());
+      emit(LockPageLoginState());
     } catch (exception) {
       print(exception.toString());
       return 'Error al crear la bóveda';
@@ -98,25 +98,30 @@ Detalles del error ${exception.toString()}."""));
 }
 
 class LockPageState extends Equatable {
-  const LockPageState({required this.vaultNames, this.selectedVault, this.loaded = true});
-  final List<String> vaultNames;
+  LockPageState(
+      {required List<String> vaultNames,
+      this.selectedVault,
+      this.loaded = true}) {
+    this.vaultNames = [...vaultNames];
+  }
+  late final List<String> vaultNames;
   final String? selectedVault;
   final bool loaded;
 
   @override
-  List<Object> get props => [vaultNames, selectedVault ?? ''];
+  List<Object> get props => [vaultNames.length, selectedVault ?? '', loaded];
 }
 
 class LockPageInitialState extends LockPageState {
-  const LockPageInitialState() : super(vaultNames: const [], loaded: false);
+  LockPageInitialState() : super(vaultNames: const [], loaded: false);
 }
 
 class LockPageLoginState extends LockPageState {
-  const LockPageLoginState() : super(vaultNames: const []);
+  LockPageLoginState() : super(vaultNames: const []);
 }
 
 class LockPageCreatingVaultState extends LockPageState {
-  const LockPageCreatingVaultState({required this.message, required this.valid})
+  LockPageCreatingVaultState({required this.message, required this.valid})
       : super(vaultNames: const []);
   final String? message;
   final bool valid;
@@ -126,7 +131,7 @@ class LockPageCreatingVaultState extends LockPageState {
 }
 
 class LockMessageState extends LockPageState {
-  const LockMessageState({required this.message}) : super(vaultNames: const []);
+  LockMessageState({required this.message}) : super(vaultNames: const []);
   final String message;
 
   @override

@@ -16,6 +16,10 @@ void main() async {
   runApp(MyApp(light: light));
 }
 
+bool get isPC => Platform.isWindows || Platform.isLinux || Platform.isMacOS;
+
+bool get isMobile => Platform.isAndroid || Platform.isIOS;
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key, required this.light});
   final bool light;

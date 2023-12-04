@@ -140,10 +140,10 @@ class KiureService {
       }
       await file.copy(accountDataRepository.getVaultFile(vaultName).path);
       _vaultNames.add(vault.vaultName);
+      this.vaultName = vaultName;
       return true;
     } catch (exception) {
-      print(exception.toString());
-      return false;
+      rethrow;
     }
   }
 

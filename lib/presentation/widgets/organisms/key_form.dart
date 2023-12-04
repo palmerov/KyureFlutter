@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:kyure/main.dart';
 import 'package:vibration/vibration.dart';
 
 class KeyFormController {}
@@ -64,7 +65,7 @@ class _KeyFormOrganismState extends State<KeyFormOrganism> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(8),
+      padding: const EdgeInsets.only(top: 4, left: 4, right: 4, bottom: 16),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.end,
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -75,21 +76,9 @@ class _KeyFormOrganismState extends State<KeyFormOrganism> {
               textAlign: TextAlign.center,
               style: TextStyle(color: widget.onBackgroundColor, fontSize: 16),
             ),
-          Visibility(
-            visible: error != null,
-            maintainSize: false,
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text(
-                error ?? '',
-                textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.red.shade200, fontSize: 14),
-              ),
-            ),
-          ),
           const SizedBox(height: 8),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 16),
             child: TextFormField(
               onFieldSubmitted: (value) {
                 submit();
@@ -106,8 +95,11 @@ class _KeyFormOrganismState extends State<KeyFormOrganism> {
                   keyboard,
               cursorColor: widget.onBackgroundColor,
               decoration: InputDecoration(
-                contentPadding: const EdgeInsets.only(
-                    left: 48, right: 0, top: 16, bottom: 16),
+                contentPadding: EdgeInsets.only(
+                    left: (Platform.isAndroid || Platform.isMacOS) ? 48 : 0,
+                    right: 0,
+                    top: 16,
+                    bottom: 16),
                 suffixIcon: loading
                     ? SizedBox(
                         height: 20,
@@ -152,12 +144,15 @@ class _KeyFormOrganismState extends State<KeyFormOrganism> {
               ),
             ),
           ),
-          const SizedBox(height: 16),
-          Visibility(
-            maintainSize: false,
-            visible: !keyboard,
-            child: SizedBox(
-              height: 300,
+          Padding(
+            padding: const EdgeInsets.all(4),
+            child: Text(error ?? '',
+            style: TextStyle(color: Colors.red.shade200),
+            textAlign: TextAlign.center),
+          ),
+          if (keyboard || isPC) const Expanded(child: SizedBox.expand()),
+          if (!keyboard && isMobile)
+            Expanded(
               child: GridView.builder(
                 padding: const EdgeInsets.all(0),
                 physics: const NeverScrollableScrollPhysics(),
@@ -233,8 +228,7 @@ class _KeyFormOrganismState extends State<KeyFormOrganism> {
                 },
                 itemCount: 12,
               ),
-            ),
-          )
+            )
         ],
       ),
     );

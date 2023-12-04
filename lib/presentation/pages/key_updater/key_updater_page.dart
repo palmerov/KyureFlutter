@@ -33,17 +33,27 @@ class _KeyUpdaterView extends StatelessWidget {
             style: TextStyle(color: kTheme.colorOnBackground),
           ),
         ),
-        body: KeyFormOrganism(
-            obscureText: false,
-            onBackgroundColor: kTheme.colorOnBackground,
-            onTapEnter: (key) async {
-              if (key.length < 4) {
-                return 'La clave debe tener al menos 4 caracteres';
-              }
-              serviceLocator.getKiureService().key = key;
-              serviceLocator.getKiureService().writeVaultData();
-              return 'La llave se ha cambiado con éxito';
-            },
-            title: 'Inserta la nueva llave de cifrado'));
+        body: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Expanded(
+              child: SizedBox(height: 200)),
+            Expanded(
+              child: KeyFormOrganism(
+                  obscureText: false,
+                  onBackgroundColor: kTheme.colorOnBackground,
+                  onTapEnter: (key) async {
+                    if (key.length < 4) {
+                      return 'La clave debe tener al menos 4 caracteres';
+                    }
+                    serviceLocator.getKiureService().key = key;
+                    serviceLocator.getKiureService().writeVaultData();
+                    return 'La llave se ha cambiado con éxito';
+                  },
+                  title: 'Inserta la nueva llave de cifrado'),
+            ),
+            const SizedBox(height: 16)
+          ],
+        ));
   }
 }
