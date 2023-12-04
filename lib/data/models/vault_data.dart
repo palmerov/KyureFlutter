@@ -1,16 +1,16 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-part 'accounts_data.freezed.dart';
-part 'accounts_data.g.dart';
+part 'vault_data.freezed.dart';
+part 'vault_data.g.dart';
 
 @unfreezed
-class AccountsData with _$AccountsData {
-  factory AccountsData(
-      {@JsonKey(name: 'accounts_data')
-      required List<AccountGroup> accountGroups}) = _AccountsData;
+class VaultData with _$VaultData {
+  factory VaultData({
+    @JsonKey(name: 'accounts_data') required List<AccountGroup> accountGroups,
+  }) = _VaultData;
 
-  factory AccountsData.fromJson(Map<String, dynamic> json) =>
-      _$AccountsDataFromJson(json);
+  factory VaultData.fromJson(Map<String, dynamic> json) =>
+      _$VaultDataFromJson(json);
 }
 
 @unfreezed
@@ -65,15 +65,15 @@ class AccountImage with _$AccountImage {
 
 enum ImageSource {
   assets,
-  url,
+  network,
   file;
 
   factory ImageSource.fromJson(String json) {
     switch (json) {
       case 'assets':
         return ImageSource.assets;
-      case 'url':
-        return ImageSource.url;
+      case 'network':
+        return ImageSource.network;
       case 'file':
         return ImageSource.file;
     }
@@ -84,8 +84,8 @@ enum ImageSource {
     switch (this) {
       case ImageSource.assets:
         return 'assets';
-      case ImageSource.url:
-        return 'url';
+      case ImageSource.network:
+        return 'network';
       case ImageSource.file:
         return 'file';
     }

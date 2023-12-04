@@ -40,8 +40,8 @@ class _KeyUpdaterView extends StatelessWidget {
               if (key.length < 4) {
                 return 'La clave debe tener al menos 4 caracteres';
               }
-              serviceLocator.getUserDataService().key = key;
-              serviceLocator.getUserDataService().writeUserData();
+              serviceLocator.getKiureService().key = key;
+              serviceLocator.getKiureService().writeVaultData();
               return 'La llave se ha cambiado con éxito';
             },
             title: 'Inserta la nueva llave de cifrado'));

@@ -1,6 +1,8 @@
+import 'dart:convert';
 import 'dart:io';
-import 'package:kyure/data/models/accounts_data.dart';
-import 'package:kyure/data/models/user_data.dart';
+import 'package:flutter/material.dart';
+import 'package:kyure/data/models/vault_data.dart';
+import 'package:kyure/data/models/vault.dart';
 import 'package:kyure/data/repositories/acount_data_repository.dart';
 import 'package:kyure/data/utils/account_data_utils.dart';
 import 'package:kyure/data/utils/encrypt_utils.dart';
@@ -10,103 +12,147 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 enum SortMethod { nameAsc, nameDesc, noOrder, creationAsc, creationDesc }
 
-class UserDataService {
+class KiureService {
+  late final String _rootPath, _rootVaults, _rootImages;
   late final AccountDataRepository accountDataRepository;
-  UserData? userData;
-  AccountsData? accountsData;
-  String? path;
-  String? key;
-  bool isInit = false;
-  late SharedPreferences prefs;
+  late SharedPreferences _prefs;
+  List<String> _vaultNames = [];
+  bool initialized = false;
 
-  UserDataService() {
+  VaultData? _vault;
+  Vault? _userData;
+  String? _vaultName;
+  String? _key;
+
+  initPrefs() async {
+    _prefs = await SharedPreferences.getInstance();
+  }
+
+  Future<void> init() async {
+    if (initialized) return;
+    initialized = true;
+
+    _rootPath = '${(await getApplicationDocumentsDirectory()).path}kiure';
+    Directory(_rootPath).createSync(recursive: true);
+    _rootVaults = '$_rootPath/vaults';
+    Directory(_rootVaults).createSync(recursive: true);
+    _rootImages = '$_rootPath/images';
+    Directory(_rootImages).createSync(recursive: true);
+
+    // init repo
     accountDataRepository = serviceLocator.getAccountDataRepository();
+    accountDataRepository.init(_rootVaults);
+
+    // prefs
+    _vaultName = _prefs.getString('vaultName');
+
+    // vault names
+    _vaultNames = await accountDataRepository.getVaultNames();
   }
 
-  Future<void> _initPrefs() async {
-    if (!isInit) {
-      isInit = true;
-      prefs = await SharedPreferences.getInstance();
+  set vaultName(String? name) {
+    _vaultName = name;
+    if (name == null) {
+      _prefs.remove('vaultName');
+    } else {
+      _prefs.setString('vaultName', name);
     }
   }
 
-  clear() {
-    userData = null;
-    accountsData = null;
-    key = null;
+  set brigtnessLight(bool light) => _prefs.setBool('light', light);
+
+  bool get brigtnessLight => _prefs.getBool('light') ?? true;
+
+  void clear() {
+    _vault = null;
+    _key = null;
   }
 
-  Future<void> _processPath() async {
-    await _initPrefs();
-    if (Platform.isAndroid) {
-      if (path == null) {
-        path =
-            '${(await getExternalStorageDirectories())!.first.path}my_accounts.kiure';
-      } else {
-        path = (await File(path!).copy(
-                '${(await getApplicationDocumentsDirectory()).path}${path!.split('/').last}'))
-            .path;
-      }
-    } else if (Platform.isLinux || Platform.isWindows || Platform.isMacOS) {
-      if (path == null) {
-        String parentPath =
-            '${(await getApplicationDocumentsDirectory()).path}kiure';
-        Directory(parentPath).createSync(recursive: true);
-        path = '$parentPath/my_accounts.kiure';
-      }
+  String? get vaultName => _vaultName;
+
+  List<String> get vaultNames => _vaultNames;
+
+  VaultData get vault => _vault!;
+
+  set key(String? key) {
+    _key = key;
+  }
+
+  bool existVault(String vaultName) {
+    return _vaultNames.contains(vaultName);
+  }
+
+  Future<void> openVault(String vaultName, String key) async {
+    _vaultName = vaultName;
+    _key = key;
+    await readVaultData();
+  }
+
+  Future<void> readVaultData() async {
+    try {
+      _userData = await accountDataRepository.readUserData(
+          EncryptAlgorithm.AES, _key!, _vaultName!);
+      _vault = _userData!.accountsData;
+      AccountDataUtils.createAllGroup(_vault!);
+    } catch (exception) {
+      print(exception.toString());
+      rethrow;
     }
-    prefs.setString('kiureFile', path!);
   }
 
-  loadPrefs() async {
-    await _initPrefs();
-    path = prefs.getString('kiureFile');
+  Future<void> writeVaultData() async {
+    try {
+      final userDataCopy = _userData!.copyWith(
+          accountsData: _userData!.accountsData!
+              .copyWith(accountGroups: _vault!.accountGroups.sublist(1)));
+      await accountDataRepository.writeUserData(
+          EncryptAlgorithm.AES, _key!, _vaultName!, userDataCopy);
+    } catch (exception) {
+      print(exception.toString());
+      rethrow;
+    }
   }
 
-  Future<bool> evaluateFile() async {
-    if (path == null) {
+  Future<void> createNewVault(String vaultName) async {
+    _vaultName = vaultName;
+    _userData = Vault(
+        version: 1,
+        vaultName: vaultName,
+        accountsData: VaultData(accountGroups: []),
+        datacrypt: '');
+    AccountDataUtils.createAllGroup(_userData!.accountsData!);
+    _vault = _userData!.accountsData!;
+    _vaultNames.add(vaultName);
+    writeVaultData();
+  }
+
+  Future<bool> importVault(File file) async {
+    try {
+      final vault = Vault.fromJson(jsonDecode(file.readAsStringSync()));
+      final vaultName = vault.vaultName;
+      if (_vaultNames.contains(vaultName)) {
+        final currentFile = accountDataRepository.getVaultFile(vaultName);
+        final currentUserData =
+            Vault.fromJson(jsonDecode(currentFile.readAsStringSync()));
+        if (currentUserData.version >= vault.version) {
+          return false;
+        }
+      }
+      await file.copy(accountDataRepository.getVaultFile(vaultName).path);
+      _vaultNames.add(vault.vaultName);
+      return true;
+    } catch (exception) {
+      print(exception.toString());
       return false;
     }
-    if ((await File(path!).exists())) {
-      return true;
-    }
-    return false;
   }
 
-  Future<void> readUserData() async {
-    try {
-      userData = await accountDataRepository.readUserData(
-          EncryptAlgorithm.AES, key!, File(path!));
-      accountsData = userData!.accountsData;
-      AccountDataUtils.createAllGroup(accountsData!);
-    } catch (exception) {
-      print(exception.toString());
-      rethrow;
-    }
-  }
-
-  Future<void> writeUserData() async {
-    try {
-      final userDataCopy = userData!.copyWith(
-          accountsData: userData!.accountsData!
-              .copyWith(accountGroups: accountsData!.accountGroups.sublist(1)));
-      await accountDataRepository.writeUserData(
-          EncryptAlgorithm.AES, key!, File(path!), userDataCopy);
-    } catch (exception) {
-      print(exception.toString());
-      rethrow;
-    }
-  }
-
-  Future<void> createNewFile() async {
-    userData = UserData(
-        version: 1,
-        accountsData: AccountsData(accountGroups: []),
-        datacrypt: '');
-    AccountDataUtils.createAllGroup(userData!.accountsData!);
-    accountsData = userData!.accountsData!;
-    await _processPath();
-    writeUserData();
+  void deleteVault() {
+    accountDataRepository.getVaultFile(vaultName!).deleteSync();
+    _vaultNames.remove(_vaultName);
+    _vault = null;
+    _vaultName = null;
+    _key = null;
   }
 
   void addNewAccount(Account account, AccountGroup group) {
@@ -117,7 +163,7 @@ class UserDataService {
 
   Account? findAccountById(int id) {
     try {
-      for (var group in accountsData!.accountGroups) {
+      for (var group in _vault!.accountGroups) {
         return group.accounts.firstWhere((element) => element.id == id);
       }
     } catch (exception) {
@@ -127,20 +173,20 @@ class UserDataService {
   }
 
   AccountGroup? getGroupByAccountId(int id) {
-    int i = accountsData!.accountGroups.sublist(1).indexWhere((element) =>
+    int i = _vault!.accountGroups.sublist(1).indexWhere((element) =>
         element.accounts.indexWhere((element) => element.id == id) >= 0);
     if (i >= 0) {
-      return accountsData!.accountGroups[i + 1];
+      return _vault!.accountGroups[i + 1];
     }
     return null;
   }
 
   AccountGroup getFirstRealGroup() {
-    return accountsData!.accountGroups[1];
+    return _vault!.accountGroups[1];
   }
 
   AccountGroup getAllGroup() {
-    return accountsData!.accountGroups.first;
+    return _vault!.accountGroups.first;
   }
 
   int getMaxId() {
@@ -152,16 +198,16 @@ class UserDataService {
   }
 
   AccountGroup? findGroupByName(String name) {
-    int index = accountsData!.accountGroups
-        .indexWhere((element) => element.name == name);
+    int index =
+        _vault!.accountGroups.indexWhere((element) => element.name == name);
     if (index >= 0) {
-      return accountsData!.accountGroups[index];
+      return _vault!.accountGroups[index];
     }
     return null;
   }
 
   List<AccountGroup> getRealGroups() {
-    return accountsData!.accountGroups.sublist(1);
+    return _vault!.accountGroups.sublist(1);
   }
 
   void deleteAccount(Account account) {
@@ -171,9 +217,9 @@ class UserDataService {
   }
 
   void deleteGroup(AccountGroup group) {
-    accountsData!.accountGroups.removeWhere((element) => element == group);
-    accountsData!.accountGroups.removeAt(0);
-    AccountDataUtils.createAllGroup(accountsData!);
+    _vault!.accountGroups.removeWhere((element) => element == group);
+    _vault!.accountGroups.removeAt(0);
+    AccountDataUtils.createAllGroup(_vault!);
   }
 
   Future<String> exportFile() async {
@@ -181,12 +227,12 @@ class UserDataService {
         ? (await getExternalStorageDirectory())!
         : await getApplicationDocumentsDirectory();
     String savePath = '${dir.path}exp_accounts_${DateTime.now()}.kiure';
-    await File(path!).copy(savePath);
+    await accountDataRepository.getVaultFile(vaultName!).copy(savePath);
     return savePath;
   }
 
   void sort(int groupIndex, SortMethod method) {
-    final group = accountsData!.accountGroups[groupIndex];
+    final group = _vault!.accountGroups[groupIndex];
     switch (method) {
       case SortMethod.nameDesc:
         {
@@ -200,9 +246,9 @@ class UserDataService {
         }
       case SortMethod.noOrder:
         {
-          if (groupIndex==0) {
-            accountsData!.accountGroups.removeAt(0);
-            AccountDataUtils.createAllGroup(accountsData!);
+          if (groupIndex == 0) {
+            _vault!.accountGroups.removeAt(0);
+            AccountDataUtils.createAllGroup(_vault!);
           } else {}
           break;
         }

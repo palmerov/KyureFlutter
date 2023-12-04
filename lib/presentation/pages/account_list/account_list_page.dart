@@ -7,7 +7,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_share/flutter_share.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kyure/config/router_config.dart';
-import 'package:kyure/data/models/accounts_data.dart';
+import 'package:kyure/data/models/vault_data.dart';
+import 'package:kyure/main.dart';
 import 'package:kyure/presentation/pages/account_list/account_list_bloc.dart';
 import 'package:kyure/presentation/widgets/molecules/account_group.dart';
 import 'package:kyure/presentation/widgets/molecules/account_group_list_shimmer.dart';
@@ -29,7 +30,7 @@ class AccountListPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) =>
-          AccountListPageBloc(serviceLocator.getUserDataService())..load(),
+          AccountListPageBloc(serviceLocator.getKiureService())..load(),
       child: _AccountListView(),
     );
   }
@@ -228,14 +229,14 @@ class _AccountListView extends StatelessWidget {
                       bloc.sort(SortMethod.nameAsc);
                       context.pop();
                     },
-                    label: 'Nombre: A -> Z',
+                    label: 'Nombre: Z -> A',
                     icon: const Icon(Icons.sort_by_alpha_rounded)),
                 ContextMenuTileMolecule(
                     onTap: () {
                       bloc.sort(SortMethod.creationDesc);
                       context.pop();
                     },
-                    label: 'Creación: anterior -> reciente',
+                    label: 'Creación: reciente -> anterior',
                     icon: const Icon(Icons.sort_rounded)),
                 ContextMenuTileMolecule(
                     onTap: () {
@@ -493,7 +494,7 @@ class _AccountListView extends StatelessWidget {
                                               'blockedByUser': 'true'
                                             });
                                         serviceLocator
-                                            .getUserDataService()
+                                            .getKiureService()
                                             .clear();
                                       },
                                     ),
@@ -528,8 +529,8 @@ class _AccountListView extends StatelessWidget {
                                       text: '+ Cuenta',
                                       onTap: () async {
                                         if (serviceLocator
-                                                .getUserDataService()
-                                                .accountsData!
+                                                .getKiureService()
+                                                .vault
                                                 .accountGroups
                                                 .length ==
                                             1) {
@@ -601,24 +602,46 @@ class Drawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final kyTheme = KyTheme.of(context)!;
+    final appBloc = context.read<ApplicationBloc>();
     return NavigationDrawer(
       elevation: isPcScreen ? 2 : 8,
       children: [
-        const SizedBox(
-          height: 140,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+        Padding(
+          padding: const EdgeInsets.only(right: 24, top: 24),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              Text(
-                'Kiure',
-                style: TextStyle(fontSize: 20),
-              ),
-              SizedBox(
-                height: 8,
-              ),
-              Text('Asegura tus cuentas'),
+              InkWell(
+                onTap: () => appBloc.toogleTheme(),
+                child: Icon(appBloc.state.light
+                    ? CupertinoIcons.sun_max
+                    : CupertinoIcons.moon),
+              )
             ],
           ),
+        ),
+        SizedBox(
+          height: 116,
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Image.asset(
+                  appBloc.state.light
+                      ? 'assets/app_icons/kiure_icon_name_light.png'
+                      : 'assets/app_icons/kiure_icon_name_dark.png',
+                  width: 100,
+                ),
+                const SizedBox(
+                  height: 8,
+                ),
+                const Text('Asegura tus cuentas'),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(
+          height: 16,
         ),
         _buildDrawerItem(
             kyTheme: kyTheme,
@@ -627,7 +650,7 @@ class Drawer extends StatelessWidget {
             icon: const Icon(CupertinoIcons.lock)),
         _buildDrawerItem(
             kyTheme: kyTheme,
-            label: 'Exportar cuentas',
+            label: 'Exportar bóveda',
             icon: const Icon(CupertinoIcons.share),
             onTap: () async {
               String path =
@@ -668,6 +691,14 @@ class Drawer extends StatelessWidget {
               );
             }),
         _buildDrawerItem(
+          kyTheme: kyTheme,
+          label: 'Eliminar bóveda',
+          icon: const Icon(CupertinoIcons.delete),
+          onTap: () {
+            _showDeleteVaultConfirmDialog(context);
+          },
+        ),
+        _buildDrawerItem(
             kyTheme: kyTheme,
             label: 'Donar :)',
             icon: const Icon(CupertinoIcons.heart),
@@ -684,10 +715,58 @@ class Drawer extends StatelessWidget {
     return ContextMenuTileMolecule(
         onTap: onTap,
         label: label,
-        textStyle: TextStyle(color: kyTheme.colorToastText, fontSize: 16),
+        textStyle: TextStyle(color: kyTheme.colorOnBackground, fontSize: 16),
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         separation: 16,
         icon: icon);
+  }
+
+  void _showDeleteVaultConfirmDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      useSafeArea: true,
+      builder: (context) => AlertDialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const Text(
+                'Eliminar Bóveda',
+                style: TextStyle(fontSize: 18),
+              ),
+              const SizedBox(
+                height: 16,
+              ),
+              const Text(
+                'Si eliminas la bóveda, se perderán todas las cuentas y grupos. ¿Deseas eliminarla?',
+                style: TextStyle(fontSize: 16),
+              ),
+              const SizedBox(
+                height: 16,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                      onPressed: () {
+                        context.pop();
+                      },
+                      child: const Text('No')),
+                  TextButton(
+                      onPressed: () {
+                        context.pop();
+                        serviceLocator.getKiureService().deleteVault();
+                        context.goNamed(KyRoutes.lockPage.name,
+                            queryParameters: {'blockedByUser': 'true'});
+                      },
+                      child: const Text('Si')),
+                ],
+              )
+            ],
+          )),
+    );
   }
 }
 

@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:kyure/data/models/accounts_data.dart';
+import 'package:kyure/data/models/vault_data.dart';
 import 'package:kyure/services/service_locator.dart';
 
 class AccountDetailsBloc extends Cubit<AccountDetailsState> {
@@ -61,7 +61,7 @@ class AccountDetailsBloc extends Cubit<AccountDetailsState> {
     accountCopy!.fieldList = fields.isEmpty ? null : fields.sublist(2);
     if (isNewAccount) {
       groupTo ??= group;
-      serviceLocator.getUserDataService().addNewAccount(accountCopy!, groupTo!);
+      serviceLocator.getKiureService().addNewAccount(accountCopy!, groupTo!);
       isNewAccount = false;
     } else {
       if (groupTo != null) {

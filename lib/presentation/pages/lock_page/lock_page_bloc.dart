@@ -7,11 +7,12 @@ import 'package:kyure/services/service_locator.dart';
 import 'package:kyure/services/user_data_service.dart';
 
 class LockPageBloc extends Cubit<LockPageState> {
-  late UserDataService userDataService;
+  late KiureService vaultService;
   final bool blockedByUser;
+  String? vaultNameCreated;
 
-  LockPageBloc(this.blockedByUser) : super(LockPageInitial()) {
-    userDataService = serviceLocator.getUserDataService();
+  LockPageBloc(this.blockedByUser) : super(const LockPageInitialState()) {
+    vaultService = serviceLocator.getKiureService();
   }
 
   pickFile() async {
@@ -19,81 +20,115 @@ class LockPageBloc extends Cubit<LockPageState> {
         .pickFiles(allowMultiple: false, type: FileType.any);
     if (result != null) {
       File file = File(result.files.single.path!);
-      insertFile(file.path);
-    }
-  }
-
-  createFile() async {
-    userDataService.path = null;
-    emit(LockInsertKeyState(
-        createKey: userDataService.path == null ||
-            (await File(userDataService.path!).length()) < 10));
-  }
-
-  loadPrefs() async {
-    await userDataService.loadPrefs();
-    findKiureFile();
-  }
-
-  findKiureFile() async {
-    bool existFile = await userDataService.evaluateFile();
-    if (existFile) {
-      emit(LockInsertKeyState(
-          createKey: (await File(userDataService.path!).length()) < 10));
-    } else {
-      emit(LockInsertFileState());
-    }
-  }
-
-  insertFile(String path) async {
-    userDataService.path = path;
-    findKiureFile();
-  }
-
-  insertKey(String key) async {
-    userDataService.key = key;
-    await userDataService.readUserData();
-    emit(LockPageInitial());
-  }
-
-  Future<String?> initWithKey(String key, bool newFile) async {
-    userDataService.key = key;
-    if (newFile) {
-      await userDataService.createNewFile();
-      emit(LockPageLogin());
-    } else {
       try {
-        await userDataService.readUserData();
-        emit(LockPageLogin());
+        bool possible = await vaultService.importVault(file);
+        if (possible) {
+          emit(LockPageState(
+              vaultNames: vaultService.vaultNames,
+              selectedVault: vaultService.vaultName));
+        } else {
+          emit(LockMessageState(
+              message:
+                  """La bóveda que estás tratando de importar ya existe en local, con una versión superior.
+Por favor, elimine la bóveda existente llamada "${vaultService.vaultName!}" o cambie su nombre.
+Para hacerlo debe ingresar en ella antes."""));
+        }
       } catch (exception) {
-        print(exception.toString());
-        return 'Llave incorrecta';
+        emit(LockMessageState(
+            message:
+                """Ha habido un error al importar la bóveda llamada "${vaultService.vaultName!}".
+Detalles del error ${exception.toString()}."""));
       }
+    }
+  }
+
+  Future<String?> openVault(String key) async {
+    if (key.length < 4) {
+      return 'La llave debe tener al menos 4 caracteres';
+    }
+    vaultService.key = key;
+    try {
+      await vaultService.readVaultData();
+      emit(const LockPageLoginState());
+    } catch (exception) {
+      print(exception.toString());
+      return 'Llave incorrecta';
+    }
+    return null;
+  }
+
+  initVaultService() async {
+    await vaultService.init();
+    emit(LockPageState(
+        vaultNames: vaultService.vaultNames,
+        selectedVault: vaultService.vaultName));
+  }
+
+  selectVault(String vaultName) {
+    vaultService.vaultName = vaultName;
+    emit(LockPageState(
+        vaultNames: vaultService.vaultNames, selectedVault: vaultName));
+  }
+
+  createVault() {
+    emit(const LockPageCreatingVaultState(message: null, valid: false));
+  }
+
+  validateName(String vaultName) {
+    vaultNameCreated = vaultName;
+    if (vaultService.existVault(vaultName)) {
+      emit(const LockPageCreatingVaultState(
+          message: 'Ya existe una bóveda con ese nombre', valid: false));
+    } else {
+      emit(const LockPageCreatingVaultState(message: null, valid: true));
+    }
+  }
+
+  Future<String?> createNewVault(String key) async {
+    try {
+      vaultService.key = key;
+      await vaultService.createNewVault(vaultNameCreated!);
+      emit(const LockPageLoginState());
+    } catch (exception) {
+      print(exception.toString());
+      return 'Error al crear la bóveda';
     }
     return null;
   }
 }
 
 class LockPageState extends Equatable {
-  const LockPageState();
+  const LockPageState({required this.vaultNames, this.selectedVault, this.loaded = true});
+  final List<String> vaultNames;
+  final String? selectedVault;
+  final bool loaded;
 
   @override
-  List<Object> get props => [];
+  List<Object> get props => [vaultNames, selectedVault ?? ''];
 }
 
-class LockInsertKeyState extends LockPageState {
-  const LockInsertKeyState({required this.createKey, this.error});
-  final bool createKey;
-  final String? error;
+class LockPageInitialState extends LockPageState {
+  const LockPageInitialState() : super(vaultNames: const [], loaded: false);
+}
+
+class LockPageLoginState extends LockPageState {
+  const LockPageLoginState() : super(vaultNames: const []);
+}
+
+class LockPageCreatingVaultState extends LockPageState {
+  const LockPageCreatingVaultState({required this.message, required this.valid})
+      : super(vaultNames: const []);
+  final String? message;
+  final bool valid;
 
   @override
-  List<Object> get props => [createKey, error ?? ''];
+  List<Object> get props => [message ?? '', valid];
 }
 
-class LockInsertFileState extends LockPageState {}
+class LockMessageState extends LockPageState {
+  const LockMessageState({required this.message}) : super(vaultNames: const []);
+  final String message;
 
-class LockPageInitial extends LockPageState {}
-
-class LockPageLoading extends LockPageState {}
-
-class LockPageLogin extends LockPageState {}
+  @override
+  List<Object> get props => [message];
+}

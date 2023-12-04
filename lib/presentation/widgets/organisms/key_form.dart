@@ -9,11 +9,12 @@ class KeyFormController {}
 class KeyFormOrganism extends StatefulWidget {
   const KeyFormOrganism(
       {super.key,
-      required this.title,
+      this.title,
       this.onBackgroundColor = Colors.white,
       required this.onTapEnter,
-      this.error, required this.obscureText});
-  final String title;
+      this.error,
+      required this.obscureText});
+  final String? title;
   final Color onBackgroundColor;
   final Future Function(String key) onTapEnter;
   final String? error;
@@ -68,11 +69,12 @@ class _KeyFormOrganismState extends State<KeyFormOrganism> {
         mainAxisAlignment: MainAxisAlignment.end,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
-            widget.title,
-            textAlign: TextAlign.center,
-            style: TextStyle(color: widget.onBackgroundColor, fontSize: 16),
-          ),
+          if (widget.title != null)
+            Text(
+              widget.title!,
+              textAlign: TextAlign.center,
+              style: TextStyle(color: widget.onBackgroundColor, fontSize: 16),
+            ),
           Visibility(
             visible: error != null,
             maintainSize: false,
@@ -104,6 +106,8 @@ class _KeyFormOrganismState extends State<KeyFormOrganism> {
                   keyboard,
               cursorColor: widget.onBackgroundColor,
               decoration: InputDecoration(
+                contentPadding: const EdgeInsets.only(
+                    left: 48, right: 0, top: 16, bottom: 16),
                 suffixIcon: loading
                     ? SizedBox(
                         height: 20,
@@ -180,6 +184,10 @@ class _KeyFormOrganismState extends State<KeyFormOrganism> {
                   } else {
                     if (index == 9) {
                       return InkWell(
+                        onLongPress: () {
+                          controller.text = '';
+                          vibrate();
+                        },
                         onTap: () {
                           if (controller.text.isNotEmpty) {
                             controller.text = controller.text
@@ -197,9 +205,6 @@ class _KeyFormOrganismState extends State<KeyFormOrganism> {
                     }
                     if (index == 10) {
                       return InkWell(
-                        splashColor: widget.onBackgroundColor.withOpacity(0.9),
-                        highlightColor: widget.onBackgroundColor.withOpacity(0.9),
-                        overlayColor: MaterialStatePropertyAll(widget.onBackgroundColor),
                         onTap: () {
                           controller.text += '${0}';
                           vibrate();

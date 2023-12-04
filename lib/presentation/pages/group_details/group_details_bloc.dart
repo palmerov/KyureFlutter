@@ -2,7 +2,7 @@ import 'dart:ui';
 
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:kyure/data/models/accounts_data.dart';
+import 'package:kyure/data/models/vault_data.dart';
 import 'package:kyure/services/service_locator.dart';
 
 class GroupDetailsBloc extends Cubit<GroupDetailsState> {
@@ -29,8 +29,8 @@ class GroupDetailsBloc extends Cubit<GroupDetailsState> {
     saved = true;
     if (isNew) {
       serviceLocator
-          .getUserDataService()
-          .accountsData!
+          .getKiureService()
+          .vault
           .accountGroups
           .add(group);
     }

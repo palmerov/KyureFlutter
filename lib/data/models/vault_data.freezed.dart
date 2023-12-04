@@ -3,7 +3,7 @@
 // ignore_for_file: type=lint
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
-part of 'accounts_data.dart';
+part of 'vault_data.dart';
 
 // **************************************************************************
 // FreezedGenerator
@@ -14,12 +14,12 @@ T _$identity<T>(T value) => value;
 final _privateConstructorUsedError = UnsupportedError(
     'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#custom-getters-and-methods');
 
-AccountsData _$AccountsDataFromJson(Map<String, dynamic> json) {
-  return _AccountsData.fromJson(json);
+VaultData _$VaultDataFromJson(Map<String, dynamic> json) {
+  return _VaultData.fromJson(json);
 }
 
 /// @nodoc
-mixin _$AccountsData {
+mixin _$VaultData {
   @JsonKey(name: 'accounts_data')
   List<AccountGroup> get accountGroups => throw _privateConstructorUsedError;
   @JsonKey(name: 'accounts_data')
@@ -28,23 +28,22 @@ mixin _$AccountsData {
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
-  $AccountsDataCopyWith<AccountsData> get copyWith =>
+  $VaultDataCopyWith<VaultData> get copyWith =>
       throw _privateConstructorUsedError;
 }
 
 /// @nodoc
-abstract class $AccountsDataCopyWith<$Res> {
-  factory $AccountsDataCopyWith(
-          AccountsData value, $Res Function(AccountsData) then) =
-      _$AccountsDataCopyWithImpl<$Res, AccountsData>;
+abstract class $VaultDataCopyWith<$Res> {
+  factory $VaultDataCopyWith(VaultData value, $Res Function(VaultData) then) =
+      _$VaultDataCopyWithImpl<$Res, VaultData>;
   @useResult
   $Res call({@JsonKey(name: 'accounts_data') List<AccountGroup> accountGroups});
 }
 
 /// @nodoc
-class _$AccountsDataCopyWithImpl<$Res, $Val extends AccountsData>
-    implements $AccountsDataCopyWith<$Res> {
-  _$AccountsDataCopyWithImpl(this._value, this._then);
+class _$VaultDataCopyWithImpl<$Res, $Val extends VaultData>
+    implements $VaultDataCopyWith<$Res> {
+  _$VaultDataCopyWithImpl(this._value, this._then);
 
   // ignore: unused_field
   final $Val _value;
@@ -66,22 +65,22 @@ class _$AccountsDataCopyWithImpl<$Res, $Val extends AccountsData>
 }
 
 /// @nodoc
-abstract class _$$AccountsDataImplCopyWith<$Res>
-    implements $AccountsDataCopyWith<$Res> {
-  factory _$$AccountsDataImplCopyWith(
-          _$AccountsDataImpl value, $Res Function(_$AccountsDataImpl) then) =
-      __$$AccountsDataImplCopyWithImpl<$Res>;
+abstract class _$$VaultDataImplCopyWith<$Res>
+    implements $VaultDataCopyWith<$Res> {
+  factory _$$VaultDataImplCopyWith(
+          _$VaultDataImpl value, $Res Function(_$VaultDataImpl) then) =
+      __$$VaultDataImplCopyWithImpl<$Res>;
   @override
   @useResult
   $Res call({@JsonKey(name: 'accounts_data') List<AccountGroup> accountGroups});
 }
 
 /// @nodoc
-class __$$AccountsDataImplCopyWithImpl<$Res>
-    extends _$AccountsDataCopyWithImpl<$Res, _$AccountsDataImpl>
-    implements _$$AccountsDataImplCopyWith<$Res> {
-  __$$AccountsDataImplCopyWithImpl(
-      _$AccountsDataImpl _value, $Res Function(_$AccountsDataImpl) _then)
+class __$$VaultDataImplCopyWithImpl<$Res>
+    extends _$VaultDataCopyWithImpl<$Res, _$VaultDataImpl>
+    implements _$$VaultDataImplCopyWith<$Res> {
+  __$$VaultDataImplCopyWithImpl(
+      _$VaultDataImpl _value, $Res Function(_$VaultDataImpl) _then)
       : super(_value, _then);
 
   @pragma('vm:prefer-inline')
@@ -89,7 +88,7 @@ class __$$AccountsDataImplCopyWithImpl<$Res>
   $Res call({
     Object? accountGroups = null,
   }) {
-    return _then(_$AccountsDataImpl(
+    return _then(_$VaultDataImpl(
       accountGroups: null == accountGroups
           ? _value.accountGroups
           : accountGroups // ignore: cast_nullable_to_non_nullable
@@ -100,12 +99,12 @@ class __$$AccountsDataImplCopyWithImpl<$Res>
 
 /// @nodoc
 @JsonSerializable()
-class _$AccountsDataImpl implements _AccountsData {
-  _$AccountsDataImpl(
+class _$VaultDataImpl implements _VaultData {
+  _$VaultDataImpl(
       {@JsonKey(name: 'accounts_data') required this.accountGroups});
 
-  factory _$AccountsDataImpl.fromJson(Map<String, dynamic> json) =>
-      _$$AccountsDataImplFromJson(json);
+  factory _$VaultDataImpl.fromJson(Map<String, dynamic> json) =>
+      _$$VaultDataImplFromJson(json);
 
   @override
   @JsonKey(name: 'accounts_data')
@@ -113,30 +112,30 @@ class _$AccountsDataImpl implements _AccountsData {
 
   @override
   String toString() {
-    return 'AccountsData(accountGroups: $accountGroups)';
+    return 'VaultData(accountGroups: $accountGroups)';
   }
 
   @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
-  _$$AccountsDataImplCopyWith<_$AccountsDataImpl> get copyWith =>
-      __$$AccountsDataImplCopyWithImpl<_$AccountsDataImpl>(this, _$identity);
+  _$$VaultDataImplCopyWith<_$VaultDataImpl> get copyWith =>
+      __$$VaultDataImplCopyWithImpl<_$VaultDataImpl>(this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$AccountsDataImplToJson(
+    return _$$VaultDataImplToJson(
       this,
     );
   }
 }
 
-abstract class _AccountsData implements AccountsData {
-  factory _AccountsData(
+abstract class _VaultData implements VaultData {
+  factory _VaultData(
       {@JsonKey(name: 'accounts_data')
-      required List<AccountGroup> accountGroups}) = _$AccountsDataImpl;
+      required List<AccountGroup> accountGroups}) = _$VaultDataImpl;
 
-  factory _AccountsData.fromJson(Map<String, dynamic> json) =
-      _$AccountsDataImpl.fromJson;
+  factory _VaultData.fromJson(Map<String, dynamic> json) =
+      _$VaultDataImpl.fromJson;
 
   @override
   @JsonKey(name: 'accounts_data')
@@ -145,7 +144,7 @@ abstract class _AccountsData implements AccountsData {
   set accountGroups(List<AccountGroup> value);
   @override
   @JsonKey(ignore: true)
-  _$$AccountsDataImplCopyWith<_$AccountsDataImpl> get copyWith =>
+  _$$VaultDataImplCopyWith<_$VaultDataImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }
 

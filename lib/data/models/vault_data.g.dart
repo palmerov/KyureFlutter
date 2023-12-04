@@ -1,19 +1,19 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'accounts_data.dart';
+part of 'vault_data.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$AccountsDataImpl _$$AccountsDataImplFromJson(Map<String, dynamic> json) =>
-    _$AccountsDataImpl(
+_$VaultDataImpl _$$VaultDataImplFromJson(Map<String, dynamic> json) =>
+    _$VaultDataImpl(
       accountGroups: (json['accounts_data'] as List<dynamic>)
           .map((e) => AccountGroup.fromJson(e as Map<String, dynamic>))
           .toList(),
     );
 
-Map<String, dynamic> _$$AccountsDataImplToJson(_$AccountsDataImpl instance) =>
+Map<String, dynamic> _$$VaultDataImplToJson(_$VaultDataImpl instance) =>
     <String, dynamic>{
       'accounts_data': instance.accountGroups,
     };

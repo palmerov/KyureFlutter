@@ -6,7 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:go_router/go_router.dart';
-import 'package:kyure/data/models/accounts_data.dart';
+import 'package:kyure/data/models/vault_data.dart';
 import 'package:kyure/presentation/pages/group_details/group_details_bloc.dart';
 import 'package:kyure/presentation/theme/ky_theme.dart';
 import 'package:kyure/presentation/widgets/molecules/image_rounded.dart';
@@ -81,8 +81,12 @@ class _GroupDetailsView extends StatelessWidget {
     _nameController.text = bloc.groupCopy.name;
     return Scaffold(
       appBar: AppBar(
-        elevation: 0.5,
-        backgroundColor: kytheme.colorBackground,
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        systemOverlayStyle: SystemUiOverlayStyle(
+            statusBarColor: Colors.transparent,
+            statusBarIconBrightness:
+                kytheme.light ? Brightness.dark : Brightness.light),
         leading: IconButton(
             onPressed: () => context.pop(bloc.saved),
             icon: Icon(CupertinoIcons.back,
@@ -155,7 +159,7 @@ class _GroupDetailsView extends StatelessWidget {
                         return 'El nombre no puede estar vacío';
                       }
                       if (serviceLocator
-                              .getUserDataService()
+                              .getKiureService()
                               .findGroupByName(value) !=
                           null) {
                         return 'Ya existe un grupo con ese nombre';
@@ -173,10 +177,11 @@ class _GroupDetailsView extends StatelessWidget {
               FilledButton.icon(
                   onPressed: () {
                     if (_nameController.text.isNotEmpty &&
-                        serviceLocator
-                                .getUserDataService()
-                                .findGroupByName(_nameController.text) ==
-                            null) {
+                        (!bloc.isNew ||
+                            serviceLocator
+                                    .getKiureService()
+                                    .findGroupByName(_nameController.text) ==
+                                null)) {
                       bloc.save();
                       context.pop(bloc.saved);
                     }

@@ -2,7 +2,7 @@ import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:kyure/clipboard_utils.dart';
-import 'package:kyure/data/models/accounts_data.dart';
+import 'package:kyure/data/models/vault_data.dart';
 import 'package:kyure/presentation/theme/ky_theme.dart';
 import 'package:kyure/presentation/widgets/molecules/copy_area.dart';
 import 'package:kyure/presentation/widgets/molecules/toast_widget.dart';
@@ -135,11 +135,11 @@ class _AccountFieldMoleculeState extends State<AccountFieldMolecule> {
             controller: controllerLabel,
             textAlignVertical: TextAlignVertical.center,
             readOnly: !widget.editting,
-            style: const TextStyle(fontSize: 15),
+            style: TextStyle(fontSize: 13, color: kyTheme.colorHint),
             decoration: const InputDecoration(
                 hintText: 'Field name',
                 border: UnderlineInputBorder(borderSide: BorderSide.none),
-                contentPadding: EdgeInsets.all(2),
+                contentPadding: EdgeInsets.all(0.5),
                 isDense: true),
           ),
         ),

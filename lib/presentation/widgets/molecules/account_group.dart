@@ -10,7 +10,8 @@ class AccountGroupMolecule extends StatelessWidget {
       required this.selected,
       required this.color,
       this.paddingHorizontal,
-      this.onLongTap});
+      this.onLongTap,
+      this.radius});
   final String text;
   final Color color;
   final Widget? icon;
@@ -18,6 +19,7 @@ class AccountGroupMolecule extends StatelessWidget {
   final Function()? onLongTap;
   final bool selected;
   final double? paddingHorizontal;
+  final double? radius;
 
   @override
   Widget build(BuildContext context) {
@@ -34,12 +36,12 @@ class AccountGroupMolecule extends StatelessWidget {
                     ? color.withOpacity(0.5)
                     : kyTheme.colorOnBackgroundOpacity30,
                 width: selected ? 1 : kyTheme.borderWidth05),
-            borderRadius: const BorderRadius.all(Radius.circular(16))),
+            borderRadius: BorderRadius.all(Radius.circular(radius??16))),
         child: InkWell(
           onTap: onTap,
           onLongPress: onLongTap,
           onSecondaryTap: onLongTap,
-          borderRadius: const BorderRadius.all(Radius.circular(8)),
+          borderRadius: BorderRadius.all(Radius.circular(radius?? 16)),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
             child: Center(

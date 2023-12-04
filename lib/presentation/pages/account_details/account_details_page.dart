@@ -5,9 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:kyure/data/models/accounts_data.dart';
+import 'package:kyure/data/models/vault_data.dart';
 import 'package:kyure/presentation/pages/account_details/bloc/account_details_bloc.dart';
 import 'package:kyure/presentation/theme/ky_theme.dart';
+import 'package:kyure/presentation/widgets/atoms/any_image.dart';
 import 'package:kyure/presentation/widgets/molecules/account_group.dart';
 import 'package:kyure/presentation/widgets/molecules/image_rounded.dart';
 import 'package:kyure/presentation/widgets/molecules/svg_icon.dart';
@@ -80,8 +81,13 @@ class _AccountDetailsView extends StatelessWidget {
       },
       child: Scaffold(
         appBar: AppBar(
-          elevation: 0.5,
-          backgroundColor: kytheme.colorBackground,
+          elevation: 0,
+          backgroundColor: Colors.transparent,
+          systemOverlayStyle: SystemUiOverlayStyle(
+              statusBarColor: Colors.transparent,
+              statusBarIconBrightness: kytheme.light
+                  ? Brightness.dark
+                  : Brightness.light),
           leading: IconButton(
               onPressed: () => context.pop(bloc.accountCopy != null),
               icon: Icon(CupertinoIcons.back,
@@ -93,7 +99,7 @@ class _AccountDetailsView extends StatelessWidget {
         ),
         body: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16, top: 4),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -122,16 +128,16 @@ class _AccountDetailsView extends StatelessWidget {
                                 buildWhen: (previous, current) =>
                                     previous.assetImage != current.assetImage,
                                 builder: (context, state) {
-                                  return Image.asset(
-                                    state.assetImage,
-                                    fit: BoxFit.fill,
-                                  );
+                                  return AnyImage(
+                                      source: AnyImageSource.fromJson(
+                                          account.image.source.toJson()),
+                                      image: account.image.path);
                                 },
                               )),
                         ),
                       ),
                     ),
-                    const SizedBox(width: 10),
+                    const SizedBox(width: 8),
                     Expanded(
                       child:
                           BlocBuilder<AccountDetailsBloc, AccountDetailsState>(
@@ -178,7 +184,7 @@ class _AccountDetailsView extends StatelessWidget {
                                           Radius.circular(16))),
                                   itemBuilder: (context) {
                                     return serviceLocator
-                                        .getUserDataService()
+                                        .getKiureService()
                                         .getRealGroups()
                                         .map((e) => PopupMenuItem(
                                             value: e,
@@ -203,6 +209,7 @@ class _AccountDetailsView extends StatelessWidget {
                                         current.selectedGroup.name,
                                     builder: (context, state) {
                                       return AccountGroupMolecule(
+                                        radius: 12,
                                         icon: SvgIcon(
                                             svgAsset:
                                                 state.selectedGroup.iconName),
@@ -255,41 +262,38 @@ class _AccountDetailsView extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         if (editting)
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 8),
-                            child: OutlinedButton(
-                                onPressed: () {
-                                  bloc.accountCopy!.fieldList ??= [];
-                                  final field = AccountField(
-                                      name: 'Nombre del campo',
-                                      data: '',
-                                      visible: false);
-                                  bloc.accountCopy!.fieldList!.add(field);
-                                  formController.addField!(field);
-                                },
-                                style: ButtonStyle(
-                                    shape: MaterialStateProperty.all(
-                                        RoundedRectangleBorder(
-                                            side: BorderSide(
-                                                color:
-                                                    kytheme.colorSeparatorLine,
-                                                width: 1),
-                                            borderRadius:
-                                                BorderRadius.circular(12)))),
-                                child: const Padding(
-                                  padding: EdgeInsets.all(8.0),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Icon(Icons.add),
-                                      SizedBox(
-                                        width: 12,
-                                      ),
-                                      Text('Agregar campo'),
-                                    ],
-                                  ),
-                                )),
-                          ),
+                          OutlinedButton(
+                              onPressed: () {
+                                bloc.accountCopy!.fieldList ??= [];
+                                final field = AccountField(
+                                    name: 'Nombre del campo',
+                                    data: '',
+                                    visible: false);
+                                bloc.accountCopy!.fieldList!.add(field);
+                                formController.addField!(field);
+                              },
+                              style: ButtonStyle(
+                                  shape: MaterialStateProperty.all(
+                                      RoundedRectangleBorder(
+                                          side: BorderSide(
+                                              color:
+                                                  kytheme.colorSeparatorLine,
+                                              width: 1),
+                                          borderRadius:
+                                              BorderRadius.circular(12)))),
+                              child: const Padding(
+                                padding: EdgeInsets.all(8.0),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(Icons.add),
+                                    SizedBox(
+                                      width: 12,
+                                    ),
+                                    Text('Agregar campo'),
+                                  ],
+                                ),
+                              )),
                         FilledButton.icon(
                             onPressed: () {
                               if (editting) {

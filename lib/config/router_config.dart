@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:kyure/data/models/accounts_data.dart';
+import 'package:kyure/data/models/vault_data.dart';
 import 'package:kyure/presentation/pages/account_details/account_details_page.dart';
 import 'package:kyure/presentation/pages/account_list/account_list_page.dart';
 import 'package:kyure/presentation/pages/group_details/group_details_page.dart';
@@ -41,15 +41,15 @@ final routerConfig = GoRouter(routes: [
                   child: AccountDetailsPage(
                       group: id >= 0
                           ? serviceLocator
-                              .getUserDataService()
+                              .getKiureService()
                               .getGroupByAccountId(id)!
                           : serviceLocator
-                              .getUserDataService()
+                              .getKiureService()
                               .getFirstRealGroup(),
                       editing: editting ?? id < 0,
                       account: id >= 0
                           ? serviceLocator
-                              .getUserDataService()
+                              .getKiureService()
                               .findAccountById(id)!
                           : Account(
                               id: -1,
@@ -70,7 +70,7 @@ final routerConfig = GoRouter(routes: [
             pageBuilder: (context, state) {
               String? name = state.uri.queryParameters['name'];
               AccountGroup group = name != null
-                  ? serviceLocator.getUserDataService().findGroupByName(name)!
+                  ? serviceLocator.getKiureService().findGroupByName(name)!
                   : AccountGroup(
                       iconName:
                           'assets/svg_icons/palette_FILL0_wght300_GRAD-25_opsz24.svg',

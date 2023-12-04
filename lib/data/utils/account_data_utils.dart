@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:kyure/data/models/accounts_data.dart';
+import 'package:kyure/data/models/vault_data.dart';
 
 class AccountDataUtils {
-  static void createAllGroup(AccountsData accountsData) {
+  static void createAllGroup(VaultData accountsData) {
     AccountGroup groupAll = AccountGroup(
         iconName: 'assets/svg_icons/widgets.svg',
         color: Colors.blue.shade700.value,

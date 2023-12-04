@@ -2,7 +2,8 @@ import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:kyure/clipboard_utils.dart';
-import 'package:kyure/data/models/accounts_data.dart';
+import 'package:kyure/data/models/vault_data.dart';
+import 'package:kyure/presentation/widgets/atoms/any_image.dart';
 import 'package:kyure/presentation/widgets/molecules/copy_area.dart';
 import 'package:kyure/presentation/theme/ky_theme.dart';
 import 'package:kyure/presentation/widgets/molecules/image_rounded.dart';
@@ -44,8 +45,9 @@ class AccountItemMolecule extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final kyTheme = KyTheme.of(context)!;
-    Image? image;
-    image = Image.asset(account.image.path);
+    Widget? image = AnyImage(
+        source: AnyImageSource.fromJson(account.image.source.toJson()),
+        image: account.image.path);
 
     return InkWell(
       onTap: onTap,
