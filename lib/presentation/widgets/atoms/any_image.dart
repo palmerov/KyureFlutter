@@ -47,27 +47,27 @@ class AnyImage extends StatelessWidget {
       AnyImageSource.assets => isSvg(false)
           ? SvgPicture.asset(image,
               alignment: alignment ?? Alignment.center,
-              fit: fit ?? BoxFit.cover)
+              fit: fit ?? BoxFit.contain)
           : Image.asset(image,
               alignment: alignment ?? Alignment.center,
-              fit: fit ?? BoxFit.cover),
+              fit: fit ?? BoxFit.contain),
       AnyImageSource.file => isSvg(false)
           ? SvgPicture.file(File(image),
               alignment: alignment ?? Alignment.center,
-              fit: fit ?? BoxFit.cover)
+              fit: fit ?? BoxFit.contain)
           : Image.file(File(image),
               alignment: alignment ?? Alignment.center,
-              fit: fit ?? BoxFit.cover),
+              fit: fit ?? BoxFit.contain),
       AnyImageSource.svgString => SvgPicture.string(image,
           height: height,
           width: width,
-          fit: fit ?? BoxFit.cover,
+          fit: fit ?? BoxFit.contain,
           alignment: alignment ?? Alignment.center),
       AnyImageSource.network => isSvg(false) || isPixeledImage()
           ? CachedNetworkImage(
               imageUrl: image,
               alignment: alignment ?? Alignment.center,
-              fit: fit ?? BoxFit.cover,
+              fit: fit ?? BoxFit.contain,
               errorWidget: (context, url, error) => const Icon(Icons.error),
               placeholder: (context, url) => Shimmer(
                   gradient: RadialGradient(
@@ -79,7 +79,7 @@ class AnyImage extends StatelessWidget {
           : CachedNetworkSVGImage(
               image,
               alignment: alignment ?? Alignment.center,
-              fit: fit ?? BoxFit.cover,
+              fit: fit ?? BoxFit.contain,
               placeholder: Shimmer(
                   gradient: RadialGradient(
                       colors: [Colors.grey.shade200, Colors.grey.shade300]),

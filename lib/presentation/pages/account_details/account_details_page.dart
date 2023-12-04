@@ -14,6 +14,7 @@ import 'package:kyure/presentation/widgets/molecules/image_rounded.dart';
 import 'package:kyure/presentation/widgets/molecules/svg_icon.dart';
 import 'package:kyure/presentation/widgets/organisms/account_form_data.dart';
 import 'package:kyure/presentation/widgets/organisms/asset_image_selector.dart';
+import 'package:kyure/presentation/widgets/organisms/network_image_selector.dart';
 import 'package:kyure/services/service_locator.dart';
 
 class AccountDetailsPage extends StatelessWidget {
@@ -40,10 +41,9 @@ class AccountDetailsPage extends StatelessWidget {
 }
 
 class _AccountDetailsView extends StatelessWidget {
-  _AccountDetailsView({super.key, required this.account}) {
+  _AccountDetailsView({super.key, required Account account}) {
     tecName = TextEditingController(text: account.name);
   }
-  final Account account;
   late final TextEditingController tecName;
   final GlobalKey<AnimatedListState> keyFormAnimatedList = GlobalKey();
   final GlobalKey<FormState> keyNameField = GlobalKey();
@@ -51,22 +51,40 @@ class _AccountDetailsView extends StatelessWidget {
 
   _showImageSelectorDialog(
       AccountDetailsBloc bloc, BuildContext context) async {
-    final json =
-        jsonDecode(await rootBundle.loadString('assets/web_icons.json'));
-    final assetImages = json['icons'].cast<String>();
     showDialog(
-      context: context,
-      builder: (context) {
-        return AssetImageSelectorOrganism(
-          assetImages: assetImages,
-          onAssetImageSelected: (assetImage) {
-            account.image =
-                AccountImage(path: assetImage, source: ImageSource.assets);
-            bloc.selectImage(account.image.path);
-          },
-        );
-      },
-    );
+        context: context,
+        builder: (context) => AlertDialog(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
+              content: NetworkImageSelectorOrganism(
+                onImageSelected: (imagePath, selected) {
+                  context.pop();
+                  if (selected) {
+                    bloc.selectImage(imagePath, ImageSource.network);
+                  }
+                },
+                onLocalImageTap: () async {
+                  context.pop();
+                  final json = jsonDecode(
+                      await rootBundle.loadString('assets/web_icons.json'));
+                  final assetImages = json['icons'].cast<String>();
+                  showDialog(
+                    context: context,
+                    builder: (context) {
+                      return AssetImageSelectorOrganism(
+                        assetImages: assetImages,
+                        onAssetImageSelected: (assetImage) {
+                          bloc.accountCopy!.image = AccountImage(
+                              path: assetImage, source: ImageSource.assets);
+                          bloc.selectImage(
+                              bloc.accountCopy!.image.path, ImageSource.assets);
+                        },
+                      );
+                    },
+                  );
+                },
+              ),
+            ));
   }
 
   @override
@@ -85,9 +103,8 @@ class _AccountDetailsView extends StatelessWidget {
           backgroundColor: Colors.transparent,
           systemOverlayStyle: SystemUiOverlayStyle(
               statusBarColor: Colors.transparent,
-              statusBarIconBrightness: kytheme.light
-                  ? Brightness.dark
-                  : Brightness.light),
+              statusBarIconBrightness:
+                  kytheme.light ? Brightness.dark : Brightness.light),
           leading: IconButton(
               onPressed: () => context.pop(bloc.accountCopy != null),
               icon: Icon(CupertinoIcons.back,
@@ -99,7 +116,8 @@ class _AccountDetailsView extends StatelessWidget {
         ),
         body: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16, top: 4),
+            padding:
+                const EdgeInsets.only(left: 16, right: 16, bottom: 16, top: 4),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -118,7 +136,7 @@ class _AccountDetailsView extends StatelessWidget {
                           }
                         },
                         child: Hero(
-                          tag: '@${account.id}:${account.name}',
+                          tag: '@${bloc.account.id}:${bloc.account.name}',
                           child: ImageRounded(
                               size: 98,
                               radius: 12,
@@ -126,12 +144,13 @@ class _AccountDetailsView extends StatelessWidget {
                                   AccountDetailsState>(
                                 bloc: bloc,
                                 buildWhen: (previous, current) =>
-                                    previous.assetImage != current.assetImage,
+                                    previous.imagePath != current.imagePath ||
+                                    previous.imageSource != current.imageSource,
                                 builder: (context, state) {
                                   return AnyImage(
                                       source: AnyImageSource.fromJson(
-                                          account.image.source.toJson()),
-                                      image: account.image.path);
+                                          state.imageSource.toJson()),
+                                      image: state.imagePath);
                                 },
                               )),
                         ),
@@ -245,7 +264,8 @@ class _AccountDetailsView extends StatelessWidget {
                       onAccountDelete: (index) {
                         bloc.accountCopy!.fieldList!.removeAt(index);
                       },
-                      account: state.editting ? bloc.accountCopy! : account,
+                      account:
+                          state.editting ? bloc.accountCopy! : bloc.account,
                       editting: state.editting,
                     ));
                   },
@@ -276,8 +296,7 @@ class _AccountDetailsView extends StatelessWidget {
                                   shape: MaterialStateProperty.all(
                                       RoundedRectangleBorder(
                                           side: BorderSide(
-                                              color:
-                                                  kytheme.colorSeparatorLine,
+                                              color: kytheme.colorSeparatorLine,
                                               width: 1),
                                           borderRadius:
                                               BorderRadius.circular(12)))),

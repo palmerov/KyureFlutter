@@ -10,6 +10,7 @@ import 'package:kyure/config/router_config.dart';
 import 'package:kyure/data/models/vault_data.dart';
 import 'package:kyure/main.dart';
 import 'package:kyure/presentation/pages/account_list/account_list_bloc.dart';
+import 'package:kyure/presentation/widgets/atoms/any_image.dart';
 import 'package:kyure/presentation/widgets/molecules/account_group.dart';
 import 'package:kyure/presentation/widgets/molecules/account_group_list_shimmer.dart';
 import 'package:kyure/presentation/widgets/molecules/account_item.dart';
@@ -60,7 +61,10 @@ class _AccountListView extends StatelessWidget {
                 children: [
                   ImageRounded(
                       radius: 8,
-                      image: Image.asset(account.image.path),
+                      image: AnyImage(
+                          source: AnyImageSource.fromJson(
+                              account.image.source.toJson()),
+                          image: account.image.path),
                       size: 24),
                   const SizedBox(
                     width: 8,

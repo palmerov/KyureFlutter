@@ -14,17 +14,18 @@ class AccountDetailsBloc extends Cubit<AccountDetailsState> {
       {required this.account, required this.group, required bool editting})
       : isNewAccount = account.id < 0,
         super(AccountDetailsInitial(
+            imageSource: account.image.source,
             selectedGroup: group,
             editting: editting,
-            assetImage: account.image.path)) {
+            imagePath: account.image.path)) {
     if (editting) {
       edit();
     }
   }
 
-  void selectImage(String image) {
-    accountCopy!.image = AccountImage(path: image, source: ImageSource.assets);
-    emit(state.copyWith(assetImage: image));
+  void selectImage(String image, ImageSource source) {
+    accountCopy!.image = AccountImage(path: image, source: source);
+    emit(state.copyWith(imagePath: image, imageSource: source));
   }
 
   void selectGroup(AccountGroup group) {
@@ -85,19 +86,22 @@ class AccountDetailsState extends Equatable {
   const AccountDetailsState({
     required this.selectedGroup,
     required this.editting,
-    required this.assetImage,
+    required this.imagePath,
+    required this.imageSource,
   });
   final AccountGroup selectedGroup;
   final bool editting;
-  final String assetImage;
+  final String imagePath;
+  final ImageSource imageSource;
   @override
-  List<Object?> get props => [selectedGroup.name, editting, assetImage];
+  List<Object?> get props => [selectedGroup.name, editting, imagePath, imageSource];
 
   //copy with
   AccountDetailsState copyWith(
-      {AccountGroup? selectedGroup, bool? editting, String? assetImage}) {
+      {AccountGroup? selectedGroup, bool? editting, String? imagePath, ImageSource? imageSource}) {
     return AccountDetailsState(
-        assetImage: assetImage ?? this.assetImage,
+        imageSource: imageSource ?? this.imageSource,
+        imagePath: imagePath ?? this.imagePath,
         selectedGroup: selectedGroup ?? this.selectedGroup,
         editting: editting ?? this.editting);
   }
@@ -107,6 +111,7 @@ class AccountDetailsInitial extends AccountDetailsState {
   const AccountDetailsInitial({
     required super.selectedGroup,
     required super.editting,
-    required super.assetImage,
+    required super.imagePath,
+    required super.imageSource,
   });
 }
