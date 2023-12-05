@@ -30,7 +30,7 @@ class GroupDetailsBloc extends Cubit<GroupDetailsState> {
     if (isNew) {
       serviceLocator
           .getKiureService()
-          .vault
+          .vault!
           .accountGroups
           .add(group);
     }

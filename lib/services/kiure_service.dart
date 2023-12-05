@@ -1,11 +1,11 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:flutter/material.dart';
 import 'package:kyure/data/models/vault_data.dart';
 import 'package:kyure/data/models/vault.dart';
 import 'package:kyure/data/repositories/acount_data_repository.dart';
 import 'package:kyure/data/utils/account_data_utils.dart';
 import 'package:kyure/data/utils/encrypt_utils.dart';
+import 'package:kyure/main.dart';
 import 'package:kyure/services/service_locator.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -16,13 +16,15 @@ class KiureService {
   late final String _rootPath, _rootVaults, _rootImages;
   late final AccountDataRepository accountDataRepository;
   late SharedPreferences _prefs;
+  Map<String, dynamic> _recentAccountIds = {};
+  List<Account> _vaultRecentAccounts = [];
   List<String> _vaultNames = [];
   bool initialized = false;
-
   VaultData? _vault;
   Vault? _userData;
   String? _vaultName;
   String? _key;
+  int _recentLenght = 4;
 
   initPrefs() async {
     _prefs = await SharedPreferences.getInstance();
@@ -48,6 +50,10 @@ class KiureService {
 
     // vault names
     _vaultNames = await accountDataRepository.getVaultNames();
+
+    // recent accounts
+    _recentAccountIds = jsonDecode(_prefs.getString('recent_accounts') ?? '{}');
+    _recentLenght = _prefs.getInt('recent_legnth') ?? 4;
   }
 
   set vaultName(String? name) {
@@ -63,16 +69,11 @@ class KiureService {
 
   bool get brigtnessLight => _prefs.getBool('light') ?? true;
 
-  void clear() {
-    _vault = null;
-    _key = null;
-  }
-
   String? get vaultName => _vaultName;
 
   List<String> get vaultNames => _vaultNames;
 
-  VaultData get vault => _vault!;
+  VaultData? get vault => _vault;
 
   set key(String? key) {
     _key = key;
@@ -85,10 +86,22 @@ class KiureService {
   Future<void> openVault(String vaultName, String key) async {
     _vaultName = vaultName;
     _key = key;
-    await readVaultData();
+    await _readVaultData();
+    // recent accounts
+    _vaultRecentAccounts = _getRecentAcounts();
+    appBloc.restartSystemTry();
   }
 
-  Future<void> readVaultData() async {
+  void closeVault() {
+    _vault = null;
+    _key = null;
+    _vaultName = vaultName;
+    // recent accounts
+    _vaultRecentAccounts = [];
+    appBloc.restartSystemTry();
+  }
+
+  Future<void> _readVaultData() async {
     try {
       _userData = await accountDataRepository.readUserData(
           EncryptAlgorithm.AES, _key!, _vaultName!);
@@ -153,6 +166,7 @@ class KiureService {
     _vault = null;
     _vaultName = null;
     _key = null;
+    appBloc.restartSystemTry();
   }
 
   void addNewAccount(Account account, AccountGroup group) {
@@ -265,5 +279,57 @@ class KiureService {
           }
         }
     }
+  }
+
+  List<Account> _getRecentAcounts() {
+    if (vaultName == null) return [];
+    String accounts = _recentAccountIds[vaultName!] ?? '';
+    if (accounts.isNotEmpty) {
+      final accIdList = accounts.split(',');
+      if (accIdList.isNotEmpty) {
+        try {
+          List<Account> accounts = [];
+          for (var accId in accIdList) {
+            final account = findAccountById(int.parse(accId));
+            if (account != null) {
+              accounts.add(account);
+            }
+          }
+          return accounts;
+        } catch (exception) {}
+      }
+    }
+    return [];
+  }
+
+  List<Account> get vaultRecentAccounts => _vaultRecentAccounts;
+
+  addToRecents(Account account) async {
+    if (_recentAccountIds.containsKey(vaultName!)) {
+      int index = _vaultRecentAccounts
+          .indexWhere((element) => element.id == account.id);
+      if (index < 0) {
+        if (vaultRecentAccounts.length >= _recentLenght) {
+          _vaultRecentAccounts =
+              _vaultRecentAccounts.sublist(0, _recentLenght - 1);
+        }
+        _vaultRecentAccounts.insert(0, account);
+      } else {
+        if (index > 0) {
+          _vaultRecentAccounts.removeAt(index);
+          _vaultRecentAccounts.insert(0, account);
+        } else {
+          return;
+        }
+      }
+      _recentAccountIds[vaultName!] = _vaultRecentAccounts
+          .map((e) => e.id.toString())
+          .reduce((value, element) => '$value,$element');
+    } else {
+      _vaultRecentAccounts.add(account);
+      _recentAccountIds[vaultName!] = '${account.id}';
+    }
+    await _prefs.setString('recent_accounts', jsonEncode(_recentAccountIds));
+    appBloc.restartSystemTry();
   }
 }

@@ -34,7 +34,7 @@ class AccountGroupMolecule extends StatelessWidget {
             border: Border.all(
                 color: selected
                     ? color.withOpacity(0.5)
-                    : kyTheme.colorOnBackgroundOpacity30,
+                    : kyTheme.colorSeparatorLine,
                 width: selected ? 1 : kyTheme.borderWidth05),
             borderRadius: BorderRadius.all(Radius.circular(radius??16))),
         child: InkWell(

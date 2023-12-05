@@ -3,8 +3,9 @@ import 'dart:io';
 import 'package:equatable/equatable.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:kyure/main.dart';
 import 'package:kyure/services/service_locator.dart';
-import 'package:kyure/services/user_data_service.dart';
+import 'package:kyure/services/kiure_service.dart';
 
 class LockPageBloc extends Cubit<LockPageState> {
   late KiureService vaultService;
@@ -13,6 +14,10 @@ class LockPageBloc extends Cubit<LockPageState> {
 
   LockPageBloc(this.blockedByUser) : super(LockPageInitialState()) {
     vaultService = serviceLocator.getKiureService();
+  }
+
+  emitLoginState() {
+    emit(LockPageLoginState());
   }
 
   pickFile() async {
@@ -46,10 +51,9 @@ Detalles del error ${exception.toString()}."""));
     if (key.length < 4) {
       return 'La llave debe tener al menos 4 caracteres';
     }
-    vaultService.key = key;
     try {
-      await vaultService.readVaultData();
-      emit(LockPageLoginState());
+      await vaultService.openVault(state.selectedVault??'', key);
+      emitLoginState();
     } catch (exception) {
       print(exception.toString());
       return 'Llave incorrecta';
@@ -88,7 +92,7 @@ Detalles del error ${exception.toString()}."""));
     try {
       vaultService.key = key;
       await vaultService.createNewVault(vaultNameCreated!);
-      emit(LockPageLoginState());
+      emitLoginState();
     } catch (exception) {
       print(exception.toString());
       return 'Error al crear la bóveda';

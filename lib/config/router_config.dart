@@ -8,7 +8,9 @@ import 'package:kyure/presentation/pages/key_updater/key_updater_page.dart';
 import 'package:kyure/presentation/pages/lock_page/lock_page.dart';
 import 'package:kyure/services/service_locator.dart';
 
-final routerConfig = GoRouter(routes: [
+GlobalKey<NavigatorState> kiureNavigatorKey = GlobalKey();
+
+final routerConfig = GoRouter(navigatorKey: kiureNavigatorKey, routes: [
   GoRoute(
     path: '/',
     redirect: (context, state) => KyRoutes.lockPage.routePath,

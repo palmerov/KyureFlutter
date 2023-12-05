@@ -16,6 +16,9 @@ class KyTheme extends InheritedWidget {
   }
 
   static final darkTheme = ThemeData.dark().copyWith(
+      scaffoldBackgroundColor: const Color.fromARGB(255, 15, 15, 15),
+      drawerTheme: const DrawerThemeData(
+          elevation: 0, backgroundColor: Color.fromARGB(255, 26, 26, 26)),
       colorScheme: const ColorScheme(
           brightness: Brightness.dark,
           primary: Color.fromARGB(255, 126, 173, 199),
@@ -31,7 +34,8 @@ class KyTheme extends InheritedWidget {
           onSurface: Color.fromARGB(255, 230, 230, 230)));
 
   bool get dark => theme.brightness == Brightness.light;
-  final Color _colorPrimarySmoothDark = const Color.fromARGB(255, 192, 214, 226);
+  final Color _colorPrimarySmoothDark =
+      const Color.fromARGB(255, 192, 214, 226);
 
   static final lightTheme = ThemeData.light().copyWith(
       colorScheme: const ColorScheme(
@@ -56,13 +60,14 @@ class KyTheme extends InheritedWidget {
       const BorderRadius.all(Radius.circular(20));
 
   final Color _colorPrimaryLight = lightTheme.colorScheme.primary;
-  final Color _colorPrimarySmoothLight = const Color.fromARGB(255, 192, 214, 226);
+  final Color _colorPrimarySmoothLight =
+      const Color.fromARGB(255, 192, 214, 226);
 
   final double blurOpacity = 0.6;
 
   //Light
   final Color _colorLightSeparatorLine =
-      const Color.fromARGB(255, 196, 196, 196);
+      const Color.fromARGB(255, 146, 146, 146);
   final Color _colorLighPassword = const Color.fromARGB(255, 59, 120, 190);
   final Color _colorLighAccount = const Color.fromARGB(255, 71, 150, 84);
   final Color _colorLighToastBackground =
@@ -70,7 +75,7 @@ class KyTheme extends InheritedWidget {
   final Color _colorLighToastText = const Color.fromARGB(255, 24, 24, 24);
 
   //Dark
-  final Color _colorDarkSeparatorLine = const Color.fromARGB(255, 95, 95, 95);
+  final Color _colorDarkSeparatorLine = const Color.fromARGB(255, 59, 59, 59);
   final Color _colorDarkPassword = const Color.fromARGB(255, 42, 142, 255);
   final Color _colorDarkAccount = const Color.fromARGB(255, 35, 131, 51);
   final Color _colorDarkToastBackground = const Color.fromARGB(126, 8, 8, 8);
@@ -89,11 +94,13 @@ class KyTheme extends InheritedWidget {
 
   Color get colorToastText => light ? _colorLighToastText : _colorDarkToastText;
 
-  Color get colorBackground =>
-      light ? lightTheme.colorScheme.background : darkTheme.colorScheme.background;
+  Color get colorBackground => light
+      ? lightTheme.colorScheme.background
+      : darkTheme.colorScheme.background;
 
-  Color get colorOnBackground =>
-      light ? lightTheme.colorScheme.onBackground : darkTheme.colorScheme.onBackground;
+  Color get colorOnBackground => light
+      ? lightTheme.colorScheme.onBackground
+      : darkTheme.colorScheme.onBackground;
 
   Color get colorOnBackgroundOpacity30 => colorOnBackground.withOpacity(0.3);
 
@@ -103,8 +110,9 @@ class KyTheme extends InheritedWidget {
 
   Color get colorOnBackgroundOpacity80 => colorOnBackground.withOpacity(0.8);
 
-  Color get colorHint =>
-      light ? lightTheme.colorScheme.onBackground.withAlpha(180) : darkTheme.colorScheme.onBackground.withAlpha(180);
+  Color get colorHint => light
+      ? lightTheme.colorScheme.onBackground.withAlpha(180)
+      : darkTheme.colorScheme.onBackground.withAlpha(180);
 
   Color get colorPrimary =>
       light ? lightTheme.colorScheme.primary : darkTheme.colorScheme.primary;

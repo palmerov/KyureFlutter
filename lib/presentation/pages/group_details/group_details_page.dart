@@ -33,7 +33,7 @@ class _GroupDetailsView extends StatelessWidget {
 
   final double imgSize = 64;
   final TextEditingController _nameController = TextEditingController();
-  final GlobalKey<FormState> _formKey = GlobalKey();
+  final GlobalKey<FormFieldState> _formKey = GlobalKey();
 
   _showImageSelectorDialog(GroupDetailsBloc bloc, BuildContext context) async {
     final json =
@@ -158,10 +158,11 @@ class _GroupDetailsView extends StatelessWidget {
                       if (value == null || value.isEmpty) {
                         return 'El nombre no puede estar vacío';
                       }
-                      if (serviceLocator
-                              .getKiureService()
-                              .findGroupByName(value) !=
-                          null) {
+                      if (bloc.isNew &&
+                          serviceLocator
+                                  .getKiureService()
+                                  .findGroupByName(_nameController.text) !=
+                              null) {
                         return 'Ya existe un grupo con ese nombre';
                       }
                       return null;
@@ -175,13 +176,11 @@ class _GroupDetailsView extends StatelessWidget {
                 ],
               ),
               FilledButton.icon(
+                  style: ButtonStyle(
+                      shape: MaterialStateProperty.all(RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)))),
                   onPressed: () {
-                    if (_nameController.text.isNotEmpty &&
-                        (!bloc.isNew ||
-                            serviceLocator
-                                    .getKiureService()
-                                    .findGroupByName(_nameController.text) ==
-                                null)) {
+                    if (_formKey.currentState?.validate() ?? false) {
                       bloc.save();
                       context.pop(bloc.saved);
                     }

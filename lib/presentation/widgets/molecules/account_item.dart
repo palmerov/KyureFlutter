@@ -8,6 +8,7 @@ import 'package:kyure/presentation/widgets/molecules/copy_area.dart';
 import 'package:kyure/presentation/theme/ky_theme.dart';
 import 'package:kyure/presentation/widgets/molecules/image_rounded.dart';
 import 'package:kyure/presentation/widgets/molecules/toast_widget.dart';
+import 'package:kyure/services/service_locator.dart';
 
 class AccountItemMolecule extends StatelessWidget {
   const AccountItemMolecule(
@@ -28,6 +29,7 @@ class AccountItemMolecule extends StatelessWidget {
         textStyle: TextStyle(color: kyTheme.colorToastText),
       ),
     );
+    serviceLocator.getKiureService().addToRecents(account);
   }
 
   copyPassword(BuildContext context, Offset offset) {
@@ -40,6 +42,7 @@ class AccountItemMolecule extends StatelessWidget {
               backgroundColor: kyTheme.colorToastBackground,
               textStyle: TextStyle(color: kyTheme.colorToastText),
             ));
+    serviceLocator.getKiureService().addToRecents(account);
   }
 
   @override

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:kyure/data/models/vault_data.dart';
 import 'package:kyure/presentation/theme/ky_theme.dart';
 import 'package:kyure/presentation/widgets/molecules/account_field.dart';
+import 'package:kyure/services/service_locator.dart';
 
 class AccountFormDataOrganism extends StatefulWidget {
   const AccountFormDataOrganism(
@@ -96,6 +97,8 @@ class _AccountFormDataOrganismState extends State<AccountFormDataOrganism> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: AccountFieldMolecule(
+        onCopy: () =>
+            serviceLocator.getKiureService().addToRecents(account),
         editting: widget.editting,
         accountField: accountField.accountField,
         onFieldChanged: (String name, String data, bool visible) {

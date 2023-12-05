@@ -87,7 +87,7 @@ class _CopyAreaMoleculeState extends State<CopyAreaMolecule> {
     return Container(
       decoration: BoxDecoration(
           border: widget.showBorder
-              ? Border.all(color: kyTheme.colorSeparatorLine, width: 1)
+              ? Border.all(color: kyTheme.colorSeparatorLine, width: 0.7)
               : null,
           borderRadius: const BorderRadius.all(Radius.circular(10))),
       child: InkWell(

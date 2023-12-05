@@ -1,6 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kyure/data/models/vault_data.dart';
-import 'package:kyure/services/user_data_service.dart';
+import 'package:kyure/services/kiure_service.dart';
 import 'package:equatable/equatable.dart';
 
 class AccountListPageBloc extends Cubit<AccountListPageState> {
@@ -12,13 +12,13 @@ class AccountListPageBloc extends Cubit<AccountListPageState> {
 
   void load() async {
     emit(AccountListPageStateLoaded(
-        userDataService.vault.accountGroups));
+        userDataService.vault!.accountGroups));
   }
 
   void filter(String filter) {
     if (filter.trim().isNotEmpty) {
       List<AccountGroup> groups = [];
-      for (var group in userDataService.vault.accountGroups) {
+      for (var group in userDataService.vault!.accountGroups) {
         List<Account> accounts = [];
         for (var account in group.accounts) {
           if (account.name.toLowerCase().contains(filter.toLowerCase()) ||
@@ -52,14 +52,14 @@ class AccountListPageBloc extends Cubit<AccountListPageState> {
       if (!equal) emit(AccountListPageFilteredState(groups, filter));
     } else {
       emit(AccountListPageStateLoaded(
-          userDataService.vault.accountGroups));
+          userDataService.vault!.accountGroups));
     }
   }
 
   void selectGroup(int index) {
     if (state.selectedGroupIndex == index) return;
     emit(AccountListPageSelectedGroupState(
-        userDataService.vault.accountGroups, index));
+        userDataService.vault!.accountGroups, index));
   }
 
   void reload() {

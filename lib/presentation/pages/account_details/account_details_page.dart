@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -46,7 +45,7 @@ class _AccountDetailsView extends StatelessWidget {
   }
   late final TextEditingController tecName;
   final GlobalKey<AnimatedListState> keyFormAnimatedList = GlobalKey();
-  final GlobalKey<FormState> keyNameField = GlobalKey();
+  final GlobalKey<FormFieldState> keyNameField = GlobalKey();
   final AccountFormController formController = AccountFormController();
 
   _showImageSelectorDialog(
@@ -306,17 +305,22 @@ class _AccountDetailsView extends StatelessWidget {
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Icon(Icons.add),
-                                    SizedBox(
-                                      width: 12,
-                                    ),
+                                    SizedBox(width: 12),
                                     Text('Agregar campo'),
                                   ],
                                 ),
                               )),
+                        const SizedBox(height: 4),
                         FilledButton.icon(
+                            style: ButtonStyle(
+                                shape: MaterialStateProperty.all(
+                                    RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(12)))),
                             onPressed: () {
                               if (editting) {
-                                if (tecName.text.isNotEmpty) {
+                                if (keyNameField.currentState?.validate() ??
+                                    false) {
                                   bloc.save(tecName.text,
                                       formController.getAccountFields!());
                                 }

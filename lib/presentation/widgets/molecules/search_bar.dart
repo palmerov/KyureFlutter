@@ -48,7 +48,7 @@ class _SearchBarMoleculeState extends State<SearchBarMolecule> {
             shape: BoxShape.rectangle,
             borderRadius: kyTheme.searchViewRadius,
             border: Border.all(
-                color: kyTheme.colorOnBackgroundOpacity30,
+                color: kyTheme.colorSeparatorLine,
                 width: kyTheme.borderWidth05)),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,

@@ -22,7 +22,7 @@ import 'package:kyure/presentation/theme/ky_theme.dart';
 import 'package:kyure/presentation/widgets/molecules/svg_icon.dart';
 import 'package:kyure/services/service_locator.dart';
 import 'package:blur/blur.dart';
-import 'package:kyure/services/user_data_service.dart';
+import 'package:kyure/services/kiure_service.dart';
 
 class AccountListPage extends StatelessWidget {
   const AccountListPage({super.key});
@@ -456,8 +456,8 @@ class _AccountListView extends StatelessWidget {
                           right: 0,
                           child: SizedBox(
                             height: kyTheme.borderWidth03,
-                            child: ColoredBox(
-                                color: kyTheme.colorOnBackgroundOpacity30),
+                            child:
+                                ColoredBox(color: kyTheme.colorSeparatorLine),
                           ),
                         )
                       ],
@@ -493,13 +493,7 @@ class _AccountListView extends StatelessWidget {
                                               .colorOnBackgroundOpacity60),
                                       text: 'Bloquear',
                                       onTap: () {
-                                        context.goNamed(KyRoutes.lockPage.name,
-                                            queryParameters: {
-                                              'blockedByUser': 'true'
-                                            });
-                                        serviceLocator
-                                            .getKiureService()
-                                            .clear();
+                                        appBloc.lock();
                                       },
                                     ),
                                     ItemAction(
@@ -534,7 +528,7 @@ class _AccountListView extends StatelessWidget {
                                       onTap: () async {
                                         if (serviceLocator
                                                 .getKiureService()
-                                                .vault
+                                                .vault!
                                                 .accountGroups
                                                 .length ==
                                             1) {

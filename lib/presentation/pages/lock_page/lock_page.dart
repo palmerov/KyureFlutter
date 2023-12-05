@@ -49,9 +49,6 @@ class _LockView extends StatelessWidget {
                 child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                  const SizedBox(
-                    height: 40,
-                  ),
                   Image.asset(
                     'assets/app_icons/kiure_icon_name_dark.png',
                     width: 90,
@@ -98,52 +95,69 @@ class _LockView extends StatelessWidget {
                           : MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Column(
-                          children: [
-                            const SizedBox(
-                              height: 40,
-                            ),
-                            Image.asset(
-                              'assets/app_icons/kiure_icon_name_dark.png',
-                              width: 90,
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.only(
-                                  left: 32, right: 32, top: 12, bottom: 8),
-                              child: Text(
-                                'Kyure es una aplicación para guardar tus contraseñas de forma segura.',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                    fontSize: 14,
-                                    color: Colors.white.withOpacity(0.6)),
+                        Expanded(
+                          child: Column(
+                            children: [
+                              const SizedBox(
+                                height: 60,
                               ),
-                            ),
-                          ],
+                              Image.asset(
+                                'assets/app_icons/kiure_icon_name_dark.png',
+                                width: 90,
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(
+                                    left: 32, right: 32, top: 12, bottom: 8),
+                                child: Text(
+                                  'Kyure es una aplicación para guardar tus contraseñas de forma segura.',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.white.withOpacity(0.6)),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                         BlocBuilder<LockPageBloc, LockPageState>(
                             builder: (context, state) {
                           if (state is LockPageCreatingVaultState) {
                             if (state.valid) {
-                              return KeyFormOrganism(
-                                title: 'Crea una llave para tu bóveda',
-                                obscureText: false,
-                                onTapEnter: (key) async {
-                                  final error = await bloc.createNewVault(key);
-                                  return error;
-                                },
+                              return Expanded(
+                                flex: 1,
+                                child: KeyFormOrganism(
+                                  title: 'Crea una llave para tu bóveda',
+                                  obscureText: false,
+                                  onTapEnter: (key) async {
+                                    final error =
+                                        await bloc.createNewVault(key);
+                                    return error;
+                                  },
+                                ),
                               );
                             } else {
-                              return VaultCreationName(
-                                  vaultNameController: _vaultNameController,
-                                  bloc: bloc);
+                              return Expanded(
+                                child: VaultCreationName(
+                                    vaultNameController: _vaultNameController,
+                                    bloc: bloc),
+                              );
                             }
                           }
                           if (state is LockMessageState) {
-                            return LockMessage(
-                                bloc: bloc, message: state.message);
+                            return Expanded(
+                              child: LockMessage(
+                                  bloc: bloc, message: state.message),
+                            );
                           }
-                          return LockView(
-                              bloc: bloc, vaultNames: state.vaultNames);
+                          if (state.vaultNames.isEmpty) {
+                            return Expanded(
+                                child: NotVaultFoundView(bloc: bloc));
+                          }
+                          return Expanded(
+                            flex: 2,
+                            child: VaultSelectorView(
+                                bloc: bloc, vaultNames: state.vaultNames),
+                          );
                         }),
                       ],
                     );
@@ -158,8 +172,8 @@ class _LockView extends StatelessWidget {
   }
 }
 
-class LockView extends StatelessWidget {
-  const LockView({
+class VaultSelectorView extends StatelessWidget {
+  const VaultSelectorView({
     super.key,
     required this.bloc,
     required this.vaultNames,
@@ -170,121 +184,133 @@ class LockView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-        Expanded(
-          flex: 1,
-          child: Column(
-            children: [
-              if (vaultNames.isEmpty)
-                Column(
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        VaultFileMenu(bloc: bloc),
+        const SizedBox(height: 32),
+        const Text(
+          'Selecciona una bóveda:',
+          textAlign: TextAlign.center,
+          style: TextStyle(fontSize: 14, color: Colors.white),
+        ),
+        const SizedBox(height: 8),
+        BlocBuilder<LockPageBloc, LockPageState>(
+          buildWhen: (previous, current) =>
+              previous != current &&
+              previous.selectedVault != current.selectedVault,
+          builder: (context, state) {
+            return PopupMenuButton(
+              offset: const Offset(0, 30),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16)),
+              itemBuilder: (context) {
+                return state.vaultNames
+                    .map((e) => PopupMenuItem(
+                            child: ListTile(
+                          title: Text(e),
+                          onTap: () {
+                            bloc.selectVault(e);
+                            context.pop();
+                          },
+                        )))
+                    .toList();
+              },
+              child: Padding(
+                padding: const EdgeInsets.all(8),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    const SizedBox(height: 32),
-                    const Text(
-                      'No hay bóvedas creadas',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 16, color: Colors.white),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Crea una nueva bóveda o importa una existente',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                          fontSize: 14, color: Colors.white.withOpacity(0.6)),
-                    ),
+                    Text(state.selectedVault ?? 'Bóveda',
+                        style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.white.withOpacity(0.8))),
+                    const SizedBox(width: 8),
+                    Icon(CupertinoIcons.chevron_down,
+                        size: 16, color: Colors.white.withOpacity(0.8)),
                   ],
                 ),
-              const SizedBox(height: 24),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  OptionButton(
-                      icon: const Icon(CupertinoIcons.folder,
-                          color: Colors.white),
-                      text: 'Importar archivo',
-                      onTap: () {
-                        bloc.pickFile();
-                      }),
-                  const SizedBox(width: 8),
-                  OptionButton(
-                      icon: const Icon(CupertinoIcons.add, color: Colors.white),
-                      text: 'Crear nueva bóveda',
-                      onTap: () async {
-                        bloc.createVault();
-                      }),
-                ],
-              )
-            ],
+              ),
+            );
+          },
+        ),
+        Expanded(
+          child: KeyFormOrganism(
+            obscureText: true,
+            onTapEnter: (key) async {
+              final error = await bloc.openVault(key);
+              return error;
+            },
           ),
         ),
-        if (vaultNames.isNotEmpty)
-          Expanded(
-            flex: 2,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                const SizedBox(height: 32),
-                const Text(
-                  'Selecciona una bóveda:',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 14, color: Colors.white),
-                ),
-                const SizedBox(height: 8),
-                BlocBuilder<LockPageBloc, LockPageState>(
-                  buildWhen: (previous, current) =>
-                      previous != current &&
-                      previous.selectedVault != current.selectedVault,
-                  builder: (context, state) {
-                    return PopupMenuButton(
-                      offset: const Offset(0, 30),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16)),
-                      itemBuilder: (context) {
-                        return state.vaultNames
-                            .map((e) => PopupMenuItem(
-                                    child: ListTile(
-                                  title: Text(e),
-                                  onTap: () {
-                                    bloc.selectVault(e);
-                                    context.pop();
-                                  },
-                                )))
-                            .toList();
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.all(8),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(state.selectedVault ?? 'Bóveda',
-                                style: TextStyle(
-                                    fontSize: 16,
-                                    color: Colors.white.withOpacity(0.8))),
-                            const SizedBox(width: 8),
-                            Icon(CupertinoIcons.chevron_down,
-                                size: 16, color: Colors.white.withOpacity(0.8)),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
-                ),
-                Expanded(
-                  child: KeyFormOrganism(
-                    obscureText: true,
-                    onTapEnter: (key) async {
-                      final error = await bloc.openVault(key);
-                      return error;
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ),
-      ]),
+      ],
+    );
+  }
+}
+
+class NotVaultFoundView extends StatelessWidget {
+  const NotVaultFoundView({
+    super.key,
+    required this.bloc,
+  });
+
+  final LockPageBloc bloc;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const SizedBox(height: 32),
+        const Text(
+          'No hay bóvedas creadas',
+          textAlign: TextAlign.center,
+          style: TextStyle(fontSize: 16, color: Colors.white),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'Crea una nueva bóveda o importa una existente',
+          textAlign: TextAlign.center,
+          style: TextStyle(fontSize: 14, color: Colors.white.withOpacity(0.6)),
+        ),
+        const SizedBox(height: 24),
+        VaultFileMenu(bloc: bloc)
+      ],
+    );
+  }
+}
+
+class VaultFileMenu extends StatelessWidget {
+  const VaultFileMenu({
+    super.key,
+    required this.bloc,
+  });
+
+  final LockPageBloc bloc;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        OptionButton(
+            icon: const Icon(CupertinoIcons.folder, color: Colors.white),
+            text: 'Importar archivo',
+            onTap: () {
+              bloc.pickFile();
+            }),
+        const SizedBox(width: 8),
+        OptionButton(
+            icon: const Icon(CupertinoIcons.add, color: Colors.white),
+            text: 'Crear nueva bóveda',
+            onTap: () async {
+              bloc.createVault();
+            }),
+      ],
     );
   }
 }

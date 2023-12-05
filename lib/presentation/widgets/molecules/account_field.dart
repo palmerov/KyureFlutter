@@ -3,19 +3,22 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:kyure/clipboard_utils.dart';
 import 'package:kyure/data/models/vault_data.dart';
+import 'package:kyure/main.dart';
 import 'package:kyure/presentation/theme/ky_theme.dart';
 import 'package:kyure/presentation/widgets/molecules/copy_area.dart';
 import 'package:kyure/presentation/widgets/molecules/toast_widget.dart';
 import 'package:random_password_generator/random_password_generator.dart';
 
 class AccountFieldMolecule extends StatefulWidget {
-  AccountFieldMolecule(
+  const AccountFieldMolecule(
       {super.key,
       required this.editting,
       required this.accountField,
       this.nameEditable = true,
       this.onTapDelete,
-      this.onFieldChanged});
+      this.onFieldChanged,
+      required this.onCopy});
+  final Function() onCopy;
   final bool editting;
   final bool nameEditable;
   final AccountField accountField;
@@ -49,6 +52,7 @@ class _AccountFieldMoleculeState extends State<AccountFieldMolecule> {
               backgroundColor: kyTheme.colorToastBackground,
               textStyle: TextStyle(color: kyTheme.colorToastText),
             ));
+    widget.onCopy();
   }
 
   AccountField getEditingData() {
@@ -66,54 +70,59 @@ class _AccountFieldMoleculeState extends State<AccountFieldMolecule> {
       controllerLabel = TextEditingController(text: widget.accountField.name);
       controllerLabel!.text = widget.accountField.name;
       field = Autocomplete<String>(
-          optionsViewBuilder: (context, Function(String) onSelected, options) {
-        if (options.isEmpty) return const SizedBox.shrink();
-        return Align(
-            alignment: Alignment.topLeft,
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 280),
-              child: SizedBox(
-                width: 280,
-                child: Material(
-                  child: InkWell(
-                    onTap: () => onSelected(options.first),
-                    borderRadius: BorderRadius.circular(12),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Row(
-                        children: [
-                          Icon(CupertinoIcons.lock,
-                              size: 20, color: kyTheme.colorPassword),
-                          const SizedBox(width: 8),
-                          Text(options.first,
-                              style: TextStyle(
-                                  fontSize: 16, color: kyTheme.colorPassword)),
-                        ],
+        optionsViewBuilder: (context, Function(String) onSelected, options) {
+          if (options.isEmpty) return const SizedBox.shrink();
+          return Align(
+              alignment: Alignment.topLeft,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 280),
+                child: SizedBox(
+                  width: 280,
+                  child: Material(
+                    child: InkWell(
+                      onTap: () => onSelected(options.first),
+                      borderRadius: BorderRadius.circular(12),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Row(
+                          children: [
+                            Icon(CupertinoIcons.lock,
+                                size: 20, color: kyTheme.colorPassword),
+                            const SizedBox(width: 8),
+                            Text(options.first,
+                                style: TextStyle(
+                                    fontSize: 16,
+                                    color: kyTheme.colorPassword)),
+                          ],
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-            ));
-      }, fieldViewBuilder:
-              (context, textEditingController, focusNode, onFieldSubmitted) {
-        controllerField = textEditingController;
-        controllerField!.text = widget.accountField.data;
-        return _buildTextField(kyTheme, focusNode);
-      }, optionsBuilder: (textEditingValue) {
-        return textEditingValue.text.isEmpty
-            ? ['Generar contraseña segura']
-            : [];
-      }, onSelected: (option) {
-        final text = passwordGenerator.randomPassword(
-            letters: true,
-            numbers: true,
-            specialChar: true,
-            uppercase: true,
-            passwordLength: 16);
-        controllerField!.text = text;
-        widget.onFieldChanged?.call(controllerLabel!.text, text, visible);
-      },);
+              ));
+        },
+        fieldViewBuilder:
+            (context, textEditingController, focusNode, onFieldSubmitted) {
+          controllerField = textEditingController;
+          controllerField!.text = widget.accountField.data;
+          return _buildTextField(kyTheme, focusNode);
+        },
+        optionsBuilder: (textEditingValue) {
+          return textEditingValue.text.isEmpty
+              ? ['Generar contraseña segura']
+              : [];
+        },
+        onSelected: (option) {
+          final text = passwordGenerator.randomPassword(
+              letters: true,
+              numbers: true,
+              specialChar: true,
+              uppercase: true,
+              passwordLength: 16);
+          controllerField!.text = text;
+          widget.onFieldChanged?.call(controllerLabel!.text, text, visible);
+        },
+      );
     } else {
       controllerField = TextEditingController(text: widget.accountField.data);
       controllerField!.text = widget.accountField.data;
@@ -136,10 +145,11 @@ class _AccountFieldMoleculeState extends State<AccountFieldMolecule> {
             textAlignVertical: TextAlignVertical.center,
             readOnly: !widget.editting,
             style: TextStyle(fontSize: 13, color: kyTheme.colorHint),
-            decoration: const InputDecoration(
+            decoration: InputDecoration(
                 hintText: 'Field name',
-                border: UnderlineInputBorder(borderSide: BorderSide.none),
-                contentPadding: EdgeInsets.all(0.5),
+                border: const UnderlineInputBorder(borderSide: BorderSide.none),
+                contentPadding:
+                    isPC ? const EdgeInsets.all(4) : EdgeInsets.all(1),
                 isDense: true),
           ),
         ),
