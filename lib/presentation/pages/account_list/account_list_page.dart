@@ -412,7 +412,7 @@ class _AccountListView extends StatelessWidget {
                               padding: const EdgeInsets.only(
                                   left: 4, right: 4, bottom: 8),
                               child: SizedBox(
-                                  height: 34,
+                                  height: 36,
                                   child: BlocBuilder<AccountListPageBloc,
                                       AccountListPageState>(
                                     buildWhen: (previous, current) =>
@@ -434,7 +434,7 @@ class _AccountListView extends StatelessWidget {
                                       return ScrollablePositionedList.builder(
                                         itemScrollController:
                                             _itemScrollController,
-                                        physics: ClampingScrollPhysics(parent: const AlwaysScrollableScrollPhysics()),
+                                        physics: const ClampingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
                                         scrollDirection: Axis.horizontal,
                                         itemBuilder: (context, groupIndex) {
                                           final group =
@@ -462,16 +462,6 @@ class _AccountListView extends StatelessWidget {
                             )
                           ],
                         ),
-                        Positioned(
-                          bottom: 0,
-                          left: 0,
-                          right: 0,
-                          child: SizedBox(
-                            height: kyTheme.borderWidth03,
-                            child:
-                                ColoredBox(color: kyTheme.colorSeparatorLine),
-                          ),
-                        )
                       ],
                     ),
                   ),
@@ -483,7 +473,7 @@ class _AccountListView extends StatelessWidget {
                       child: BluredBottomAppBarMolecule(
                         items: [
                           BottomItemActionMolecule(
-                            icon: Icon(CupertinoIcons.restart,
+                            icon: Icon(CupertinoIcons.arrow_2_circlepath,
                                 color: kyTheme.colorOnBackgroundOpacity60),
                             text: 'Sincronizar',
                             onTap: () {
@@ -549,16 +539,6 @@ class _AccountListView extends StatelessWidget {
                           )
                         ],
                       )),
-                  Positioned(
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    child: SizedBox(
-                      height: kyTheme.borderWidth03,
-                      child:
-                          ColoredBox(color: kyTheme.colorOnBackgroundOpacity30),
-                    ),
-                  )
                 ],
               ),
             ),

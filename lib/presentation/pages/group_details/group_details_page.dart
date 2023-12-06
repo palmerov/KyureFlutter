@@ -66,6 +66,7 @@ class _GroupDetailsView extends StatelessWidget {
             pickerColor: color,
             onColorChanged: (value) {
               bloc.setColor(value);
+              context.pop();
             },
           ),
         ),

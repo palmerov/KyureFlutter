@@ -21,7 +21,7 @@ class KyTheme extends InheritedWidget {
           elevation: 0, backgroundColor: Color.fromARGB(255, 26, 26, 26)),
       colorScheme: const ColorScheme(
           brightness: Brightness.dark,
-          primary: Color.fromARGB(255, 75, 159, 238),
+          primary: Color(0xff4b73a7),
           onPrimary: Colors.white,
           secondary: Colors.deepOrangeAccent,
           onSecondary: Colors.white,
@@ -40,7 +40,7 @@ class KyTheme extends InheritedWidget {
   static final lightTheme = ThemeData.light().copyWith(
       colorScheme: const ColorScheme(
           brightness: Brightness.light,
-          primary: Colors.blueGrey,
+          primary: Color(0xff325186),
           onPrimary: Colors.white,
           secondary: Colors.deepOrangeAccent,
           onSecondary: Colors.white,
