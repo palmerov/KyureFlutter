@@ -15,12 +15,14 @@ class AnyImage extends StatelessWidget {
     this.width,
     this.alignment,
     this.fit,
+    this.errorWidget,
   });
   final Alignment? alignment;
   final BoxFit? fit;
   final AnyImageSource source;
   final String image;
   final double? height, width;
+  final Widget? errorWidget;
 
   isSvg(bool deep) {
     if (deep) {
@@ -68,7 +70,14 @@ class AnyImage extends StatelessWidget {
               imageUrl: image,
               alignment: alignment ?? Alignment.center,
               fit: fit ?? BoxFit.contain,
-              errorWidget: (context, url, error) => const Icon(Icons.error),
+              errorWidget: (context, url, error) =>
+                  errorWidget ??
+                  Container(
+                    height: height,
+                    width: width,
+                    color: Colors.grey.shade300,
+                    child: const Icon(Icons.error),
+                  ),
               placeholder: (context, url) => Shimmer(
                   gradient: RadialGradient(
                       colors: [Colors.grey.shade200, Colors.grey.shade300]),
@@ -80,6 +89,13 @@ class AnyImage extends StatelessWidget {
               image,
               alignment: alignment ?? Alignment.center,
               fit: fit ?? BoxFit.contain,
+              errorWidget: errorWidget ??
+                  Container(
+                    height: height,
+                    width: width,
+                    color: Colors.grey.shade300,
+                    child: const Icon(Icons.error),
+                  ),
               placeholder: Shimmer(
                   gradient: RadialGradient(
                       colors: [Colors.grey.shade200, Colors.grey.shade300]),

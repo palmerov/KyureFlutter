@@ -169,6 +169,14 @@ class KiureService {
     appBloc.restartSystemTry();
   }
 
+  void moveInGroups(
+      Account account, AccountGroup groupFrom, AccountGroup groupTo) {
+    if (groupFrom.name != groupTo.name) {
+      groupFrom.accounts.removeWhere((element) => element.id == account.id);
+      groupTo.accounts.add(account);
+    }
+  }
+
   void addNewAccount(Account account, AccountGroup group) {
     account.id = getMaxId() + 1;
     getAllGroup().accounts.insert(0, account);

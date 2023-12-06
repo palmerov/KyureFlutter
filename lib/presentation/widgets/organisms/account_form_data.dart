@@ -5,32 +5,30 @@ import 'package:kyure/presentation/widgets/molecules/account_field.dart';
 import 'package:kyure/services/service_locator.dart';
 
 class AccountFormDataOrganism extends StatefulWidget {
-  const AccountFormDataOrganism(
-      {super.key,
-      required this.account,
-      required this.editting,
-      required this.onAccountDelete,
-      required this.keyList,
-      required this.controller});
+  const AccountFormDataOrganism({
+    super.key,
+    required this.account,
+    required this.editting,
+    required this.onAccountDelete,
+    required this.keyList,
+  });
 
   final Account account;
   final bool editting;
   final GlobalKey<AnimatedListState> keyList;
   final Function(int index) onAccountDelete;
-  final AccountFormController controller;
 
   @override
   State<AccountFormDataOrganism> createState() =>
-      _AccountFormDataOrganismState();
+      AccountFormDataOrganismState();
 }
 
-class _AccountFormDataOrganismState extends State<AccountFormDataOrganism> {
+class AccountFormDataOrganismState extends State<AccountFormDataOrganism> {
   late final List<AccountFieldWrapper> accountList;
   late final Account account;
   late final bool editting;
   late final GlobalKey<AnimatedListState> keyList;
   late final Function(int index) onAccountDelete;
-  late final AccountFormController controller;
 
   @override
   void initState() {
@@ -39,7 +37,6 @@ class _AccountFormDataOrganismState extends State<AccountFormDataOrganism> {
     editting = widget.editting;
     keyList = widget.keyList;
     onAccountDelete = widget.onAccountDelete;
-    controller = widget.controller;
 
     accountList = [
       AccountFieldWrapper(1, account.fieldUsername),
@@ -49,20 +46,19 @@ class _AccountFormDataOrganismState extends State<AccountFormDataOrganism> {
     for (var element in account.fieldList ?? []) {
       accountList.add(AccountFieldWrapper(i++, element));
     }
+  }
 
-    controller.addField = (AccountField accountField) {
-      accountList
-          .add(AccountFieldWrapper(accountList.last.id + 1, accountField));
-      keyList.currentState!.insertItem(accountList.length - 1);
-    };
+  List<AccountField> getAccountFields() {
+    List<AccountField> accountFields = [];
+    for (var element in accountList) {
+      accountFields.add(element.accountField);
+    }
+    return accountFields;
+  }
 
-    controller.getAccountFields = () {
-      List<AccountField> accountFields = [];
-      for (var element in accountList) {
-        accountFields.add(element.accountField);
-      }
-      return accountFields;
-    };
+  void addField(AccountField accountField) {
+    accountList.add(AccountFieldWrapper(accountList.last.id + 1, accountField));
+    keyList.currentState!.insertItem(accountList.length - 1);
   }
 
   @override
@@ -97,8 +93,7 @@ class _AccountFormDataOrganismState extends State<AccountFormDataOrganism> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: AccountFieldMolecule(
-        onCopy: () =>
-            serviceLocator.getKiureService().addToRecents(account),
+        onCopy: () => serviceLocator.getKiureService().addToRecents(account),
         editting: widget.editting,
         accountField: accountField.accountField,
         onFieldChanged: (String name, String data, bool visible) {
@@ -131,10 +126,4 @@ class AccountFieldWrapper {
   AccountFieldWrapper(this.id, this.accountField);
   final AccountField accountField;
   final int id;
-}
-
-class AccountFormController {
-  AccountFormController();
-  Function(AccountField accountField)? addField;
-  List<AccountField> Function()? getAccountFields;
 }

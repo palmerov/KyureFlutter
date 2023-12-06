@@ -44,6 +44,7 @@ class MyApp extends StatelessWidget {
           return KyTheme(
             theme: state.light ? KyTheme.lightTheme : KyTheme.darkTheme,
             child: MaterialApp.router(
+              scrollBehavior: MyScrollBehavior(),
               title: 'Flutter Demo',
               builder: BotToastInit(),
               theme: state.light ? KyTheme.lightTheme : KyTheme.darkTheme,
@@ -54,6 +55,14 @@ class MyApp extends StatelessWidget {
         },
       ),
     );
+  }
+}
+
+class MyScrollBehavior extends ScrollBehavior {
+  @override
+  Widget buildOverscrollIndicator(
+      BuildContext context, Widget child, ScrollableDetails details) {
+    return child;
   }
 }
 

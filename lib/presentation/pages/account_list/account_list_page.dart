@@ -15,6 +15,7 @@ import 'package:kyure/presentation/widgets/molecules/account_group.dart';
 import 'package:kyure/presentation/widgets/molecules/account_group_list_shimmer.dart';
 import 'package:kyure/presentation/widgets/molecules/account_item.dart';
 import 'package:kyure/presentation/widgets/molecules/account_list_shimmer.dart';
+import 'package:kyure/presentation/widgets/molecules/blured_bottom_app_bar/export.dart';
 import 'package:kyure/presentation/widgets/molecules/context_menu_tile.dart';
 import 'package:kyure/presentation/widgets/molecules/image_rounded.dart';
 import 'package:kyure/presentation/widgets/molecules/search_bar.dart';
@@ -23,6 +24,7 @@ import 'package:kyure/presentation/widgets/molecules/svg_icon.dart';
 import 'package:kyure/services/service_locator.dart';
 import 'package:blur/blur.dart';
 import 'package:kyure/services/kiure_service.dart';
+import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 class AccountListPage extends StatelessWidget {
   const AccountListPage({super.key});
@@ -39,11 +41,12 @@ class AccountListPage extends StatelessWidget {
 
 class _AccountListView extends StatelessWidget {
   _AccountListView({super.key}) {
-    keyScaffold = GlobalKey<ScaffoldState>();
-    pageController = PageController();
+    _keyScaffold = GlobalKey<ScaffoldState>();
+    _pageController = PageController();
   }
-  late final GlobalKey<ScaffoldState> keyScaffold;
-  late final PageController pageController;
+  late final GlobalKey<ScaffoldState> _keyScaffold;
+  late final PageController _pageController;
+  final ItemScrollController _itemScrollController = ItemScrollController();
 
   _showAccountContextMenuDialog(
       AccountListPageBloc bloc, BuildContext context, Account account) {
@@ -271,7 +274,7 @@ class _AccountListView extends StatelessWidget {
     AccountListPageBloc bloc = BlocProvider.of<AccountListPageBloc>(context);
     final bool isPcScreen = MediaQuery.of(context).size.width > 600;
     return Scaffold(
-      key: keyScaffold,
+      key: _keyScaffold,
       appBar: AppBar(
         toolbarHeight: 0,
         elevation: 0,
@@ -310,7 +313,7 @@ class _AccountListView extends StatelessWidget {
                             listener: (context, state) async {
                               if (state is AccountListPageSelectedGroupState) {
                                 bloc.listenPageView = false;
-                                await pageController.animateToPage(
+                                await _pageController.animateToPage(
                                     state.selectedGroupIndex,
                                     duration: const Duration(milliseconds: 300),
                                     curve: Curves.easeInOut);
@@ -319,9 +322,16 @@ class _AccountListView extends StatelessWidget {
                             },
                             child: PageView.builder(
                               itemCount: state.accountGroups.length,
-                              controller: pageController,
-                              onPageChanged: (value) => {
-                                if (bloc.listenPageView) bloc.selectGroup(value)
+                              controller: _pageController,
+                              physics: const BouncingScrollPhysics(),
+                              onPageChanged: (value) {
+                                if (bloc.listenPageView) {
+                                  _itemScrollController.scrollTo(
+                                      index: value,
+                                      duration:
+                                          const Duration(milliseconds: 200));
+                                  bloc.selectGroup(value);
+                                }
                               },
                               itemBuilder: (context, groupIndex) => Center(
                                 child: BlocBuilder<AccountListPageBloc,
@@ -391,7 +401,7 @@ class _AccountListView extends StatelessWidget {
                                     onSearchChanged: (text) =>
                                         bloc.filter(text),
                                     onLeadingTap: () {
-                                      keyScaffold.currentState!.openDrawer();
+                                      _keyScaffold.currentState!.openDrawer();
                                     },
                                     showLeading: !isPcScreen,
                                   );
@@ -421,8 +431,10 @@ class _AccountListView extends StatelessWidget {
                                               is AccountListPageStateInitial) {
                                         return const AccountGroupListShimmerMolecule();
                                       }
-                                      return ListView.builder(
-                                        physics: const BouncingScrollPhysics(),
+                                      return ScrollablePositionedList.builder(
+                                        itemScrollController:
+                                            _itemScrollController,
+                                        physics: ClampingScrollPhysics(parent: const AlwaysScrollableScrollPhysics()),
                                         scrollDirection: Axis.horizontal,
                                         itemBuilder: (context, groupIndex) {
                                           final group =
@@ -468,109 +480,85 @@ class _AccountListView extends StatelessWidget {
                       right: 0,
                       left: 0,
                       height: 60,
-                      child: SizedBox(
-                        height: 60,
-                        child: Stack(
-                          children: [
-                            Positioned.fill(
-                              child: Blur(
-                                colorOpacity: kyTheme.blurOpacity,
-                                blurColor: kyTheme.colorBackground,
-                                child: const SizedBox.shrink(),
-                              ),
-                            ),
-                            Positioned.fill(
-                              child: Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 8),
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceEvenly,
-                                  children: [
-                                    ItemAction(
-                                      icon: Icon(CupertinoIcons.lock,
-                                          color: kyTheme
-                                              .colorOnBackgroundOpacity60),
-                                      text: 'Bloquear',
-                                      onTap: () {
-                                        appBloc.lock();
-                                      },
-                                    ),
-                                    ItemAction(
-                                      icon: Icon(CupertinoIcons.list_number,
-                                          color: kyTheme
-                                              .colorOnBackgroundOpacity60),
-                                      text: 'Orden',
-                                      onTap: () {
-                                        _showSortDialog(context);
-                                      },
-                                    ),
-                                    ItemAction(
-                                      icon: Icon(
-                                          CupertinoIcons
-                                              .rectangle_on_rectangle_angled,
-                                          color: kyTheme
-                                              .colorOnBackgroundOpacity60),
-                                      text: '+ Grupo',
-                                      onTap: () async {
-                                        final saved = await context.pushNamed(
-                                            KyRoutes.groupEditor.name);
-                                        if (saved != null && (saved as bool)) {
-                                          bloc.reload();
-                                        }
-                                      },
-                                    ),
-                                    ItemAction(
-                                      icon: Icon(CupertinoIcons.person,
-                                          color: kyTheme
-                                              .colorOnBackgroundOpacity60),
-                                      text: '+ Cuenta',
-                                      onTap: () async {
-                                        if (serviceLocator
-                                                .getKiureService()
-                                                .vault!
-                                                .accountGroups
-                                                .length ==
-                                            1) {
-                                          _showYesOrNoDialog(
-                                              context,
-                                              'No hay grupos',
-                                              'Para crear una cuenta, debes tener al menos un grupo además de "Todos". ¿Continuar y crear uno?',
-                                              () async {
-                                            final saved =
-                                                await context.pushNamed(
-                                                    KyRoutes.groupEditor.name);
-                                            if (saved != null &&
-                                                (saved as bool)) {
-                                              bloc.reload();
-                                            }
-                                          }, () => null);
-                                        } else {
-                                          final result =
-                                              await context.pushNamed(
-                                                  KyRoutes.accountEditor.name);
-                                          if (result != null &&
-                                              (result as bool)) bloc.reload();
-                                        }
-                                      },
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            Positioned(
-                              top: 0,
-                              left: 0,
-                              right: 0,
-                              child: SizedBox(
-                                height: kyTheme.borderWidth03,
-                                child: ColoredBox(
-                                    color: kyTheme.colorOnBackgroundOpacity30),
-                              ),
-                            )
-                          ],
-                        ),
+                      child: BluredBottomAppBarMolecule(
+                        items: [
+                          BottomItemActionMolecule(
+                            icon: Icon(CupertinoIcons.restart,
+                                color: kyTheme.colorOnBackgroundOpacity60),
+                            text: 'Sincronizar',
+                            onTap: () {
+                              appBloc.lock();
+                            },
+                          ),
+                          BottomItemActionMolecule(
+                            icon: Icon(CupertinoIcons.list_number,
+                                color: kyTheme.colorOnBackgroundOpacity60),
+                            text: 'Orden',
+                            onTap: () {
+                              _showSortDialog(context);
+                            },
+                          ),
+                          BottomItemActionMolecule(
+                            icon: Icon(CupertinoIcons.lock,
+                                color: kyTheme.colorOnBackgroundOpacity60),
+                            text: 'Bloquear',
+                            onTap: () {
+                              appBloc.lock();
+                            },
+                          ),
+                          BottomItemActionMolecule(
+                            icon: Icon(
+                                CupertinoIcons.rectangle_on_rectangle_angled,
+                                color: kyTheme.colorOnBackgroundOpacity60),
+                            text: '+ Grupo',
+                            onTap: () async {
+                              final saved = await context
+                                  .pushNamed(KyRoutes.groupEditor.name);
+                              if (saved != null && (saved as bool)) {
+                                bloc.reload();
+                              }
+                            },
+                          ),
+                          BottomItemActionMolecule(
+                            icon: Icon(CupertinoIcons.person,
+                                color: kyTheme.colorOnBackgroundOpacity60),
+                            text: '+ Cuenta',
+                            onTap: () async {
+                              if (serviceLocator
+                                      .getKiureService()
+                                      .vault!
+                                      .accountGroups
+                                      .length ==
+                                  1) {
+                                _showYesOrNoDialog(context, 'No hay grupos',
+                                    'Para crear una cuenta, debes tener al menos un grupo además de "Todos". ¿Continuar y crear uno?',
+                                    () async {
+                                  final saved = await context
+                                      .pushNamed(KyRoutes.groupEditor.name);
+                                  if (saved != null && (saved as bool)) {
+                                    bloc.reload();
+                                  }
+                                }, () => null);
+                              } else {
+                                final result = await context
+                                    .pushNamed(KyRoutes.accountEditor.name);
+                                if (result != null && (result as bool))
+                                  bloc.reload();
+                              }
+                            },
+                          )
+                        ],
                       )),
+                  Positioned(
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    child: SizedBox(
+                      height: kyTheme.borderWidth03,
+                      child:
+                          ColoredBox(color: kyTheme.colorOnBackgroundOpacity30),
+                    ),
+                  )
                 ],
               ),
             ),
@@ -594,8 +582,10 @@ class Drawer extends StatelessWidget {
   const Drawer({
     super.key,
     required this.isPcScreen,
+    this.width,
   });
   final bool isPcScreen;
+  final double? width;
 
   @override
   Widget build(BuildContext context) {
@@ -764,41 +754,6 @@ class Drawer extends StatelessWidget {
               )
             ],
           )),
-    );
-  }
-}
-
-class ItemAction extends StatelessWidget {
-  const ItemAction(
-      {super.key,
-      required this.icon,
-      required this.text,
-      this.onTap,
-      this.color});
-  final Widget icon;
-  final String text;
-  final Function()? onTap;
-  final Color? color;
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: InkWell(
-        onTap: onTap,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            icon,
-            const SizedBox(
-              height: 2,
-            ),
-            Text(
-              text,
-              style: TextStyle(color: color),
-            )
-          ],
-        ),
-      ),
     );
   }
 }

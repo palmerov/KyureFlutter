@@ -14,21 +14,20 @@ class AssetImageSelectorOrganism extends StatelessWidget {
         child: GridView.builder(
           physics: const BouncingScrollPhysics(),
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 5),
+              crossAxisCount: 6),
           itemBuilder: (context, index) {
             return Padding(
               padding: const EdgeInsets.all(1),
               child: GestureDetector(
                   onTap: () {
-                    Navigator.pop(context, assetImages[index]);
                     onAssetImageSelected!(assetImages[index]);
                   },
-                  child: assetImages![index].toLowerCase().endsWith('.svg')
+                  child: assetImages[index].toLowerCase().endsWith('.svg')
                       ? SvgIcon(svgAsset: assetImages[index])
                       : Image.asset(assetImages[index])),
             );
           },
-          itemCount: assetImages!.length,
+          itemCount: assetImages.length,
         ));
   }
 }

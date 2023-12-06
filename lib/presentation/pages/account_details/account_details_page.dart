@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -12,8 +11,7 @@ import 'package:kyure/presentation/widgets/molecules/account_group.dart';
 import 'package:kyure/presentation/widgets/molecules/image_rounded.dart';
 import 'package:kyure/presentation/widgets/molecules/svg_icon.dart';
 import 'package:kyure/presentation/widgets/organisms/account_form_data.dart';
-import 'package:kyure/presentation/widgets/organisms/asset_image_selector.dart';
-import 'package:kyure/presentation/widgets/organisms/network_image_selector.dart';
+import 'package:kyure/presentation/widgets/organisms/global_image_selector.dart';
 import 'package:kyure/services/service_locator.dart';
 
 class AccountDetailsPage extends StatelessWidget {
@@ -46,44 +44,25 @@ class _AccountDetailsView extends StatelessWidget {
   late final TextEditingController tecName;
   final GlobalKey<AnimatedListState> keyFormAnimatedList = GlobalKey();
   final GlobalKey<FormFieldState> keyNameField = GlobalKey();
-  final AccountFormController formController = AccountFormController();
+  final GlobalKey<AccountFormDataOrganismState> keyAccountForm = GlobalKey();
+  final GlobalKey<ScaffoldState> _keyScaffold = GlobalKey();
 
-  _showImageSelectorDialog(
+  _showImageSelectorBottomSheet(
       AccountDetailsBloc bloc, BuildContext context) async {
-    showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12)),
-              content: NetworkImageSelectorOrganism(
-                onImageSelected: (imagePath, selected) {
-                  context.pop();
-                  if (selected) {
-                    bloc.selectImage(imagePath, ImageSource.network);
-                  }
-                },
-                onLocalImageTap: () async {
-                  context.pop();
-                  final json = jsonDecode(
-                      await rootBundle.loadString('assets/web_icons.json'));
-                  final assetImages = json['icons'].cast<String>();
-                  showDialog(
-                    context: context,
-                    builder: (context) {
-                      return AssetImageSelectorOrganism(
-                        assetImages: assetImages,
-                        onAssetImageSelected: (assetImage) {
-                          bloc.accountCopy!.image = AccountImage(
-                              path: assetImage, source: ImageSource.assets);
-                          bloc.selectImage(
-                              bloc.accountCopy!.image.path, ImageSource.assets);
-                        },
-                      );
-                    },
-                  );
-                },
-              ),
-            ));
+    showModalBottomSheet(
+        context: _keyScaffold.currentContext!,
+        constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(context).size.height * 0.76, minHeight: MediaQuery.of(context).size.height * 0.76),
+        shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(16), topRight: Radius.circular(16))),
+        builder: (context) => GlobalImageSelectorOrganism(
+          image: bloc.accountCopy!.image,
+          onImageSelected: (imagePath, source) {
+            context.pop();
+            bloc.selectImage(imagePath, source);
+          },
+        ));
   }
 
   @override
@@ -97,6 +76,7 @@ class _AccountDetailsView extends StatelessWidget {
         return false;
       },
       child: Scaffold(
+        key: _keyScaffold,
         appBar: AppBar(
           elevation: 0,
           backgroundColor: Colors.transparent,
@@ -131,7 +111,7 @@ class _AccountDetailsView extends StatelessWidget {
                       child: InkWell(
                         onTap: () {
                           if (bloc.state.editting) {
-                            _showImageSelectorDialog(bloc, context);
+                            _showImageSelectorBottomSheet(bloc, context);
                           }
                         },
                         child: Hero(
@@ -258,7 +238,7 @@ class _AccountDetailsView extends StatelessWidget {
                   builder: (context, state) {
                     return Expanded(
                         child: AccountFormDataOrganism(
-                      controller: formController,
+                      key: keyAccountForm,
                       keyList: keyFormAnimatedList,
                       onAccountDelete: (index) {
                         bloc.accountCopy!.fieldList!.removeAt(index);
@@ -289,7 +269,7 @@ class _AccountDetailsView extends StatelessWidget {
                                     data: '',
                                     visible: false);
                                 bloc.accountCopy!.fieldList!.add(field);
-                                formController.addField!(field);
+                                keyAccountForm.currentState?.addField(field);
                               },
                               style: ButtonStyle(
                                   shape: MaterialStateProperty.all(
@@ -310,7 +290,7 @@ class _AccountDetailsView extends StatelessWidget {
                                   ],
                                 ),
                               )),
-                        const SizedBox(height: 4),
+                        const SizedBox(height: 8),
                         FilledButton.icon(
                             style: ButtonStyle(
                                 shape: MaterialStateProperty.all(
@@ -321,8 +301,10 @@ class _AccountDetailsView extends StatelessWidget {
                               if (editting) {
                                 if (keyNameField.currentState?.validate() ??
                                     false) {
-                                  bloc.save(tecName.text,
-                                      formController.getAccountFields!());
+                                  bloc.save(
+                                      tecName.text,
+                                      keyAccountForm.currentState!
+                                          .getAccountFields());
                                 }
                               } else {
                                 bloc.edit();

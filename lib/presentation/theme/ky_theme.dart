@@ -21,7 +21,7 @@ class KyTheme extends InheritedWidget {
           elevation: 0, backgroundColor: Color.fromARGB(255, 26, 26, 26)),
       colorScheme: const ColorScheme(
           brightness: Brightness.dark,
-          primary: Color.fromARGB(255, 126, 173, 199),
+          primary: Color.fromARGB(255, 75, 159, 238),
           onPrimary: Colors.white,
           secondary: Colors.deepOrangeAccent,
           onSecondary: Colors.white,

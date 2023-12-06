@@ -64,18 +64,16 @@ class AccountDetailsBloc extends Cubit<AccountDetailsState> {
       groupTo ??= group;
       serviceLocator.getKiureService().addNewAccount(accountCopy!, groupTo!);
       isNewAccount = false;
+      account = accountCopy!;
     } else {
       if (groupTo != null) {
-        group.accounts.removeWhere((element) => element.id == account.id);
-        groupTo!.accounts.add(accountCopy!);
-        account = accountCopy ?? account;
-      } else {
-        account.name = accountCopy!.name;
-        account.image = accountCopy!.image;
-        account.fieldPassword = accountCopy!.fieldPassword;
-        account.fieldUsername = accountCopy!.fieldUsername;
-        account.fieldList = accountCopy!.fieldList;
+        serviceLocator.getKiureService().moveInGroups(account, group, groupTo!);
       }
+      account.name = accountCopy!.name;
+      account.image = accountCopy!.image;
+      account.fieldPassword = accountCopy!.fieldPassword;
+      account.fieldUsername = accountCopy!.fieldUsername;
+      account.fieldList = accountCopy!.fieldList;
     }
     group = groupTo ?? group;
     emit(state.copyWith(editting: false));
@@ -94,11 +92,15 @@ class AccountDetailsState extends Equatable {
   final String imagePath;
   final ImageSource imageSource;
   @override
-  List<Object?> get props => [selectedGroup.name, editting, imagePath, imageSource];
+  List<Object?> get props =>
+      [selectedGroup.name, editting, imagePath, imageSource];
 
   //copy with
   AccountDetailsState copyWith(
-      {AccountGroup? selectedGroup, bool? editting, String? imagePath, ImageSource? imageSource}) {
+      {AccountGroup? selectedGroup,
+      bool? editting,
+      String? imagePath,
+      ImageSource? imageSource}) {
     return AccountDetailsState(
         imageSource: imageSource ?? this.imageSource,
         imagePath: imagePath ?? this.imagePath,
