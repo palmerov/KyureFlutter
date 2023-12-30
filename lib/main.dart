@@ -91,7 +91,6 @@ class ApplicationBloc extends Cubit<ApplicationState> {
 
       // We first init the systray menu
       await systemTray.initSystemTray(
-        title: "system tray",
         toolTip: 'Kiure',
         iconPath: path,
       );
