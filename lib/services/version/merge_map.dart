@@ -46,6 +46,7 @@ class MergeMap<K, V> {
         _mergedFromA = true;
         break;
       case MergeSource.srcAny:
+        _mergedFromA = true;
         break;
     }
   }
@@ -63,11 +64,12 @@ class MergeMap<K, V> {
       } else if (values.$2 == null) {
         mergedMap[key] = values.$1 as V;
         _mergedFromA = true;
+      } else {
+        (V, MergeSource) mergeValues =
+            getUpTodate(values.$1 as V, values.$2 as V);
+        _applyMergeSource(mergeValues.$2);
+        mergedMap[key] = mergeValues.$1;
       }
-      (V, MergeSource) mergeValues =
-          getUpTodate(values.$1 as V, values.$2 as V);
-      mergedMap[key] = mergeValues.$1;
-      _applyMergeSource(mergeValues.$2);
     }
     return mergedMap;
   }

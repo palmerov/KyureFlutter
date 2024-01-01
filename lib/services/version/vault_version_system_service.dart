@@ -92,8 +92,8 @@ class VaultVersionSystemService {
         vdMerged.deletedAccounts[account.id] = account;
       }
     }
-    mergedFromA = mergedFromA || mergeMapGroups.isMergedfromA;
-    mergedFromB = mergedFromB || mergeMapGroups.isMergedfromB;
+    mergedFromA = (mergedFromA || mergeMapAccounts.isMergedfromA);
+    mergedFromB = (mergedFromB || mergeMapAccounts.isMergedfromB);
 
     if (mergedFromA && mergedFromB) {
       vdMerged.modifDate = DateTime.now();

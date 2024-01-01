@@ -35,6 +35,12 @@ class DropBoxDataProvider implements DataProvider{
     throw UnimplementedError();
   }
   
+  @override
+  Future<Vault> decryptVault(EncryptAlgorithm algorithm, String key, Vault vault) {
+    // TODO: implement decryptvault
+    throw UnimplementedError();
+  }
+  
 }
 
 class RemoteInitData{

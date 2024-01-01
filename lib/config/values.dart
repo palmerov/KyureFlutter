@@ -7,7 +7,7 @@ const String VAULTS_DIR_NAME = 'vaults';
 final AccountGroup GROUP_ALL = AccountGroup(
   name: 'Todos',
   color: Colors.blue.shade700.value,
-  iconName: '',
+  iconName: 'assets/svg_icons/widgets.svg',
   id: -1,
   modifDate: DateTime.now(),
   status: LifeStatus.active,

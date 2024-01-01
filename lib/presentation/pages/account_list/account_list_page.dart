@@ -8,6 +8,7 @@ import 'package:flutter_share/flutter_share.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kyure/config/router_config.dart';
 import 'package:kyure/data/models/vault_data.dart';
+import 'package:kyure/data/utils/dialog_utils.dart';
 import 'package:kyure/main.dart';
 import 'package:kyure/presentation/pages/account_list/account_list_bloc.dart';
 import 'package:kyure/presentation/widgets/atoms/any_image.dart';
@@ -282,7 +283,11 @@ class _AccountListView extends StatelessWidget {
               child: Stack(
                 children: [
                   BlocConsumer<AccountListPageBloc, AccountListPageState>(
-                    listener: (context, state) {},
+                    listener: (context, state) {
+                      if (state.alertMessage != null) {
+                        showQuickAlertDialog(context, state.alertMessage!);
+                      }
+                    },
                     buildWhen: (previous, current) =>
                         previous.runtimeType != current.runtimeType &&
                             (previous is AccountListPageStateLoading ||
@@ -512,26 +517,10 @@ class _AccountListView extends StatelessWidget {
                                 color: kyTheme.colorOnBackgroundOpacity60),
                             text: '+ Cuenta',
                             onTap: () async {
-                              if (serviceLocator
-                                      .getVaultService()
-                                      .groups!
-                                      .length ==
-                                  1) {
-                                _showYesOrNoDialog(context, 'No hay grupos',
-                                    'Para crear una cuenta, debes tener al menos un grupo además de "Todos". ¿Continuar y crear uno?',
-                                    () async {
-                                  final saved = await context
-                                      .pushNamed(KyRoutes.groupEditor.name);
-                                  if (saved != null && (saved as bool)) {
-                                    bloc.reload(true);
-                                  }
-                                }, () => null);
-                              } else {
-                                final result = await context
-                                    .pushNamed(KyRoutes.accountEditor.name);
-                                if (result != null && (result as bool)) {
-                                  bloc.reload(true);
-                                }
+                              final result = await context
+                                  .pushNamed(KyRoutes.accountEditor.name);
+                              if (result != null && (result as bool)) {
+                                bloc.reload(true);
                               }
                             },
                           )
@@ -569,6 +558,7 @@ class Drawer extends StatelessWidget {
   Widget build(BuildContext context) {
     final kyTheme = KyTheme.of(context)!;
     final appBloc = context.read<ApplicationBloc>();
+    final listBloc = BlocProvider.of<AccountListPageBloc>(context);
     return NavigationDrawer(
       elevation: isPcScreen ? 2 : 8,
       children: [
@@ -616,45 +606,51 @@ class Drawer extends StatelessWidget {
             icon: const Icon(CupertinoIcons.lock)),
         _buildDrawerItem(
             kyTheme: kyTheme,
+            onTap: () => listBloc.syncWithFile(),
+            label: 'Sincronizar con archivo',
+            icon: const Icon(CupertinoIcons.arrow_down_doc)),
+        _buildDrawerItem(
+            kyTheme: kyTheme,
             label: 'Exportar bóveda',
             icon: const Icon(CupertinoIcons.share),
             onTap: () async {
               String path =
                   await context.read<AccountListPageBloc>().exportFile();
-              // ignore: use_build_context_synchronously
-              showDialog(
-                context: context,
-                builder: (context) => AlertDialog(
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16)),
-                  content:
-                      Text('Tu archivo de cuentas ha sido exportado a: $path'),
-                  actions: [
-                    InkWell(
-                      borderRadius: BorderRadius.circular(16),
-                      child: const Padding(
-                        padding: EdgeInsets.all(12),
-                        child: Text('Copiar directorio'),
+              if (context.mounted) {
+                showDialog(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16)),
+                    content: Text(
+                        'Tu archivo de cuentas ha sido exportado a: $path'),
+                    actions: [
+                      InkWell(
+                        borderRadius: BorderRadius.circular(16),
+                        child: const Padding(
+                          padding: EdgeInsets.all(12),
+                          child: Text('Copiar directorio'),
+                        ),
+                        onTap: () {
+                          Clipboard.setData(
+                              ClipboardData(text: File(path).parent.path));
+                        },
                       ),
-                      onTap: () {
-                        Clipboard.setData(
-                            ClipboardData(text: File(path).parent.path));
-                      },
-                    ),
-                    InkWell(
-                      borderRadius: BorderRadius.circular(16),
-                      child: const Padding(
-                        padding: EdgeInsets.all(12),
-                        child: Text('Compartir'),
-                      ),
-                      onTap: () {
-                        shareFile(path, 'Cuentas Kiure',
-                            'Archivo Encriptado de cuentas de Kiure');
-                      },
-                    )
-                  ],
-                ),
-              );
+                      InkWell(
+                        borderRadius: BorderRadius.circular(16),
+                        child: const Padding(
+                          padding: EdgeInsets.all(12),
+                          child: Text('Compartir'),
+                        ),
+                        onTap: () {
+                          shareFile(path, 'Cuentas Kiure',
+                              'Archivo Encriptado de cuentas de Kiure');
+                        },
+                      )
+                    ],
+                  ),
+                );
+              }
             }),
         _buildDrawerItem(
           kyTheme: kyTheme,

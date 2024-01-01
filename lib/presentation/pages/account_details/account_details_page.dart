@@ -4,7 +4,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kyure/data/models/vault_data.dart';
-import 'package:kyure/data/utils/group_utils.dart';
 import 'package:kyure/presentation/pages/account_details/bloc/account_details_bloc.dart';
 import 'package:kyure/presentation/theme/ky_theme.dart';
 import 'package:kyure/presentation/widgets/atoms/any_image.dart';
@@ -13,6 +12,7 @@ import 'package:kyure/presentation/widgets/molecules/image_rounded.dart';
 import 'package:kyure/presentation/widgets/molecules/svg_icon.dart';
 import 'package:kyure/presentation/widgets/organisms/account_form_data.dart';
 import 'package:kyure/presentation/widgets/organisms/global_image_selector.dart';
+import 'package:kyure/services/service_locator.dart';
 
 class AccountDetailsPage extends StatelessWidget {
   const AccountDetailsPage(
@@ -47,9 +47,6 @@ class _AccountDetailsView extends StatelessWidget {
       AccountDetailsBloc bloc, BuildContext context) async {
     showModalBottomSheet(
         context: _keyScaffold.currentContext!,
-        constraints: BoxConstraints(
-            maxHeight: MediaQuery.of(context).size.height * 0.76,
-            minHeight: MediaQuery.of(context).size.height * 0.76),
         shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.only(
                 topLeft: Radius.circular(16), topRight: Radius.circular(16))),
@@ -66,7 +63,6 @@ class _AccountDetailsView extends StatelessWidget {
   Widget build(BuildContext context) {
     final kytheme = KyTheme.of(context)!;
     final bloc = BlocProvider.of<AccountDetailsBloc>(context);
-    final wsize = MediaQuery.of(context).size;
     return WillPopScope(
       onWillPop: () async {
         context.pop(bloc.accountCopy != null);
@@ -179,7 +175,9 @@ class _AccountDetailsView extends StatelessWidget {
                                       borderRadius: BorderRadius.all(
                                           Radius.circular(16))),
                                   itemBuilder: (context) {
-                                    return AccountGroupUtils.getAllGroups()
+                                    return serviceLocator
+                                        .getVaultService()
+                                        .groups!
                                         .map((e) => PopupMenuItem(
                                             value: e,
                                             height: 44,
@@ -248,7 +246,23 @@ class _AccountDetailsView extends StatelessWidget {
                 const SizedBox(
                   height: 8,
                 ),
-                BlocBuilder<AccountDetailsBloc, AccountDetailsState>(
+                BlocConsumer<AccountDetailsBloc, AccountDetailsState>(
+                  listenWhen: (previous, current) =>
+                      current is ErrorSavingState,
+                  listener: (context, state) {
+                    showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: const Text('Ups...'),
+                        content: Text((state as ErrorSavingState).error),
+                        actions: [
+                          TextButton(
+                              onPressed: () => context.pop(),
+                              child: const Text('Seguir editando'))
+                        ],
+                      ),
+                    );
+                  },
                   buildWhen: (previous, current) =>
                       previous.editting != current.editting,
                   builder: (context, state) {
@@ -308,7 +322,7 @@ class _AccountDetailsView extends StatelessWidget {
                             },
                             icon: Icon(editting ? Icons.save : Icons.edit),
                             label:
-                                Text(editting ? 'Guardar cambios' : 'Editar')),
+                                Text(editting ? 'Guardar cuenta' : 'Editar')),
                       ],
                     );
                   },

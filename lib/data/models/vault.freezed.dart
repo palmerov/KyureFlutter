@@ -24,9 +24,9 @@ mixin _$Vault {
   String get vaultName => throw _privateConstructorUsedError;
   @JsonKey(name: 'vault_name')
   set vaultName(String value) => throw _privateConstructorUsedError;
-  @JsonKey(name: 'version')
+  @JsonKey(name: 'modif_date')
   DateTime get modifDate => throw _privateConstructorUsedError;
-  @JsonKey(name: 'version')
+  @JsonKey(name: 'modif_date')
   set modifDate(DateTime value) => throw _privateConstructorUsedError;
   @JsonKey(name: 'datacrypt')
   String get datacrypt => throw _privateConstructorUsedError;
@@ -49,7 +49,7 @@ abstract class $VaultCopyWith<$Res> {
   @useResult
   $Res call(
       {@JsonKey(name: 'vault_name') String vaultName,
-      @JsonKey(name: 'version') DateTime modifDate,
+      @JsonKey(name: 'modif_date') DateTime modifDate,
       @JsonKey(name: 'datacrypt') String datacrypt,
       @JsonKey(includeToJson: false, includeFromJson: false) VaultData? data});
 
@@ -116,7 +116,7 @@ abstract class _$$VaultImplCopyWith<$Res> implements $VaultCopyWith<$Res> {
   @useResult
   $Res call(
       {@JsonKey(name: 'vault_name') String vaultName,
-      @JsonKey(name: 'version') DateTime modifDate,
+      @JsonKey(name: 'modif_date') DateTime modifDate,
       @JsonKey(name: 'datacrypt') String datacrypt,
       @JsonKey(includeToJson: false, includeFromJson: false) VaultData? data});
 
@@ -166,7 +166,7 @@ class __$$VaultImplCopyWithImpl<$Res>
 class _$VaultImpl implements _Vault {
   _$VaultImpl(
       {@JsonKey(name: 'vault_name') required this.vaultName,
-      @JsonKey(name: 'version') required this.modifDate,
+      @JsonKey(name: 'modif_date') required this.modifDate,
       @JsonKey(name: 'datacrypt') required this.datacrypt,
       @JsonKey(includeToJson: false, includeFromJson: false) this.data});
 
@@ -177,7 +177,7 @@ class _$VaultImpl implements _Vault {
   @JsonKey(name: 'vault_name')
   String vaultName;
   @override
-  @JsonKey(name: 'version')
+  @JsonKey(name: 'modif_date')
   DateTime modifDate;
   @override
   @JsonKey(name: 'datacrypt')
@@ -208,7 +208,7 @@ class _$VaultImpl implements _Vault {
 abstract class _Vault implements Vault {
   factory _Vault(
       {@JsonKey(name: 'vault_name') required String vaultName,
-      @JsonKey(name: 'version') required DateTime modifDate,
+      @JsonKey(name: 'modif_date') required DateTime modifDate,
       @JsonKey(name: 'datacrypt') required String datacrypt,
       @JsonKey(includeToJson: false, includeFromJson: false)
       VaultData? data}) = _$VaultImpl;
@@ -221,9 +221,9 @@ abstract class _Vault implements Vault {
   @JsonKey(name: 'vault_name')
   set vaultName(String value);
   @override
-  @JsonKey(name: 'version')
+  @JsonKey(name: 'modif_date')
   DateTime get modifDate;
-  @JsonKey(name: 'version')
+  @JsonKey(name: 'modif_date')
   set modifDate(DateTime value);
   @override
   @JsonKey(name: 'datacrypt')

@@ -62,15 +62,26 @@ class AccountDetailsBloc extends Cubit<AccountDetailsState> {
     emit(state.copyWith(editting: true));
   }
 
-  void save(String name, List<AccountField> fields) {
+  save(String name, List<AccountField> fields) async {
     accountCopy!.name = name;
     accountCopy!.fieldUsername = fields[0];
     accountCopy!.fieldPassword = fields[1];
     accountCopy!.fieldList = fields.isEmpty ? null : fields.sublist(2);
     if (isNewAccount) {
-      serviceLocator.getVaultService().addNewAccount(accountCopy!);
-      isNewAccount = false;
-      account = accountCopy!;
+      if (await serviceLocator.getVaultService().addNewAccount(accountCopy!)) {
+        isNewAccount = false;
+        account = accountCopy!;
+      } else {
+        emit(ErrorSavingState(
+            dateTime: DateTime.now(),
+            error:
+                'Ya tienes una cuenta llamada "${accountCopy!.name}" y con nombre de usuario "${accountCopy!.fieldUsername.data}". Debes cambiar alguno de los dos campos.',
+            editting: true,
+            imagePath: state.imagePath,
+            imageSourceType: state.imageSourceType,
+            selectedGroup: state.selectedGroup));
+        return;
+      }
     } else {
       account.groupId = accountCopy!.groupId;
       account.name = accountCopy!.name;
@@ -119,4 +130,20 @@ class AccountDetailsInitial extends AccountDetailsState {
     required super.imageSourceType,
     required super.selectedGroup,
   });
+}
+
+class ErrorSavingState extends AccountDetailsState {
+  const ErrorSavingState({
+    required this.dateTime,
+    required this.error,
+    required super.editting,
+    required super.imagePath,
+    required super.imageSourceType,
+    required super.selectedGroup,
+  });
+  final String error;
+  final DateTime dateTime;
+
+  @override
+  List<Object?> get props => [error, dateTime, ...super.props];
 }

@@ -9,6 +9,8 @@ abstract class DataProvider {
       EncryptAlgorithm algorithm, String key, String vaultName, Vault vault);
   Future<Vault?> readVault(
       EncryptAlgorithm algorithm, String key, String vaultName);
+  Future<Vault> decryptVault(
+      EncryptAlgorithm algorithm, String key, Vault vault);
   Future<void> deleteVault(String vaultName);
   Future<List<VaultRegister>> listVaults();
 }

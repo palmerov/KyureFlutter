@@ -9,56 +9,59 @@ import 'package:kyure/data/utils/encrypt_utils.dart';
 import 'package:kyure/data/utils/file_utils.dart';
 
 class LocalDataProvider implements DataProvider {
-  late String _rootPath;
-  late Directory _rootDir;
+  late Directory _rootVaultDir;
   late File _vaultRegisterFile;
 
   @override
   Future init(String rootPath) async {
-    _rootPath = rootPath;
-    _rootDir = Directory(concatPath(rootPath, VAULTS_DIR_NAME));
-    if (!await _rootDir.exists()) {
-      await _rootDir.create();
-    }
-    _vaultRegisterFile = File(concatPath(_rootPath, VAULT_REGISTER_FILE_NAME));
+    _rootVaultDir = Directory(concatPath(rootPath, VAULTS_DIR_NAME));
+    _vaultRegisterFile =
+        File(concatPath(_rootVaultDir.path, VAULT_REGISTER_FILE_NAME));
+    await _updateRegister();
   }
 
-  Directory get rootDir => _rootDir;
+  get rootVaultDir => _rootVaultDir;
 
-  void _updateRegister() async {
+  _updateRegister() async {
     List<VaultRegister> vaultRegisters = [];
-    _rootDir.list().forEach((element) {
+    final list = (await _rootVaultDir.list().toList());
+    for (var element in list) {
       if (element is File) {
         if (element.path.endsWith(VAULT_FILE_EXTENSION)) {
-          Vault vault = Vault.fromJson(
-              jsonDecode(element.readAsStringSync()) as Map<String, dynamic>);
-          vaultRegisters.add(VaultRegister(
-              name: vault.vaultName,
-              modifDate: element.lastModifiedSync(),
-              path: element.path.substring(_rootDir.path.length + 1)));
+          try {
+            Vault vault = Vault.fromJson(
+                jsonDecode(element.readAsStringSync()) as Map<String, dynamic>);
+            vaultRegisters.add(VaultRegister(
+                name: vault.vaultName,
+                modifDate: element.lastModifiedSync(),
+                path: element.absolute.path
+                    .substring(_rootVaultDir.absolute.path.length + 1)));
+          } catch (e) {}
         }
       }
-    });
-    await _vaultRegisterFile.writeAsString(
-        jsonEncode(RepositoryRegister(registers: vaultRegisters).toJson()));
+    }
+    String strRegister =
+        jsonEncode(RepositoryRegister(registers: vaultRegisters).toJson());
+    if (_vaultRegisterFile.readAsStringSync() != strRegister) {
+      await _vaultRegisterFile.writeAsString(strRegister);
+    }
   }
 
-  Future<File?> _getVaultFile(String vaultName, bool create) async {
+  Future<(File?, bool)> _getVaultFile(String vaultName, bool create) async {
     VaultRegister vaultRegister;
     try {
       vaultRegister = (await listVaults())
           .firstWhere((element) => element.name == vaultName);
-      return File(concatPath(_rootDir.path, vaultRegister.path));
+      return (File(concatPath(_rootVaultDir.path, vaultRegister.path)), false);
     } catch (e) {
       if (create) {
         vaultRegister = VaultRegister(
             name: vaultName,
             modifDate: DateTime.now(),
             path: '$vaultName$VAULT_FILE_EXTENSION');
-        _updateRegister();
-        return File(concatPath(_rootDir.path, vaultRegister.path));
+        return (File(concatPath(_rootVaultDir.path, vaultRegister.path)), true);
       } else {
-        return null;
+        return (null, false);
       }
     }
   }
@@ -67,7 +70,7 @@ class LocalDataProvider implements DataProvider {
   Future<Vault?> readVault(
       EncryptAlgorithm algorithm, String key, String vaultName) async {
     String? text =
-        await (await _getVaultFile(vaultName, false))?.readAsString();
+        await (await _getVaultFile(vaultName, false)).$1?.readAsString();
     if (text != null) {
       Map<String, dynamic> json = jsonDecode(text);
       Vault userData = Vault.fromJson(json);
@@ -84,7 +87,11 @@ class LocalDataProvider implements DataProvider {
     vault.datacrypt =
         EncryptUtils.encrypt(algorithm, key, jsonEncode(vault.data!.toJson()));
     String strUserData = jsonEncode(vault);
-    (await _getVaultFile(vaultName, true))!.writeAsString(strUserData);
+    final fileResult = (await _getVaultFile(vaultName, true));
+    fileResult.$1!.writeAsString(strUserData);
+    if (fileResult.$2) {
+      _updateRegister();
+    }
   }
 
   @override
@@ -93,7 +100,7 @@ class LocalDataProvider implements DataProvider {
     try {
       vaultRegister = (await listVaults())
           .firstWhere((element) => element.name == vaultName);
-      await File(concatPath(_rootDir.path, vaultRegister.path)).delete();
+      await File(concatPath(_rootVaultDir.path, vaultRegister.path)).delete();
       _updateRegister();
       return true;
     } catch (e) {
@@ -108,5 +115,17 @@ class LocalDataProvider implements DataProvider {
                 jsonDecode(await _vaultRegisterFile.readAsString()))
             .registers
         : [];
+  }
+
+  @override
+  Future<Vault> decryptVault(
+      EncryptAlgorithm algorithm, String key, Vault vault) {
+    try {
+      vault.data = VaultData.fromJson(
+          jsonDecode(EncryptUtils.decrypt(algorithm, key, vault.datacrypt)));
+    } catch (e) {
+      throw const InvalidKeyException();
+    }
+    return Future.value(vault);
   }
 }

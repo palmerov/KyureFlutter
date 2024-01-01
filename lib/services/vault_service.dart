@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 
+import 'package:kyure/config/values.dart';
 import 'package:kyure/data/models/vault.dart';
 import 'package:kyure/data/models/vault_data.dart';
 import 'package:kyure/data/models/vault_register.dart';
@@ -10,16 +11,17 @@ import 'package:kyure/data/repositories/local_data_provider.dart';
 import 'package:kyure/data/repositories/remote_data_provider.dart';
 import 'package:kyure/data/utils/account_utils.dart';
 import 'package:kyure/data/utils/encrypt_utils.dart';
+import 'package:kyure/data/utils/file_utils.dart';
 import 'package:kyure/data/utils/group_utils.dart';
 import 'package:kyure/services/service_locator.dart';
 import 'package:kyure/services/version/vault_version_system_service.dart';
 
 class VaultService {
-  late final VaultVersionSystemService vaultVersionSystemService;
-  late final LocalDataProvider localDataProvider;
-  late final DataProvider? remoteDataProvider;
-  late final List<VaultRegister> _localVaultRegisters;
-  late final List<VaultRegister>? _remoteVaultRegisters;
+  late VaultVersionSystemService vaultVersionSystemService;
+  late LocalDataProvider localDataProvider;
+  DataProvider? remoteDataProvider;
+  List<VaultRegister> _localVaultRegisters = [];
+  List<VaultRegister>? _remoteVaultRegisters;
 
   String? _key;
   String? _vaultName;
@@ -46,16 +48,19 @@ class VaultService {
 
   get localVaultNames => _localVaultRegisters.map((e) => e.name).toList();
 
-  void init(String localPath, RemoteInitData? remoteInitData) async {
+  init(String localPath, RemoteInitData? remoteInitData) async {
+    vaultVersionSystemService = VaultVersionSystemService();
     // local
     localDataProvider = serviceLocator.getLocalDataProvider();
     await localDataProvider.init(localPath);
     _localVaultRegisters = await localDataProvider.listVaults();
 
-    remoteDataProvider = serviceLocator.getRemoteDataProvider();
-    if (remoteDataProvider != null) {
-      await remoteDataProvider!.init(localPath);
-    }
+    try {
+      remoteDataProvider = serviceLocator.getRemoteDataProvider();
+      if (remoteDataProvider != null) {
+        await remoteDataProvider!.init(localPath);
+      }
+    } catch (e) {}
   }
 
   bool existVaultInLocal(String vaultName) {
@@ -72,9 +77,13 @@ class VaultService {
   }
 
   bool existVaultFileInLocal(File file) {
+    return existVaultInLocal(getVaultNameFromFile(file));
+  }
+
+  String getVaultNameFromFile(File file) {
     Vault vault = Vault.fromJson(
         jsonDecode(file.readAsStringSync()) as Map<String, dynamic>);
-    return existVaultInLocal(vault.vaultName);
+    return vault.vaultName;
   }
 
   _fetchRemoteVaultRegisters() async {
@@ -90,13 +99,10 @@ class VaultService {
     _vaultName = vaultName;
     _key = key;
     _algorithm = algorithm;
-    _accounts = _vaultData!.accounts.values.toList();
-    _groups = _vaultData!.groups.values.toList();
-    sort(_vaultData!.sort);
     await _readVaultData();
   }
 
-  void sort(SortBy method) {
+  void sort(SortBy method, [bool save = true]) {
     switch (method) {
       case SortBy.nameDesc:
         _accounts!.sort((a, b) => a.name.compareTo(b.name));
@@ -119,8 +125,11 @@ class VaultService {
   }
 
   File getVaultFile() {
-    return File(
-        '${localDataProvider.rootDir.path}${_localVaultRegisters.firstWhere((element) => element.name == _vaultName).path}');
+    return File(concatPath(
+        localDataProvider.rootVaultDir.path,
+        _localVaultRegisters
+            .firstWhere((element) => element.name == _vaultName)
+            .path));
   }
 
   void closeVault() {
@@ -135,6 +144,9 @@ class VaultService {
       _vault =
           await localDataProvider.readVault(_algorithm!, _key!, _vaultName!);
       _vaultData = _vault!.data;
+      _accounts = _vaultData!.accounts.values.toList();
+      _groups = _vaultData!.groups.values.toList();
+      sort(_vaultData!.sort, false);
     } catch (exception) {
       print(exception.toString());
       rethrow;
@@ -169,21 +181,48 @@ class VaultService {
     return !existRemoteVault || outOfDateWithRemote;
   }
 
-  Future<void> createNewVault(String vaultName) async {
+  Future<void> createNewVault(
+      String vaultName, EncryptAlgorithm algorithm, String key) async {
     _vaultName = vaultName;
+    _key = key;
+    _algorithm = algorithm;
     _vault = Vault(
         modifDate: DateTime.now(),
         vaultName: vaultName,
         data: VaultData(
             accounts: {},
             deletedAccounts: {},
-            groups: {},
+            groups: {-1: GROUP_ALL.copyWith()},
             deletedGroups: {},
             modifDate: DateTime.now(),
             sort: SortBy.modifDateDesc),
         datacrypt: '');
     _vaultData = _vault!.data!;
+    _accounts = [];
+    _groups = _vaultData!.groups.values.toList();
     saveVaultData(false, false);
+  }
+
+  Future<SyncResult> syncWithFile(String? fileVaultKey, File file) async {
+    try {
+      fileVaultKey ??= _key;
+      Vault fileEncryptedVault =
+          Vault.fromJson(jsonDecode(file.readAsStringSync()));
+      if (fileEncryptedVault.vaultName != _vaultName) {
+        return SyncResult.incompatible;
+      }
+      try {
+        final fileVault = await localDataProvider.decryptVault(
+            _algorithm!, fileVaultKey!, fileEncryptedVault);
+        await mergeVault(fileVault, fileVaultKey);
+      } on InvalidKeyException {
+        return SyncResult.wrongRemoteKey;
+      }
+      return SyncResult.success;
+    } catch (exception) {
+      log(exception.toString());
+      return SyncResult.accessError;
+    }
   }
 
   Future<SyncResult> syncWithRemote(String? remoteKey) async {
@@ -222,10 +261,10 @@ class VaultService {
         } else {
           await remoteDataProvider?.writeVault(
               _algorithm!, _key!, _vaultName!, _vault!);
-          return SyncResult.upToDate;
+          return SyncResult.success;
         }
       }
-      return SyncResult.upToDate;
+      return SyncResult.success;
     } catch (exception) {
       log(exception.toString());
       return SyncResult.accessError;
@@ -283,6 +322,7 @@ class VaultService {
     _vaultData!.deletedAccounts.removeWhere((key, value) =>
         AccountUtils.simplifyName(value) == simpleName &&
         value.fieldUsername.data == account.fieldUsername.data);
+    _accounts!.add(account);
     await saveVaultData(false, true);
     return true;
   }
@@ -295,6 +335,7 @@ class VaultService {
     String simpleName = group.name.trim().toLowerCase();
     _vaultData!.deletedGroups.removeWhere(
         (key, value) => value.name.trim().toLowerCase() == simpleName);
+    _groups!.add(group);
     await saveVaultData(false, true);
     return true;
   }
@@ -326,6 +367,8 @@ class VaultService {
     account.status = LifeStatus.deleted;
     _vaultData!.accounts.remove(account.id);
     _vaultData!.deletedAccounts[account.id] = account;
+    _accounts!
+        .removeAt(_accounts!.indexWhere((element) => account.id == element.id));
     saveVaultData(false, true);
   }
 
@@ -333,8 +376,9 @@ class VaultService {
     group.status = LifeStatus.deleted;
     _vaultData!.groups.remove(group.id);
     _vaultData!.deletedGroups[group.id] = group;
+    _groups!.removeAt(_groups!.indexWhere((element) => group.id == element.id));
     saveVaultData(false, true);
   }
 }
 
-enum SyncResult { accessError, wrongRemoteKey, upToDate }
+enum SyncResult { accessError, wrongRemoteKey, incompatible, success }

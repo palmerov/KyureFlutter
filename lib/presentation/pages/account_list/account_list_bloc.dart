@@ -1,9 +1,14 @@
+import 'dart:io';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kyure/data/models/vault_data.dart';
+import 'package:kyure/data/utils/dialog_utils.dart';
 import 'package:kyure/services/kiure_service.dart';
 import 'package:equatable/equatable.dart';
 import 'package:kyure/services/service_locator.dart';
 import 'package:kyure/services/vault_service.dart';
+import 'package:quickalert/models/quickalert_type.dart';
 
 class AccountListPageBloc extends Cubit<AccountListPageState> {
   late final KiureService kiureService;
@@ -62,7 +67,7 @@ class AccountListPageBloc extends Cubit<AccountListPageState> {
 
   void deleteGroup(AccountGroup group) {
     vaultService.deleteGroup(group);
-    emit(state.copyWith(version: state.version + 1));
+    emit(state.copyWith(version: state.version + 1, selectedGroupIndex: 0));
   }
 
   Future<String> exportFile() async {
@@ -73,6 +78,35 @@ class AccountListPageBloc extends Cubit<AccountListPageState> {
     vaultService.sort(method);
     emit(state.copyWith(version: state.version + 1));
   }
+
+  syncWithFile([String? key]) async {
+    final result = await FilePicker.platform
+        .pickFiles(allowMultiple: false, type: FileType.any);
+    if (result != null) {
+      File file = File(result.files.single.path!);
+      final syncResult = await vaultService.syncWithFile(null, file);
+      switch (syncResult) {
+        case SyncResult.success:
+          emit(state.copyWith(
+              alertMessage: AlertMessage(
+                type: QuickAlertType.success,
+                text: 'Sincronizado con éxito',
+                confirmBtnText: 'Ok',
+              ),
+              version: state.version + 1,
+              accounts: vaultService.accounts!,
+              groups: vaultService.groups!));
+          break;
+        case SyncResult.incompatible:
+          // TODO: incompatible error
+          break;
+        case SyncResult.wrongRemoteKey:
+          // TODO: show insert remote key
+          break;
+        case SyncResult.accessError:
+      }
+    }
+  }
 }
 
 class AccountListPageState extends Equatable {
@@ -81,24 +115,28 @@ class AccountListPageState extends Equatable {
       this.groups = const [],
       this.selectedGroupIndex = 0,
       this.filter = '',
-      this.version = 0});
+      this.version = 0,
+      this.alertMessage});
   final List<Account> accounts;
   final List<AccountGroup> groups;
   final int selectedGroupIndex;
   final int version;
   final String filter;
+  final AlertMessage? alertMessage;
 
   AccountListPageState copyWith(
       {List<Account>? accounts,
       List<AccountGroup>? groups,
       int? selectedGroupIndex,
       String? filter,
-      int? version}) {
+      int? version,
+      AlertMessage? alertMessage}) {
     return AccountListPageState(
         accounts: accounts ?? this.accounts,
         groups: groups ?? this.groups,
         version: version ?? this.version,
         filter: filter ?? this.filter,
+        alertMessage: alertMessage,
         selectedGroupIndex: selectedGroupIndex ?? this.selectedGroupIndex);
   }
 

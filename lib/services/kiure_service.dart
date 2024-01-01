@@ -32,7 +32,7 @@ class KiureService {
     // services
     String rootPath = '${(await getApplicationDocumentsDirectory()).path}kiure';
     _vaultService = serviceLocator.getVaultService();
-    _vaultService.init(rootPath, null);
+    await _vaultService.init(rootPath, null);
 
     // recent accounts
     _recentAccountIds = jsonDecode(_prefs.getString('recent_accounts') ?? '{}');

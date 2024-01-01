@@ -34,11 +34,11 @@ class LockPageBloc extends Cubit<LockPageState> {
               vaultNames: vaultService.localVaultNames,
               selectedVault: vaultService.vaultName));
         } else {
+          String name = vaultService.getVaultNameFromFile(file);
           emit(LockMessageState(
               message:
-                  """La bóveda que estás tratando de importar ya existe localmente. , con una versión superior.
-Por favor, elimine la bóveda existente llamada "${vaultService.vaultName!}" o cambie su nombre.
-Para hacerlo debe ingresar en ella antes."""));
+                  """La bóveda "$name" ya existe localmente.
+Debes ingresar en ella y usar la opción "Sincronizar desde archivo" para actualizarla."""));
         }
       } catch (exception) {
         emit(LockMessageState(
@@ -65,7 +65,7 @@ Detalles del error ${exception.toString()}."""));
   }
 
   initVaultService() async {
-    kiureService.init();
+    await kiureService.init();
     emit(LockPageState(
         vaultNames: vaultService.localVaultNames,
         selectedVault: vaultService.vaultName));
@@ -93,8 +93,8 @@ Detalles del error ${exception.toString()}."""));
 
   Future<String?> createNewVault(String key) async {
     try {
-      vaultService.key = key;
-      await vaultService.createNewVault(vaultNameCreated!);
+      await vaultService.createNewVault(
+          vaultNameCreated!, EncryptAlgorithm.AES, key);
       emitLoginState();
     } catch (exception) {
       print(exception.toString());

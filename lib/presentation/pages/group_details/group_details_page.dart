@@ -49,6 +49,7 @@ class _GroupDetailsView extends StatelessWidget {
               assetImages: assetImages,
               onAssetImageSelected: (assetImage) {
                 bloc.setIconName(assetImage);
+                context.pop();
               },
             ),
           );

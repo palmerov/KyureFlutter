@@ -9,10 +9,11 @@ class AccountUtils {
       id = 1;
     }
     Account? accountFound = accounts[id];
+    String simpleName = simplifyName(account);
     if (accountFound != null) {
       do {
-        if (accountFound?.name == account.name &&
-            accountFound?.fieldUsername.data == account.fieldUsername.data) {
+        if (simplifyName(accountFound!) == simpleName &&
+            accountFound.fieldUsername.data == account.fieldUsername.data) {
           return false;
         }
         id = getNextId(id, accounts);
@@ -21,6 +22,11 @@ class AccountUtils {
       account.id = id;
       return true;
     } else {
+      if (accounts.values.any((element) =>
+          simplifyName(element) == simpleName &&
+          element.fieldUsername.data == account.fieldUsername.data)) {
+        return false;
+      }
       account.id = id;
       accounts[id] = account;
       return true;
@@ -36,11 +42,13 @@ class AccountUtils {
   }
 
   static int hashAccount(Account account) {
-    return account.name.hashCode ^ account.fieldUsername.data.hashCode;
+    return simplifyName(account).hashCode ^
+        account.fieldUsername.data.trim().hashCode;
   }
 
   static String simplifyName(Account account) {
     return account.name
+        .trim()
         .toLowerCase()
         .replaceAll(' ', '')
         .replaceAll('-', '')

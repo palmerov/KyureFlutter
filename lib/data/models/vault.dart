@@ -8,7 +8,7 @@ part 'vault.g.dart';
 class Vault with _$Vault {
   factory Vault({
     @JsonKey(name: 'vault_name') required String vaultName,
-    @JsonKey(name: 'version') required DateTime modifDate,
+    @JsonKey(name: 'modif_date') required DateTime modifDate,
     @JsonKey(name: 'datacrypt') required String datacrypt,
     @JsonKey(includeToJson: false, includeFromJson: false) VaultData? data, 
   }) = _Vault;

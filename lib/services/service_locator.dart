@@ -15,8 +15,8 @@ class ServiceLocator {
 
   void registerAll() {
     _getit.registerSingleton<LocalDataProvider>(LocalDataProvider());
-    _getit.registerSingleton(KiureService());
     _getit.registerSingleton(VaultService());
+    _getit.registerSingleton(KiureService());
   }
 
   void registerRemoteDataProvider<T extends DataProvider>(T instance) {
