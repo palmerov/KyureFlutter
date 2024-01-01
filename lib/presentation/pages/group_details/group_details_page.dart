@@ -29,7 +29,7 @@ class GroupDetailsPage extends StatelessWidget {
 }
 
 class _GroupDetailsView extends StatelessWidget {
-  _GroupDetailsView({super.key});
+  _GroupDetailsView();
 
   final double imgSize = 64;
   final TextEditingController _nameController = TextEditingController();
@@ -39,20 +39,22 @@ class _GroupDetailsView extends StatelessWidget {
     final json =
         jsonDecode(await rootBundle.loadString('assets/svg_icons.json'));
     final assetImages = json['icons'].cast<String>();
-    showDialog(
-      context: context,
-      builder: (context) {
-        return Container(
-          color: KyTheme.of(context)!.colorBackground,
-          child: AssetImageSelectorOrganism(
-            assetImages: assetImages,
-            onAssetImageSelected: (assetImage) {
-              bloc.setIconName(assetImage);
-            },
-          ),
-        );
-      },
-    );
+    if (context.mounted) {
+      showDialog(
+        context: context,
+        builder: (context) {
+          return Container(
+            color: KyTheme.of(context)!.colorBackground,
+            child: AssetImageSelectorOrganism(
+              assetImages: assetImages,
+              onAssetImageSelected: (assetImage) {
+                bloc.setIconName(assetImage);
+              },
+            ),
+          );
+        },
+      );
+    }
   }
 
   _showColorPickerDialog(BuildContext context, Color color) async {
@@ -78,7 +80,6 @@ class _GroupDetailsView extends StatelessWidget {
   Widget build(BuildContext context) {
     final kytheme = KyTheme.of(context)!;
     final bloc = BlocProvider.of<GroupDetailsBloc>(context);
-    final wsize = MediaQuery.of(context).size;
     _nameController.text = bloc.groupCopy.name;
     return Scaffold(
       appBar: AppBar(
@@ -161,7 +162,7 @@ class _GroupDetailsView extends StatelessWidget {
                       }
                       if (bloc.isNew &&
                           serviceLocator
-                                  .getKiureService()
+                                  .getVaultService()
                                   .findGroupByName(_nameController.text) !=
                               null) {
                         return 'Ya existe un grupo con ese nombre';

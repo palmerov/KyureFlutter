@@ -8,8 +8,6 @@ import 'package:kyure/services/vault_service.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-enum SortMethod { nameAsc, nameDesc, noOrder, creationAsc, creationDesc }
-
 class KiureService {
   late SharedPreferences _prefs;
   late VaultService _vaultService;
@@ -32,7 +30,9 @@ class KiureService {
     _vaultName = _prefs.getString('vaultName');
 
     // services
+    String rootPath = '${(await getApplicationDocumentsDirectory()).path}kiure';
     _vaultService = serviceLocator.getVaultService();
+    _vaultService.init(rootPath, null);
 
     // recent accounts
     _recentAccountIds = jsonDecode(_prefs.getString('recent_accounts') ?? '{}');

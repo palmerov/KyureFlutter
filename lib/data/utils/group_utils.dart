@@ -17,9 +17,16 @@ class AccountGroupUtils {
 
   static List<AccountGroup> getAllGroups() {
     List<AccountGroup> groupList = [
-      GROUP_NILL,
+      GROUP_ALL,
       ...serviceLocator.getVaultService().groups!
     ];
     return groupList;
+  }
+
+  static bool assignId(AccountGroup group, Map<int, AccountGroup> groups) {
+    int id = group.name.trim().toLowerCase().hashCode;
+    if (groups.containsKey(id)) return false;
+    group.id = id;
+    return true;
   }
 }

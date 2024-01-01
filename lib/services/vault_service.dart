@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 
@@ -9,6 +10,7 @@ import 'package:kyure/data/repositories/local_data_provider.dart';
 import 'package:kyure/data/repositories/remote_data_provider.dart';
 import 'package:kyure/data/utils/account_utils.dart';
 import 'package:kyure/data/utils/encrypt_utils.dart';
+import 'package:kyure/data/utils/group_utils.dart';
 import 'package:kyure/services/service_locator.dart';
 import 'package:kyure/services/version/vault_version_system_service.dart';
 
@@ -36,6 +38,14 @@ class VaultService {
 
   String? get vaultName => _vaultName;
 
+  set key(String? key) => _key = key;
+
+  get localVaultRegisters => _localVaultRegisters;
+
+  set vaultName(String? name) => _vaultName = name;
+
+  get localVaultNames => _localVaultRegisters.map((e) => e.name).toList();
+
   void init(String localPath, RemoteInitData? remoteInitData) async {
     // local
     localDataProvider = serviceLocator.getLocalDataProvider();
@@ -59,6 +69,12 @@ class VaultService {
     return (_remoteVaultRegisters ?? [])
         .where((element) => element.name == vaultName)
         .isNotEmpty;
+  }
+
+  bool existVaultFileInLocal(File file) {
+    Vault vault = Vault.fromJson(
+        jsonDecode(file.readAsStringSync()) as Map<String, dynamic>);
+    return existVaultInLocal(vault.vaultName);
   }
 
   _fetchRemoteVaultRegisters() async {
@@ -99,6 +115,7 @@ class VaultService {
         _groups!.sort((a, b) => b.id.compareTo(a.id));
         break;
     }
+    saveVaultData(false, true);
   }
 
   File getVaultFile() {
@@ -124,8 +141,14 @@ class VaultService {
     }
   }
 
-  Future<void> saveVaultData() async {
+  Future<void> saveVaultData(bool updateVault, bool updateVaultData) async {
     try {
+      if (updateVault) {
+        _vault!.modifDate = DateTime.now();
+      }
+      if (updateVaultData) {
+        _vaultData!.modifDate = DateTime.now();
+      }
       await localDataProvider.writeVault(
           _algorithm!, _key!, _vaultName!, _vault!);
     } catch (exception) {
@@ -160,7 +183,7 @@ class VaultService {
             sort: SortBy.modifDateDesc),
         datacrypt: '');
     _vaultData = _vault!.data!;
-    saveVaultData();
+    saveVaultData(false, false);
   }
 
   Future<SyncResult> syncWithRemote(String? remoteKey) async {
@@ -187,7 +210,7 @@ class VaultService {
             return SyncResult.wrongRemoteKey;
           }
           if (remoteVault != null) {
-            final updateDirection = await mergeVault(remoteVault);
+            final updateDirection = await mergeVault(remoteVault, remoteKey!);
             if (updateDirection == UpdateDirection.toRemote ||
                 updateDirection == UpdateDirection.toRemoteAndLocal) {
               await remoteDataProvider?.writeVault(
@@ -209,19 +232,28 @@ class VaultService {
     }
   }
 
-  Future<UpdateDirection> mergeVault(Vault vault) async {
+  Future<UpdateDirection> mergeVault(
+      Vault decryptedVault, String vaultKey) async {
     try {
-      final vaultName = vault.vaultName;
+      final vaultName = decryptedVault.vaultName;
       if (vaultName == _vaultName) {
         UpdateDirection updateDirection;
         VaultData mergedVaultData;
         (mergedVaultData, updateDirection) = await vaultVersionSystemService
-            .getMergedData(_vaultData!, vault.data!);
+            .getMergedData(_vaultData!, decryptedVault.data!);
+        bool updatekey = decryptedVault.modifDate
+            .isAfter(_vault!.modifDate); // has the incomming vault a newer key?
         if (updateDirection == UpdateDirection.toLocal ||
-            updateDirection == UpdateDirection.toRemoteAndLocal) {
+            updateDirection == UpdateDirection.toRemoteAndLocal ||
+            updatekey) {
           _vaultData = mergedVaultData;
           _vault!.data = mergedVaultData;
-          await saveVaultData();
+          if (updatekey) {
+            // update the current vault key with the newer
+            _key = vaultKey;
+            _vault!.modifDate = decryptedVault.modifDate;
+          }
+          await saveVaultData(false, false);
         }
         return updateDirection;
       }
@@ -244,15 +276,32 @@ class VaultService {
 
   Future<bool> addNewAccount(Account account) async {
     bool insert = AccountUtils.assignId(account, _vaultData!.accounts);
-    if (!insert) return Future.value(false);
+    if (!insert) return false;
     _vaultData!.accounts[account.id] = account;
     // if exists in deletted accounts, remove from there
     String simpleName = AccountUtils.simplifyName(account);
     _vaultData!.deletedAccounts.removeWhere((key, value) =>
         AccountUtils.simplifyName(value) == simpleName &&
         value.fieldUsername.data == account.fieldUsername.data);
-    await saveVaultData();
+    await saveVaultData(false, true);
     return true;
+  }
+
+  Future<bool> addNewGroup(AccountGroup group) async {
+    bool insert = AccountGroupUtils.assignId(group, _vaultData!.groups);
+    if (!insert) return false;
+    _vaultData!.groups[group.id] = group;
+    // if exists in deletted groups, remove from there
+    String simpleName = group.name.trim().toLowerCase();
+    _vaultData!.deletedGroups.removeWhere(
+        (key, value) => value.name.trim().toLowerCase() == simpleName);
+    await saveVaultData(false, true);
+    return true;
+  }
+
+  Future updateKey(String key) async {
+    _key = key;
+    await saveVaultData(true, false);
   }
 
   Account? findAccountById(int accountId) {
@@ -263,18 +312,28 @@ class VaultService {
     return _vaultData!.groups[groupId];
   }
 
+  AccountGroup? findGroupByName(String name) {
+    name = name.trim().toLowerCase();
+    for (var group in groups!) {
+      if (group.name.trim().toLowerCase() == name) {
+        return group;
+      }
+    }
+    return null;
+  }
+
   void deleteAccount(Account account) {
     account.status = LifeStatus.deleted;
     _vaultData!.accounts.remove(account.id);
     _vaultData!.deletedAccounts[account.id] = account;
-    saveVaultData();
+    saveVaultData(false, true);
   }
 
   void deleteGroup(AccountGroup group) {
     group.status = LifeStatus.deleted;
     _vaultData!.groups.remove(group.id);
     _vaultData!.deletedGroups[group.id] = group;
-    saveVaultData();
+    saveVaultData(false, true);
   }
 }
 

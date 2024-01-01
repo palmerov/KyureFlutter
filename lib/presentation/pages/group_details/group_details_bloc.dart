@@ -13,10 +13,13 @@ class GroupDetailsBloc extends Cubit<GroupDetailsState> {
 
   GroupDetailsBloc({required this.group, this.isNew = false})
       : groupCopy = AccountGroup(
-            iconName: group.iconName,
-            name: group.name,
-            color: group.color,
-            accounts: group.accounts),
+          id: group.id,
+          iconName: group.iconName,
+          name: group.name,
+          color: group.color,
+          modifDate: group.modifDate,
+          status: group.status,
+        ),
         super(GroupDetailsInitial(
             color: Color(group.color),
             iconName: group.iconName,
@@ -28,11 +31,7 @@ class GroupDetailsBloc extends Cubit<GroupDetailsState> {
     group.color = groupCopy.color;
     saved = true;
     if (isNew) {
-      serviceLocator
-          .getKiureService()
-          .vault!
-          .accountGroups
-          .add(group);
+      serviceLocator.getVaultService().addNewGroup(group);
     }
   }
 

@@ -18,7 +18,7 @@ class AccountDetailsBloc extends Cubit<AccountDetailsState> {
             selectedGroup: serviceLocator
                     .getVaultService()
                     .findGroupById(account.groupId) ??
-                GROUP_NILL)) {
+                GROUP_ALL)) {
     if (editting) {
       edit();
     }

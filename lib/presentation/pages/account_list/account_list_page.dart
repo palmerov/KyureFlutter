@@ -23,7 +23,6 @@ import 'package:kyure/presentation/theme/ky_theme.dart';
 import 'package:kyure/presentation/widgets/molecules/svg_icon.dart';
 import 'package:kyure/services/service_locator.dart';
 import 'package:blur/blur.dart';
-import 'package:kyure/services/kiure_service.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 class AccountListPage extends StatelessWidget {
@@ -32,8 +31,7 @@ class AccountListPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) =>
-          AccountListPageBloc(serviceLocator.getKiureService())..load(),
+      create: (context) => AccountListPageBloc()..load(),
       child: _AccountListView(),
     );
   }
@@ -136,7 +134,7 @@ class _AccountListView extends StatelessWidget {
                       'editting': 'true'
                     });
                     if (edited != null && (edited as bool)) {
-                      bloc.reload();
+                      bloc.reload(true);
                     }
                   },
                   label: 'Editar',
@@ -211,7 +209,7 @@ class _AccountListView extends StatelessWidget {
     final updated = await context.pushNamed(KyRoutes.accountEditor.name,
         queryParameters: {'id': '${account.id}', 'editting': '$editting'});
     if (updated != null) {
-      bloc.reload();
+      bloc.reload(true);
     }
   }
 
@@ -226,39 +224,32 @@ class _AccountListView extends StatelessWidget {
               children: [
                 ContextMenuTileMolecule(
                     onTap: () {
-                      bloc.sort(SortMethod.nameDesc);
+                      bloc.sort(SortBy.nameDesc);
                       context.pop();
                     },
                     label: 'Nombre: A -> Z',
                     icon: const Icon(Icons.sort_by_alpha_rounded)),
                 ContextMenuTileMolecule(
                     onTap: () {
-                      bloc.sort(SortMethod.nameAsc);
+                      bloc.sort(SortBy.nameAsc);
                       context.pop();
                     },
                     label: 'Nombre: Z -> A',
                     icon: const Icon(Icons.sort_by_alpha_rounded)),
                 ContextMenuTileMolecule(
                     onTap: () {
-                      bloc.sort(SortMethod.creationDesc);
+                      bloc.sort(SortBy.modifDateDesc);
                       context.pop();
                     },
                     label: 'Creación: reciente -> anterior',
                     icon: const Icon(Icons.sort_rounded)),
                 ContextMenuTileMolecule(
                     onTap: () {
-                      bloc.sort(SortMethod.creationAsc);
+                      bloc.sort(SortBy.modifDateAsc);
                       context.pop();
                     },
                     label: 'Creación: anterior -> reciente',
                     icon: const Icon(Icons.sort_rounded)),
-                ContextMenuTileMolecule(
-                    onTap: () {
-                      bloc.sort(SortMethod.noOrder);
-                      context.pop();
-                    },
-                    label: 'Sin orden',
-                    icon: const Icon(Icons.sort_rounded))
               ],
             ),
             shape:
@@ -269,7 +260,6 @@ class _AccountListView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final wsizeP = MediaQuery.of(context).size;
     final kyTheme = KyTheme.of(context)!;
     AccountListPageBloc bloc = BlocProvider.of<AccountListPageBloc>(context);
     final bool isPcScreen = MediaQuery.of(context).size.width > 600;
@@ -321,7 +311,7 @@ class _AccountListView extends StatelessWidget {
                               }
                             },
                             child: PageView.builder(
-                              itemCount: state.accountGroups.length,
+                              itemCount: state.groups.length,
                               controller: _pageController,
                               physics: const BouncingScrollPhysics(),
                               onPageChanged: (value) {
@@ -340,14 +330,23 @@ class _AccountListView extends StatelessWidget {
                                       previous.version != current.version ||
                                       current is AccountListPageFilteredState,
                                   builder: (context, state) {
+                                    AccountGroup pageGroup =
+                                        state.groups[state.selectedGroupIndex];
+                                    List<Account> pageAccounts = state
+                                                .selectedGroupIndex ==
+                                            0
+                                        ? state.accounts
+                                        : state.accounts
+                                            .where((element) =>
+                                                element.groupId == pageGroup.id)
+                                            .toList();
                                     return ListView.builder(
                                       physics: const BouncingScrollPhysics(),
                                       padding: const EdgeInsets.only(
                                           top: 100, bottom: 60),
                                       itemBuilder: (context, accountIndex) {
-                                        Account account = state
-                                            .accountGroups[groupIndex]
-                                            .accounts[accountIndex];
+                                        Account account =
+                                            pageAccounts[accountIndex];
                                         return AccountItemMolecule(
                                           account: account,
                                           onTap: () => _openAccountDetails(
@@ -357,10 +356,7 @@ class _AccountListView extends StatelessWidget {
                                                   bloc, context, account),
                                         );
                                       },
-                                      itemCount: state.accountGroups.isEmpty
-                                          ? 0
-                                          : state.accountGroups[groupIndex]
-                                              .accounts.length,
+                                      itemCount: pageAccounts.length,
                                     );
                                   },
                                 ),
@@ -434,11 +430,13 @@ class _AccountListView extends StatelessWidget {
                                       return ScrollablePositionedList.builder(
                                         itemScrollController:
                                             _itemScrollController,
-                                        physics: const ClampingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+                                        physics: const ClampingScrollPhysics(
+                                            parent:
+                                                AlwaysScrollableScrollPhysics()),
                                         scrollDirection: Axis.horizontal,
                                         itemBuilder: (context, groupIndex) {
                                           final group =
-                                              state.accountGroups[groupIndex];
+                                              state.groups[groupIndex];
                                           return AccountGroupMolecule(
                                               text: group.name,
                                               color: Color(group.color),
@@ -455,7 +453,7 @@ class _AccountListView extends StatelessWidget {
                                                   state.selectedGroupIndex ==
                                                       groupIndex);
                                         },
-                                        itemCount: state.accountGroups.length,
+                                        itemCount: state.groups.length,
                                       );
                                     },
                                   )),
@@ -505,7 +503,7 @@ class _AccountListView extends StatelessWidget {
                               final saved = await context
                                   .pushNamed(KyRoutes.groupEditor.name);
                               if (saved != null && (saved as bool)) {
-                                bloc.reload();
+                                bloc.reload(true);
                               }
                             },
                           ),
@@ -515,9 +513,8 @@ class _AccountListView extends StatelessWidget {
                             text: '+ Cuenta',
                             onTap: () async {
                               if (serviceLocator
-                                      .getKiureService()
-                                      .vault!
-                                      .accountGroups
+                                      .getVaultService()
+                                      .groups!
                                       .length ==
                                   1) {
                                 _showYesOrNoDialog(context, 'No hay grupos',
@@ -526,14 +523,15 @@ class _AccountListView extends StatelessWidget {
                                   final saved = await context
                                       .pushNamed(KyRoutes.groupEditor.name);
                                   if (saved != null && (saved as bool)) {
-                                    bloc.reload();
+                                    bloc.reload(true);
                                   }
                                 }, () => null);
                               } else {
                                 final result = await context
                                     .pushNamed(KyRoutes.accountEditor.name);
-                                if (result != null && (result as bool))
-                                  bloc.reload();
+                                if (result != null && (result as bool)) {
+                                  bloc.reload(true);
+                                }
                               }
                             },
                           )
@@ -725,7 +723,7 @@ class Drawer extends StatelessWidget {
                   TextButton(
                       onPressed: () {
                         context.pop();
-                        serviceLocator.getKiureService().deleteVault();
+                        serviceLocator.getVaultService().deleteVault(false);
                         context.goNamed(KyRoutes.lockPage.name,
                             queryParameters: {'blockedByUser': 'true'});
                       },

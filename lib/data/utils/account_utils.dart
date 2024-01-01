@@ -3,6 +3,11 @@ import 'package:kyure/data/models/vault_data.dart';
 class AccountUtils {
   static bool assignId(Account account, Map<int, Account> accounts) {
     int id = hashAccount(account);
+    if (id < 0) {
+      id = -id;
+    } else if (id == 0) {
+      id = 1;
+    }
     Account? accountFound = accounts[id];
     if (accountFound != null) {
       do {

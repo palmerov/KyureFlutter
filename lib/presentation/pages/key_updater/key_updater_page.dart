@@ -15,7 +15,6 @@ class KeyUpdaterPage extends StatelessWidget {
 }
 
 class _KeyUpdaterView extends StatelessWidget {
-  _KeyUpdaterView();
 
   @override
   Widget build(BuildContext context) {
@@ -43,11 +42,11 @@ class _KeyUpdaterView extends StatelessWidget {
                   obscureText: false,
                   onBackgroundColor: kTheme.colorOnBackground,
                   onTapEnter: (key) async {
-                    if (key.length < 4) {
-                      return 'La clave debe tener al menos 4 caracteres';
+                    if (key.length < 8) {
+                      return 'La clave debe tener al menos 8 caracteres';
                     }
-                    serviceLocator.getKiureService().key = key;
-                    serviceLocator.getKiureService().saveVaultData();
+
+                    serviceLocator.getVaultService().updateKey(key);
                     return 'La llave se ha cambiado con éxito';
                   },
                   title: 'Inserta la nueva llave de cifrado'),

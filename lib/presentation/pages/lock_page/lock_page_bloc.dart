@@ -1,19 +1,21 @@
 import 'dart:io';
-
 import 'package:equatable/equatable.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:kyure/main.dart';
-import 'package:kyure/services/service_locator.dart';
+import 'package:kyure/data/utils/encrypt_utils.dart';
 import 'package:kyure/services/kiure_service.dart';
+import 'package:kyure/services/service_locator.dart';
+import 'package:kyure/services/vault_service.dart';
 
 class LockPageBloc extends Cubit<LockPageState> {
-  late KiureService vaultService;
+  late KiureService kiureService;
+  late VaultService vaultService;
   final bool blockedByUser;
   String? vaultNameCreated;
 
   LockPageBloc(this.blockedByUser) : super(LockPageInitialState()) {
-    vaultService = serviceLocator.getKiureService();
+    kiureService = serviceLocator.getKiureService();
+    vaultService = serviceLocator.getVaultService();
   }
 
   emitLoginState() {
@@ -26,15 +28,15 @@ class LockPageBloc extends Cubit<LockPageState> {
     if (result != null) {
       File file = File(result.files.single.path!);
       try {
-        bool possible = await vaultService.importVault(file);
+        bool possible = !vaultService.existVaultFileInLocal(file);
         if (possible) {
           emit(LockPageState(
-              vaultNames: vaultService.vaultNames,
+              vaultNames: vaultService.localVaultNames,
               selectedVault: vaultService.vaultName));
         } else {
           emit(LockMessageState(
               message:
-                  """La bóveda que estás tratando de importar ya existe en local, con una versión superior.
+                  """La bóveda que estás tratando de importar ya existe localmente. , con una versión superior.
 Por favor, elimine la bóveda existente llamada "${vaultService.vaultName!}" o cambie su nombre.
 Para hacerlo debe ingresar en ella antes."""));
         }
@@ -52,7 +54,8 @@ Detalles del error ${exception.toString()}."""));
       return 'La llave debe tener al menos 4 caracteres';
     }
     try {
-      await vaultService.openVault(state.selectedVault??'', key);
+      await vaultService.openVault(
+          state.selectedVault ?? '', EncryptAlgorithm.AES, key);
       emitLoginState();
     } catch (exception) {
       print(exception.toString());
@@ -62,16 +65,16 @@ Detalles del error ${exception.toString()}."""));
   }
 
   initVaultService() async {
-    await vaultService.init();
+    kiureService.init();
     emit(LockPageState(
-        vaultNames: vaultService.vaultNames,
+        vaultNames: vaultService.localVaultNames,
         selectedVault: vaultService.vaultName));
   }
 
   selectVault(String vaultName) {
     vaultService.vaultName = vaultName;
     emit(LockPageState(
-        vaultNames: vaultService.vaultNames, selectedVault: vaultName));
+        vaultNames: vaultService.localVaultNames, selectedVault: vaultName));
   }
 
   createVault() {
@@ -80,7 +83,7 @@ Detalles del error ${exception.toString()}."""));
 
   validateName(String vaultName) {
     vaultNameCreated = vaultName;
-    if (vaultService.existVault(vaultName)) {
+    if (vaultService.existVaultInLocal(vaultName)) {
       emit(LockPageCreatingVaultState(
           message: 'Ya existe una bóveda con ese nombre', valid: false));
     } else {
