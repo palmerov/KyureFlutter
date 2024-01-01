@@ -8,39 +8,66 @@ part of 'vault_data.dart';
 
 _$VaultDataImpl _$$VaultDataImplFromJson(Map<String, dynamic> json) =>
     _$VaultDataImpl(
-      accountGroups: (json['accounts_data'] as List<dynamic>)
-          .map((e) => AccountGroup.fromJson(e as Map<String, dynamic>))
-          .toList(),
+      accounts: (json['accounts'] as Map<String, dynamic>).map(
+        (k, e) =>
+            MapEntry(int.parse(k), Account.fromJson(e as Map<String, dynamic>)),
+      ),
+      deletedAccounts: (json['del_accounts'] as Map<String, dynamic>).map(
+        (k, e) =>
+            MapEntry(int.parse(k), Account.fromJson(e as Map<String, dynamic>)),
+      ),
+      groups: (json['groups'] as Map<String, dynamic>).map(
+        (k, e) => MapEntry(
+            int.parse(k), AccountGroup.fromJson(e as Map<String, dynamic>)),
+      ),
+      deletedGroups: (json['del_groups'] as Map<String, dynamic>).map(
+        (k, e) => MapEntry(
+            int.parse(k), AccountGroup.fromJson(e as Map<String, dynamic>)),
+      ),
+      sort: SortBy.fromJson(json['sort'] as int),
+      modifDate: DateTime.parse(json['modif_date'] as String),
     );
 
 Map<String, dynamic> _$$VaultDataImplToJson(_$VaultDataImpl instance) =>
     <String, dynamic>{
-      'accounts_data': instance.accountGroups,
+      'accounts': instance.accounts.map((k, e) => MapEntry(k.toString(), e)),
+      'del_accounts':
+          instance.deletedAccounts.map((k, e) => MapEntry(k.toString(), e)),
+      'groups': instance.groups.map((k, e) => MapEntry(k.toString(), e)),
+      'del_groups':
+          instance.deletedGroups.map((k, e) => MapEntry(k.toString(), e)),
+      'sort': instance.sort,
+      'modif_date': instance.modifDate.toIso8601String(),
     };
 
 _$AccountGroupImpl _$$AccountGroupImplFromJson(Map<String, dynamic> json) =>
     _$AccountGroupImpl(
+      id: json['id'] as int,
       iconName: json['icon'] as String,
       name: json['name'] as String,
       color: json['color'] as int,
-      accounts: (json['accounts'] as List<dynamic>)
-          .map((e) => Account.fromJson(e as Map<String, dynamic>))
-          .toList(),
+      modifDate: DateTime.parse(json['modif_date'] as String),
+      status: LifeStatus.fromJson(json['status'] as int),
     );
 
 Map<String, dynamic> _$$AccountGroupImplToJson(_$AccountGroupImpl instance) =>
     <String, dynamic>{
+      'id': instance.id,
       'icon': instance.iconName,
       'name': instance.name,
       'color': instance.color,
-      'accounts': instance.accounts,
+      'modif_date': instance.modifDate.toIso8601String(),
+      'status': instance.status,
     };
 
 _$AccountImpl _$$AccountImplFromJson(Map<String, dynamic> json) =>
     _$AccountImpl(
       id: json['id'] as int,
+      groupId: json['group_id'] as int,
+      status: LifeStatus.fromJson(json['status'] as int),
       name: json['name'] as String,
-      image: AccountImage.fromJson(json['image'] as Map<String, dynamic>),
+      modifDate: DateTime.parse(json['modif_date'] as String),
+      image: ImageSource.fromJson(json['image'] as Map<String, dynamic>),
       fieldUsername:
           AccountField.fromJson(json['username'] as Map<String, dynamic>),
       fieldPassword:
@@ -53,7 +80,10 @@ _$AccountImpl _$$AccountImplFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$$AccountImplToJson(_$AccountImpl instance) =>
     <String, dynamic>{
       'id': instance.id,
+      'group_id': instance.groupId,
+      'status': instance.status,
       'name': instance.name,
+      'modif_date': instance.modifDate.toIso8601String(),
       'image': instance.image,
       'username': instance.fieldUsername,
       'password': instance.fieldPassword,
@@ -74,13 +104,13 @@ Map<String, dynamic> _$$AccountFieldImplToJson(_$AccountFieldImpl instance) =>
       'visible': instance.visible,
     };
 
-_$AccountImageImpl _$$AccountImageImplFromJson(Map<String, dynamic> json) =>
-    _$AccountImageImpl(
+_$ImageSourceImpl _$$ImageSourceImplFromJson(Map<String, dynamic> json) =>
+    _$ImageSourceImpl(
       path: json['path'] as String,
-      source: ImageSource.fromJson(json['source'] as String),
+      source: ImageSourceType.fromJson(json['source'] as String),
     );
 
-Map<String, dynamic> _$$AccountImageImplToJson(_$AccountImageImpl instance) =>
+Map<String, dynamic> _$$ImageSourceImplToJson(_$ImageSourceImpl instance) =>
     <String, dynamic>{
       'path': instance.path,
       'source': instance.source,

@@ -78,7 +78,7 @@ class ApplicationBloc extends Cubit<ApplicationState> {
     BuildContext? context = kiureNavigatorKey.currentContext;
     if (context != null) {
       context.goNamed(KyRoutes.lockPage.name);
-      serviceLocator.getKiureService().closeVault();
+      serviceLocator.getVaultService().closeVault();
     }
   }
 
@@ -112,7 +112,7 @@ class ApplicationBloc extends Cubit<ApplicationState> {
               showingWindow = !showingWindow;
               restartSystemTry();
             }),
-        if (serviceLocator.getKiureService().vault != null)
+        if (serviceLocator.getVaultService().isOpen)
           MenuItemLabel(
               label: 'Bloquear',
               image: 'assets/app_icons/lock_tray.png',
@@ -123,8 +123,9 @@ class ApplicationBloc extends Cubit<ApplicationState> {
         ...serviceLocator.getKiureService().vaultRecentAccounts.map((e) =>
             SubMenu(
                 label: e.name,
-                image:
-                    e.image.source == ImageSource.assets ? e.image.path : null,
+                image: e.image.source == ImageSourceType.asset
+                    ? e.image.path
+                    : null,
                 children: [
                   MenuItemLabel(
                       label: e.fieldUsername.data,

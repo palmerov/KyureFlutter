@@ -7,14 +7,14 @@ part of 'vault.dart';
 // **************************************************************************
 
 _$VaultImpl _$$VaultImplFromJson(Map<String, dynamic> json) => _$VaultImpl(
-      version: json['version'] as int,
       vaultName: json['vault_name'] as String,
+      modifDate: DateTime.parse(json['version'] as String),
       datacrypt: json['datacrypt'] as String,
     );
 
 Map<String, dynamic> _$$VaultImplToJson(_$VaultImpl instance) =>
     <String, dynamic>{
-      'version': instance.version,
       'vault_name': instance.vaultName,
+      'version': instance.modifDate.toIso8601String(),
       'datacrypt': instance.datacrypt,
     };

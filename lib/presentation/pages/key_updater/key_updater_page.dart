@@ -47,7 +47,7 @@ class _KeyUpdaterView extends StatelessWidget {
                       return 'La clave debe tener al menos 4 caracteres';
                     }
                     serviceLocator.getKiureService().key = key;
-                    serviceLocator.getKiureService().writeVaultData();
+                    serviceLocator.getKiureService().saveVaultData();
                     return 'La llave se ha cambiado con éxito';
                   },
                   title: 'Inserta la nueva llave de cifrado'),

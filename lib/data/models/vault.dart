@@ -7,10 +7,10 @@ part 'vault.g.dart';
 @unfreezed
 class Vault with _$Vault {
   factory Vault({
-    @JsonKey(name: 'version') required int version,
     @JsonKey(name: 'vault_name') required String vaultName,
+    @JsonKey(name: 'version') required DateTime modifDate,
     @JsonKey(name: 'datacrypt') required String datacrypt,
-    @JsonKey(includeToJson: false, includeFromJson: false) VaultData? accountsData, 
+    @JsonKey(includeToJson: false, includeFromJson: false) VaultData? data, 
   }) = _Vault;
 
   factory Vault.fromJson(Map<String, dynamic> json) =>

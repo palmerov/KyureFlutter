@@ -20,22 +20,22 @@ Vault _$VaultFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$Vault {
-  @JsonKey(name: 'version')
-  int get version => throw _privateConstructorUsedError;
-  @JsonKey(name: 'version')
-  set version(int value) => throw _privateConstructorUsedError;
   @JsonKey(name: 'vault_name')
   String get vaultName => throw _privateConstructorUsedError;
   @JsonKey(name: 'vault_name')
   set vaultName(String value) => throw _privateConstructorUsedError;
+  @JsonKey(name: 'version')
+  DateTime get modifDate => throw _privateConstructorUsedError;
+  @JsonKey(name: 'version')
+  set modifDate(DateTime value) => throw _privateConstructorUsedError;
   @JsonKey(name: 'datacrypt')
   String get datacrypt => throw _privateConstructorUsedError;
   @JsonKey(name: 'datacrypt')
   set datacrypt(String value) => throw _privateConstructorUsedError;
   @JsonKey(includeToJson: false, includeFromJson: false)
-  VaultData? get accountsData => throw _privateConstructorUsedError;
+  VaultData? get data => throw _privateConstructorUsedError;
   @JsonKey(includeToJson: false, includeFromJson: false)
-  set accountsData(VaultData? value) => throw _privateConstructorUsedError;
+  set data(VaultData? value) => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
@@ -48,13 +48,12 @@ abstract class $VaultCopyWith<$Res> {
       _$VaultCopyWithImpl<$Res, Vault>;
   @useResult
   $Res call(
-      {@JsonKey(name: 'version') int version,
-      @JsonKey(name: 'vault_name') String vaultName,
+      {@JsonKey(name: 'vault_name') String vaultName,
+      @JsonKey(name: 'version') DateTime modifDate,
       @JsonKey(name: 'datacrypt') String datacrypt,
-      @JsonKey(includeToJson: false, includeFromJson: false)
-      VaultData? accountsData});
+      @JsonKey(includeToJson: false, includeFromJson: false) VaultData? data});
 
-  $VaultDataCopyWith<$Res>? get accountsData;
+  $VaultDataCopyWith<$Res>? get data;
 }
 
 /// @nodoc
@@ -70,40 +69,40 @@ class _$VaultCopyWithImpl<$Res, $Val extends Vault>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? version = null,
     Object? vaultName = null,
+    Object? modifDate = null,
     Object? datacrypt = null,
-    Object? accountsData = freezed,
+    Object? data = freezed,
   }) {
     return _then(_value.copyWith(
-      version: null == version
-          ? _value.version
-          : version // ignore: cast_nullable_to_non_nullable
-              as int,
       vaultName: null == vaultName
           ? _value.vaultName
           : vaultName // ignore: cast_nullable_to_non_nullable
               as String,
+      modifDate: null == modifDate
+          ? _value.modifDate
+          : modifDate // ignore: cast_nullable_to_non_nullable
+              as DateTime,
       datacrypt: null == datacrypt
           ? _value.datacrypt
           : datacrypt // ignore: cast_nullable_to_non_nullable
               as String,
-      accountsData: freezed == accountsData
-          ? _value.accountsData
-          : accountsData // ignore: cast_nullable_to_non_nullable
+      data: freezed == data
+          ? _value.data
+          : data // ignore: cast_nullable_to_non_nullable
               as VaultData?,
     ) as $Val);
   }
 
   @override
   @pragma('vm:prefer-inline')
-  $VaultDataCopyWith<$Res>? get accountsData {
-    if (_value.accountsData == null) {
+  $VaultDataCopyWith<$Res>? get data {
+    if (_value.data == null) {
       return null;
     }
 
-    return $VaultDataCopyWith<$Res>(_value.accountsData!, (value) {
-      return _then(_value.copyWith(accountsData: value) as $Val);
+    return $VaultDataCopyWith<$Res>(_value.data!, (value) {
+      return _then(_value.copyWith(data: value) as $Val);
     });
   }
 }
@@ -116,14 +115,13 @@ abstract class _$$VaultImplCopyWith<$Res> implements $VaultCopyWith<$Res> {
   @override
   @useResult
   $Res call(
-      {@JsonKey(name: 'version') int version,
-      @JsonKey(name: 'vault_name') String vaultName,
+      {@JsonKey(name: 'vault_name') String vaultName,
+      @JsonKey(name: 'version') DateTime modifDate,
       @JsonKey(name: 'datacrypt') String datacrypt,
-      @JsonKey(includeToJson: false, includeFromJson: false)
-      VaultData? accountsData});
+      @JsonKey(includeToJson: false, includeFromJson: false) VaultData? data});
 
   @override
-  $VaultDataCopyWith<$Res>? get accountsData;
+  $VaultDataCopyWith<$Res>? get data;
 }
 
 /// @nodoc
@@ -137,27 +135,27 @@ class __$$VaultImplCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? version = null,
     Object? vaultName = null,
+    Object? modifDate = null,
     Object? datacrypt = null,
-    Object? accountsData = freezed,
+    Object? data = freezed,
   }) {
     return _then(_$VaultImpl(
-      version: null == version
-          ? _value.version
-          : version // ignore: cast_nullable_to_non_nullable
-              as int,
       vaultName: null == vaultName
           ? _value.vaultName
           : vaultName // ignore: cast_nullable_to_non_nullable
               as String,
+      modifDate: null == modifDate
+          ? _value.modifDate
+          : modifDate // ignore: cast_nullable_to_non_nullable
+              as DateTime,
       datacrypt: null == datacrypt
           ? _value.datacrypt
           : datacrypt // ignore: cast_nullable_to_non_nullable
               as String,
-      accountsData: freezed == accountsData
-          ? _value.accountsData
-          : accountsData // ignore: cast_nullable_to_non_nullable
+      data: freezed == data
+          ? _value.data
+          : data // ignore: cast_nullable_to_non_nullable
               as VaultData?,
     ));
   }
@@ -167,31 +165,30 @@ class __$$VaultImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$VaultImpl implements _Vault {
   _$VaultImpl(
-      {@JsonKey(name: 'version') required this.version,
-      @JsonKey(name: 'vault_name') required this.vaultName,
+      {@JsonKey(name: 'vault_name') required this.vaultName,
+      @JsonKey(name: 'version') required this.modifDate,
       @JsonKey(name: 'datacrypt') required this.datacrypt,
-      @JsonKey(includeToJson: false, includeFromJson: false)
-      this.accountsData});
+      @JsonKey(includeToJson: false, includeFromJson: false) this.data});
 
   factory _$VaultImpl.fromJson(Map<String, dynamic> json) =>
       _$$VaultImplFromJson(json);
 
   @override
-  @JsonKey(name: 'version')
-  int version;
-  @override
   @JsonKey(name: 'vault_name')
   String vaultName;
+  @override
+  @JsonKey(name: 'version')
+  DateTime modifDate;
   @override
   @JsonKey(name: 'datacrypt')
   String datacrypt;
   @override
   @JsonKey(includeToJson: false, includeFromJson: false)
-  VaultData? accountsData;
+  VaultData? data;
 
   @override
   String toString() {
-    return 'Vault(version: $version, vaultName: $vaultName, datacrypt: $datacrypt, accountsData: $accountsData)';
+    return 'Vault(vaultName: $vaultName, modifDate: $modifDate, datacrypt: $datacrypt, data: $data)';
   }
 
   @JsonKey(ignore: true)
@@ -210,24 +207,24 @@ class _$VaultImpl implements _Vault {
 
 abstract class _Vault implements Vault {
   factory _Vault(
-      {@JsonKey(name: 'version') required int version,
-      @JsonKey(name: 'vault_name') required String vaultName,
+      {@JsonKey(name: 'vault_name') required String vaultName,
+      @JsonKey(name: 'version') required DateTime modifDate,
       @JsonKey(name: 'datacrypt') required String datacrypt,
       @JsonKey(includeToJson: false, includeFromJson: false)
-      VaultData? accountsData}) = _$VaultImpl;
+      VaultData? data}) = _$VaultImpl;
 
   factory _Vault.fromJson(Map<String, dynamic> json) = _$VaultImpl.fromJson;
 
-  @override
-  @JsonKey(name: 'version')
-  int get version;
-  @JsonKey(name: 'version')
-  set version(int value);
   @override
   @JsonKey(name: 'vault_name')
   String get vaultName;
   @JsonKey(name: 'vault_name')
   set vaultName(String value);
+  @override
+  @JsonKey(name: 'version')
+  DateTime get modifDate;
+  @JsonKey(name: 'version')
+  set modifDate(DateTime value);
   @override
   @JsonKey(name: 'datacrypt')
   String get datacrypt;
@@ -235,9 +232,9 @@ abstract class _Vault implements Vault {
   set datacrypt(String value);
   @override
   @JsonKey(includeToJson: false, includeFromJson: false)
-  VaultData? get accountsData;
+  VaultData? get data;
   @JsonKey(includeToJson: false, includeFromJson: false)
-  set accountsData(VaultData? value);
+  set data(VaultData? value);
   @override
   @JsonKey(ignore: true)
   _$$VaultImplCopyWith<_$VaultImpl> get copyWith =>

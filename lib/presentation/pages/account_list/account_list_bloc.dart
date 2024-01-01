@@ -63,7 +63,7 @@ class AccountListPageBloc extends Cubit<AccountListPageState> {
   }
 
   void reload() {
-    userDataService.writeVaultData();
+    userDataService.saveVaultData();
     emit(state.copyWith(version: state.version + 1));
   }
 

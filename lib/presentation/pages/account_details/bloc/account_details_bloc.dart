@@ -1,42 +1,49 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:kyure/config/values.dart';
 import 'package:kyure/data/models/vault_data.dart';
 import 'package:kyure/services/service_locator.dart';
 
 class AccountDetailsBloc extends Cubit<AccountDetailsState> {
-  AccountGroup group;
-  AccountGroup? groupTo;
   Account account;
   Account? accountCopy;
   bool isNewAccount;
 
-  AccountDetailsBloc(
-      {required this.account, required this.group, required bool editting})
+  AccountDetailsBloc({required this.account, required bool editting})
       : isNewAccount = account.id < 0,
         super(AccountDetailsInitial(
-            imageSource: account.image.source,
-            selectedGroup: group,
             editting: editting,
-            imagePath: account.image.path)) {
+            imagePath: account.image.path,
+            imageSourceType: account.image.source,
+            selectedGroup: serviceLocator
+                    .getVaultService()
+                    .findGroupById(account.groupId) ??
+                GROUP_NILL)) {
     if (editting) {
       edit();
     }
   }
 
-  void selectImage(String image, ImageSource source) {
-    accountCopy!.image = AccountImage(path: image, source: source);
-    emit(state.copyWith(imagePath: image, imageSource: source));
+  void selectImage(String image, ImageSourceType source) {
+    accountCopy!.image = ImageSource(path: image, source: source);
+    emit(state.copyWith(imagePath: image, imageSourceType: source));
   }
 
-  void selectGroup(AccountGroup group) {
-    if (group.name != groupTo?.name) {
-      groupTo = group;
+  void selectGroup(AccountGroup? group) {
+    if (group == null) {
+      accountCopy!.groupId = -1;
+      emit(state.copyWith(selectedGroup: group));
+    } else if (group.id != accountCopy!.groupId) {
+      accountCopy!.groupId = group.id;
       emit(state.copyWith(selectedGroup: group));
     }
   }
 
   void edit() {
     accountCopy = Account(
+        groupId: account.groupId,
+        modifDate: account.modifDate,
+        status: account.status,
         id: account.id,
         name: account.name,
         image: account.image,
@@ -61,21 +68,17 @@ class AccountDetailsBloc extends Cubit<AccountDetailsState> {
     accountCopy!.fieldPassword = fields[1];
     accountCopy!.fieldList = fields.isEmpty ? null : fields.sublist(2);
     if (isNewAccount) {
-      groupTo ??= group;
-      serviceLocator.getKiureService().addNewAccount(accountCopy!, groupTo!);
+      serviceLocator.getVaultService().addNewAccount(accountCopy!);
       isNewAccount = false;
       account = accountCopy!;
     } else {
-      if (groupTo != null) {
-        serviceLocator.getKiureService().moveInGroups(account, group, groupTo!);
-      }
+      account.groupId = accountCopy!.groupId;
       account.name = accountCopy!.name;
       account.image = accountCopy!.image;
       account.fieldPassword = accountCopy!.fieldPassword;
       account.fieldUsername = accountCopy!.fieldUsername;
       account.fieldList = accountCopy!.fieldList;
     }
-    group = groupTo ?? group;
     emit(state.copyWith(editting: false));
   }
 }
@@ -85,24 +88,24 @@ class AccountDetailsState extends Equatable {
     required this.selectedGroup,
     required this.editting,
     required this.imagePath,
-    required this.imageSource,
+    required this.imageSourceType,
   });
   final AccountGroup selectedGroup;
   final bool editting;
   final String imagePath;
-  final ImageSource imageSource;
+  final ImageSourceType imageSourceType;
   @override
   List<Object?> get props =>
-      [selectedGroup.name, editting, imagePath, imageSource];
+      [selectedGroup.name, editting, imagePath, imageSourceType];
 
   //copy with
   AccountDetailsState copyWith(
       {AccountGroup? selectedGroup,
       bool? editting,
       String? imagePath,
-      ImageSource? imageSource}) {
+      ImageSourceType? imageSourceType}) {
     return AccountDetailsState(
-        imageSource: imageSource ?? this.imageSource,
+        imageSourceType: imageSourceType ?? this.imageSourceType,
         imagePath: imagePath ?? this.imagePath,
         selectedGroup: selectedGroup ?? this.selectedGroup,
         editting: editting ?? this.editting);
@@ -111,9 +114,9 @@ class AccountDetailsState extends Equatable {
 
 class AccountDetailsInitial extends AccountDetailsState {
   const AccountDetailsInitial({
-    required super.selectedGroup,
     required super.editting,
     required super.imagePath,
-    required super.imageSource,
+    required super.imageSourceType,
+    required super.selectedGroup,
   });
 }

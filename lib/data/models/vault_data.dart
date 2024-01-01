@@ -6,7 +6,12 @@ part 'vault_data.g.dart';
 @unfreezed
 class VaultData with _$VaultData {
   factory VaultData({
-    @JsonKey(name: 'accounts_data') required List<AccountGroup> accountGroups,
+    @JsonKey(name: 'accounts') required Map<int, Account> accounts,
+    @JsonKey(name: 'del_accounts') required Map<int, Account> deletedAccounts,
+    @JsonKey(name: 'groups') required Map<int, AccountGroup> groups,
+    @JsonKey(name: 'del_groups') required Map<int, AccountGroup> deletedGroups,
+    @JsonKey(name: 'sort') required SortBy sort,
+    @JsonKey(name: 'modif_date') required DateTime modifDate,
   }) = _VaultData;
 
   factory VaultData.fromJson(Map<String, dynamic> json) =>
@@ -15,12 +20,14 @@ class VaultData with _$VaultData {
 
 @unfreezed
 class AccountGroup with _$AccountGroup {
-  factory AccountGroup(
-          {@JsonKey(name: 'icon') required String iconName,
-          @JsonKey(name: 'name') required String name,
-          @JsonKey(name: 'color') required int color,
-          @JsonKey(name: 'accounts') required List<Account> accounts}) =
-      _AccountGroup;
+  factory AccountGroup({
+    @JsonKey(name: 'id') required int id,
+    @JsonKey(name: 'icon') required String iconName,
+    @JsonKey(name: 'name') required String name,
+    @JsonKey(name: 'color') required int color,
+    @JsonKey(name: 'modif_date') required DateTime modifDate,
+    @JsonKey(name: 'status') required LifeStatus status,
+  }) = _AccountGroup;
 
   factory AccountGroup.fromJson(Map<String, dynamic> json) =>
       _$AccountGroupFromJson(json);
@@ -30,8 +37,11 @@ class AccountGroup with _$AccountGroup {
 class Account with _$Account {
   factory Account({
     @JsonKey(name: 'id') required int id,
+    @JsonKey(name: 'group_id') required int groupId,
+    @JsonKey(name: 'status') required LifeStatus status,
     @JsonKey(name: 'name') required String name,
-    @JsonKey(name: 'image') required AccountImage image,
+    @JsonKey(name: 'modif_date') required DateTime modifDate,
+    @JsonKey(name: 'image') required ImageSource image,
     @JsonKey(name: 'username') required AccountField fieldUsername,
     @JsonKey(name: 'password') required AccountField fieldPassword,
     @JsonKey(name: 'fields') List<AccountField>? fieldList,
@@ -53,41 +63,72 @@ class AccountField with _$AccountField {
 }
 
 @unfreezed
-class AccountImage with _$AccountImage {
-  factory AccountImage({
+class ImageSource with _$ImageSource {
+  factory ImageSource({
     @JsonKey(name: 'path') required String path,
-    @JsonKey(name: 'source') required ImageSource source,
-  }) = _AccountImage;
+    @JsonKey(name: 'source') required ImageSourceType source,
+  }) = _ImageSource;
 
-  factory AccountImage.fromJson(Map<String, dynamic> json) =>
-      _$AccountImageFromJson(json);
+  factory ImageSource.fromJson(Map<String, dynamic> json) =>
+      _$ImageSourceFromJson(json);
 }
 
-enum ImageSource {
-  assets,
-  network,
-  file;
+enum LifeStatus {
+  active(1),
+  deleted(2);
 
-  factory ImageSource.fromJson(String json) {
-    switch (json) {
-      case 'assets':
-        return ImageSource.assets;
-      case 'network':
-        return ImageSource.network;
-      case 'file':
-        return ImageSource.file;
+  const LifeStatus(this.value);
+  final int value;
+
+  factory LifeStatus.fromJson(int json) {
+    for (LifeStatus status in LifeStatus.values) {
+      if (status.value == json) return status;
     }
-    return ImageSource.assets;
+    return LifeStatus.active;
+  }
+
+  int toJson() {
+    return value;
+  }
+}
+
+enum SortBy {
+  nameAsc(1),
+  nameDesc(-1),
+  modifDateAsc(2),
+  modifDateDesc(-2);
+
+  const SortBy(this.value);
+  final int value;
+
+  factory SortBy.fromJson(int value) {
+    for (SortBy sort in SortBy.values) {
+      if (sort.value == value) return sort;
+    }
+    return SortBy.nameAsc;
+  }
+
+  int toJson() {
+    return value;
+  }
+}
+
+enum ImageSourceType {
+  asset('asset'),
+  network('network'),
+  file('file');
+
+  const ImageSourceType(this.value);
+  final String value;
+
+  factory ImageSourceType.fromJson(String json) {
+    for (ImageSourceType sourceType in ImageSourceType.values) {
+      if (sourceType.value == json) return sourceType;
+    }
+    return ImageSourceType.asset;
   }
 
   String toJson() {
-    switch (this) {
-      case ImageSource.assets:
-        return 'assets';
-      case ImageSource.network:
-        return 'network';
-      case ImageSource.file:
-        return 'file';
-    }
+    return value;
   }
 }

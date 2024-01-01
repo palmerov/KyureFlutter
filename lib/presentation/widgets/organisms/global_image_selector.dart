@@ -13,8 +13,9 @@ import 'package:kyure/presentation/widgets/organisms/asset_image_selector.dart';
 class GlobalImageSelectorOrganism extends StatefulWidget {
   const GlobalImageSelectorOrganism(
       {super.key, required this.onImageSelected, required this.image});
-  final Function(String imagePath, ImageSource imageSource) onImageSelected;
-  final AccountImage image;
+  final Function(String imagePath, ImageSourceType imageSourceType)
+      onImageSelected;
+  final ImageSource image;
 
   @override
   State<GlobalImageSelectorOrganism> createState() =>
@@ -24,7 +25,7 @@ class GlobalImageSelectorOrganism extends StatefulWidget {
 class _GlobalImageSelectorOrganismState
     extends State<GlobalImageSelectorOrganism> {
   String? path;
-  ImageSource? imageSource;
+  ImageSourceType? imageSourceType;
   List<String>? assetImages;
   late TextEditingController textEdController;
 
@@ -32,9 +33,9 @@ class _GlobalImageSelectorOrganismState
   void initState() {
     super.initState();
     path = widget.image.path;
-    imageSource = widget.image.source;
+    imageSourceType = widget.image.source;
     textEdController = TextEditingController(
-        text: (widget.image.source == ImageSource.network)
+        text: (widget.image.source == ImageSourceType.network)
             ? widget.image.path
             : '');
     initAssetImages();
@@ -79,8 +80,8 @@ class _GlobalImageSelectorOrganismState
                   child: AssetImageSelectorOrganism(
                       assetImages: assetImages!,
                       onAssetImageSelected: (assetImage) => setState(() {
-                            textEdController!.text = '';
-                            imageSource = ImageSource.assets;
+                            textEdController.text = '';
+                            imageSourceType = ImageSourceType.asset;
                             path = assetImage;
                           })),
                 ),
@@ -94,7 +95,8 @@ class _GlobalImageSelectorOrganismState
                     size: 64,
                     radius: 12,
                     image: AnyImage(
-                      source: AnyImageSource.fromJson(imageSource!.toJson()),
+                      source:
+                          AnyImageSource.fromJson(imageSourceType!.toJson()),
                       image: path!,
                       height: 64,
                       width: 64,
@@ -123,7 +125,7 @@ class _GlobalImageSelectorOrganismState
                                   textEdController.text =
                                       (await ClipboardUtils.paste()) ?? '';
                                   setState(() {
-                                    imageSource = ImageSource.network;
+                                    imageSourceType = ImageSourceType.network;
                                     path = textEdController.text;
                                   });
                                 },
@@ -142,7 +144,7 @@ class _GlobalImageSelectorOrganismState
                           borderRadius: BorderRadius.all(Radius.circular(12))),
                     ),
                     onChanged: (value) => setState(() {
-                      imageSource = ImageSource.network;
+                      imageSourceType = ImageSourceType.network;
                       path = value;
                     }),
                   ),
@@ -157,7 +159,7 @@ class _GlobalImageSelectorOrganismState
                 icon: const Icon(Icons.check),
                 label: const Text('Seleccionar'),
                 onPressed: () {
-                  widget.onImageSelected(path!, imageSource!);
+                  widget.onImageSelected(path!, imageSourceType!);
                 }),
           ],
         ),

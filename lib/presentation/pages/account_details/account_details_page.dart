@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kyure/data/models/vault_data.dart';
+import 'package:kyure/data/utils/group_utils.dart';
 import 'package:kyure/presentation/pages/account_details/bloc/account_details_bloc.dart';
 import 'package:kyure/presentation/theme/ky_theme.dart';
 import 'package:kyure/presentation/widgets/atoms/any_image.dart';
@@ -12,24 +13,19 @@ import 'package:kyure/presentation/widgets/molecules/image_rounded.dart';
 import 'package:kyure/presentation/widgets/molecules/svg_icon.dart';
 import 'package:kyure/presentation/widgets/organisms/account_form_data.dart';
 import 'package:kyure/presentation/widgets/organisms/global_image_selector.dart';
-import 'package:kyure/services/service_locator.dart';
 
 class AccountDetailsPage extends StatelessWidget {
-  const AccountDetailsPage({
-    Key? key,
-    required this.account,
-    required this.editing,
-    required this.group,
-  }) : super(key: key);
+  const AccountDetailsPage(
+      {Key? key, required this.account, required this.editing})
+      : super(key: key);
   final bool editing;
   final Account account;
-  final AccountGroup group;
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) =>
-          AccountDetailsBloc(account: account, group: group, editting: editing),
+          AccountDetailsBloc(account: account, editting: editing),
       child: _AccountDetailsView(
         account: account,
       ),
@@ -38,7 +34,7 @@ class AccountDetailsPage extends StatelessWidget {
 }
 
 class _AccountDetailsView extends StatelessWidget {
-  _AccountDetailsView({super.key, required Account account}) {
+  _AccountDetailsView({required Account account}) {
     tecName = TextEditingController(text: account.name);
   }
   late final TextEditingController tecName;
@@ -52,17 +48,18 @@ class _AccountDetailsView extends StatelessWidget {
     showModalBottomSheet(
         context: _keyScaffold.currentContext!,
         constraints: BoxConstraints(
-            maxHeight: MediaQuery.of(context).size.height * 0.76, minHeight: MediaQuery.of(context).size.height * 0.76),
+            maxHeight: MediaQuery.of(context).size.height * 0.76,
+            minHeight: MediaQuery.of(context).size.height * 0.76),
         shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.only(
                 topLeft: Radius.circular(16), topRight: Radius.circular(16))),
         builder: (context) => GlobalImageSelectorOrganism(
-          image: bloc.accountCopy!.image,
-          onImageSelected: (imagePath, source) {
-            context.pop();
-            bloc.selectImage(imagePath, source);
-          },
-        ));
+              image: bloc.accountCopy!.image,
+              onImageSelected: (imagePath, source) {
+                context.pop();
+                bloc.selectImage(imagePath, source);
+              },
+            ));
   }
 
   @override
@@ -124,11 +121,12 @@ class _AccountDetailsView extends StatelessWidget {
                                 bloc: bloc,
                                 buildWhen: (previous, current) =>
                                     previous.imagePath != current.imagePath ||
-                                    previous.imageSource != current.imageSource,
+                                    previous.imageSourceType !=
+                                        current.imageSourceType,
                                 builder: (context, state) {
                                   return AnyImage(
                                       source: AnyImageSource.fromJson(
-                                          state.imageSource.toJson()),
+                                          state.imageSourceType.toJson()),
                                       image: state.imagePath);
                                 },
                               )),
@@ -172,7 +170,7 @@ class _AccountDetailsView extends StatelessWidget {
                               ),
                               SizedBox(
                                 height: 36,
-                                child: PopupMenuButton(
+                                child: PopupMenuButton<AccountGroup>(
                                   enabled: state.editting,
                                   onSelected: (value) =>
                                       bloc.selectGroup(value),
@@ -181,9 +179,7 @@ class _AccountDetailsView extends StatelessWidget {
                                       borderRadius: BorderRadius.all(
                                           Radius.circular(16))),
                                   itemBuilder: (context) {
-                                    return serviceLocator
-                                        .getKiureService()
-                                        .getRealGroups()
+                                    return AccountGroupUtils.getAllGroups()
                                         .map((e) => PopupMenuItem(
                                             value: e,
                                             height: 44,
@@ -203,8 +199,8 @@ class _AccountDetailsView extends StatelessWidget {
                                   child: BlocBuilder<AccountDetailsBloc,
                                       AccountDetailsState>(
                                     buildWhen: (previous, current) =>
-                                        previous.selectedGroup.name !=
-                                        current.selectedGroup.name,
+                                        previous.selectedGroup.id !=
+                                        current.selectedGroup.id,
                                     builder: (context, state) {
                                       return AccountGroupMolecule(
                                         radius: 12,
