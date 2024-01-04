@@ -1,11 +1,8 @@
 import 'dart:io';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:kyure/main.dart';
 import 'package:vibration/vibration.dart';
-
-class KeyFormController {}
 
 class KeyFormOrganism extends StatefulWidget {
   const KeyFormOrganism(

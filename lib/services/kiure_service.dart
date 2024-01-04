@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:kyure/data/models/vault_data.dart';
 import 'package:kyure/data/repositories/local_data_provider.dart';
+import 'package:kyure/data/utils/file_utils.dart';
 import 'package:kyure/main.dart';
 import 'package:kyure/services/service_locator.dart';
 import 'package:kyure/services/vault_service.dart';
@@ -30,7 +31,7 @@ class KiureService {
     _vaultName = _prefs.getString('vaultName');
 
     // services
-    String rootPath = '${(await getApplicationDocumentsDirectory()).path}kiure';
+    String rootPath = (await getLocalInternalRootDir()).path;
     _vaultService = serviceLocator.getVaultService();
     await _vaultService.init(rootPath, null);
 

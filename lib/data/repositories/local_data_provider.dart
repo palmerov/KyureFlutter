@@ -15,6 +15,7 @@ class LocalDataProvider implements DataProvider {
   @override
   Future init(String rootPath) async {
     _rootVaultDir = Directory(concatPath(rootPath, VAULTS_DIR_NAME));
+    await _rootVaultDir.create(recursive: true);
     _vaultRegisterFile =
         File(concatPath(_rootVaultDir.path, VAULT_REGISTER_FILE_NAME));
     await _updateRegister();
@@ -42,7 +43,8 @@ class LocalDataProvider implements DataProvider {
     }
     String strRegister =
         jsonEncode(RepositoryRegister(registers: vaultRegisters).toJson());
-    if (_vaultRegisterFile.readAsStringSync() != strRegister) {
+    if (!(await _vaultRegisterFile.exists()) ||
+        _vaultRegisterFile.readAsStringSync() != strRegister) {
       await _vaultRegisterFile.writeAsString(strRegister);
     }
   }

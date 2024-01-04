@@ -93,7 +93,7 @@ BEGIN
             VALUE "FileDescription", "kyure" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
             VALUE "InternalName", "kyure" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2023 com.example. All rights reserved." "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2023 com.palmerov. All rights reserved." "\0"
             VALUE "OriginalFilename", "kyure.exe" "\0"
             VALUE "ProductName", "kyure" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"

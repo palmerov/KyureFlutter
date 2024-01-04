@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:kyure/data/models/vault_data.dart';
-import 'package:kyure/presentation/theme/ky_theme.dart';
 import 'package:kyure/presentation/widgets/molecules/account_field.dart';
 import 'package:kyure/services/service_locator.dart';
 
@@ -63,7 +62,6 @@ class AccountFormDataOrganismState extends State<AccountFormDataOrganism> {
 
   @override
   Widget build(BuildContext context) {
-    final kTheme = KyTheme.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
