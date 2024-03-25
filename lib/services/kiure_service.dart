@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:kyure/data/models/vault_data.dart';
-import 'package:kyure/data/repositories/local_data_provider.dart';
 import 'package:kyure/data/utils/file_utils.dart';
 import 'package:kyure/main.dart';
 import 'package:kyure/services/service_locator.dart';
@@ -12,7 +11,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 class KiureService {
   late SharedPreferences _prefs;
   late VaultService _vaultService;
-  late LocalDataProvider localDataProvider;
   bool initialized = false;
   Map<String, dynamic> _recentAccountIds = {};
   List<Account> _vaultRecentAccounts = [];

@@ -1,48 +1,8 @@
-import 'package:kyure/data/models/vault.dart';
-import 'package:kyure/data/models/vault_register.dart';
 import 'package:kyure/data/repositories/data_provider.dart';
-import 'package:kyure/data/utils/encrypt_utils.dart';
 
-class DropBoxDataProvider implements DataProvider{
+abstract class RemoteDataProvider extends DataProvider {
 
-  @override
-  Future<void> init(String rootPath) {
-    // TODO: implement init
-    throw UnimplementedError();
-  }
+  Future<dynamic> authorize(Map<String, String> values);
 
-  @override
-  Future<List<VaultRegister>> listVaults() {
-    // TODO: implement listVaults
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<Vault?> readVault(EncryptAlgorithm algorithm, String key, String vaultName) {
-    // TODO: implement readVault
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<void> writeVault(EncryptAlgorithm algorithm, String key, String vaultName, Vault vault) {
-    // TODO: implement writeVault
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<void> deleteVault(String vaultName) {
-    // TODO: implement deleteVault
-    throw UnimplementedError();
-  }
-  
-  @override
-  Future<Vault> decryptVault(EncryptAlgorithm algorithm, String key, Vault vault) {
-    // TODO: implement decryptvault
-    throw UnimplementedError();
-  }
-  
-}
-
-class RemoteInitData{
-  
+  Future<dynamic> getToken(Map<String, String> values);
 }

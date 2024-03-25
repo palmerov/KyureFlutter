@@ -11,6 +11,7 @@ import 'package:kyure/data/models/vault_data.dart';
 import 'package:kyure/data/utils/dialog_utils.dart';
 import 'package:kyure/main.dart';
 import 'package:kyure/presentation/pages/account_list/account_list_bloc.dart';
+import 'package:kyure/presentation/pages/account_list/views/drawer.dart';
 import 'package:kyure/presentation/widgets/atoms/any_image.dart';
 import 'package:kyure/presentation/widgets/molecules/account_group.dart';
 import 'package:kyure/presentation/widgets/molecules/account_group_list_shimmer.dart';
@@ -22,8 +23,8 @@ import 'package:kyure/presentation/widgets/molecules/image_rounded.dart';
 import 'package:kyure/presentation/widgets/molecules/search_bar.dart';
 import 'package:kyure/presentation/theme/ky_theme.dart';
 import 'package:kyure/presentation/widgets/molecules/svg_icon.dart';
-import 'package:kyure/services/service_locator.dart';
 import 'package:blur/blur.dart';
+import 'package:kyure/services/service_locator.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 class AccountListPage extends StatelessWidget {
@@ -43,6 +44,7 @@ class _AccountListView extends StatelessWidget {
     _keyScaffold = GlobalKey<ScaffoldState>();
     _pageController = PageController();
   }
+
   late final GlobalKey<ScaffoldState> _keyScaffold;
   late final PageController _pageController;
   final ItemScrollController _itemScrollController = ItemScrollController();
@@ -278,14 +280,14 @@ class _AccountListView extends StatelessWidget {
       body: SafeArea(
         child: Row(
           children: [
-            if (isPcScreen) Drawer(isPcScreen: isPcScreen),
+            if (isPcScreen) KiureDrawer(isPcScreen: isPcScreen),
             Expanded(
               child: Stack(
                 children: [
                   BlocConsumer<AccountListPageBloc, AccountListPageState>(
                     listener: (context, state) {
                       if (state.alertMessage != null) {
-                        showQuickAlertDialog(context, state.alertMessage!);
+                        context.showQuickAlertDialog(state.alertMessage!);
                       }
                     },
                     buildWhen: (previous, current) =>
@@ -476,10 +478,11 @@ class _AccountListView extends StatelessWidget {
                       child: BluredBottomAppBarMolecule(
                         items: [
                           BottomItemActionMolecule(
-                            icon: Icon(CupertinoIcons.arrow_2_circlepath,
+                            icon: Icon(CupertinoIcons.cloud,
                                 color: kyTheme.colorOnBackgroundOpacity60),
                             text: 'Sincronizar',
                             onTap: () {
+
                               appBloc.lock();
                             },
                           ),
@@ -532,7 +535,7 @@ class _AccountListView extends StatelessWidget {
           ],
         ),
       ),
-      drawer: isPcScreen ? null : Drawer(isPcScreen: isPcScreen),
+      drawer: isPcScreen ? null : KiureDrawer(isPcScreen: isPcScreen),
     );
   }
 }
@@ -543,191 +546,4 @@ Future<void> shareFile(String filePath, String title, String shareText) async {
     text: shareText,
     filePath: filePath,
   );
-}
-
-class Drawer extends StatelessWidget {
-  const Drawer({
-    super.key,
-    required this.isPcScreen,
-    this.width,
-  });
-  final bool isPcScreen;
-  final double? width;
-
-  @override
-  Widget build(BuildContext context) {
-    final kyTheme = KyTheme.of(context)!;
-    final appBloc = context.read<ApplicationBloc>();
-    final listBloc = BlocProvider.of<AccountListPageBloc>(context);
-    return NavigationDrawer(
-      elevation: isPcScreen ? 2 : 8,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(right: 24, top: 24),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              InkWell(
-                onTap: () => appBloc.toogleTheme(),
-                child: Icon(appBloc.state.light
-                    ? CupertinoIcons.sun_max
-                    : CupertinoIcons.moon),
-              )
-            ],
-          ),
-        ),
-        SizedBox(
-          height: 116,
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Image.asset(
-                  appBloc.state.light
-                      ? 'assets/app_icons/kiure_icon_name_light.png'
-                      : 'assets/app_icons/kiure_icon_name_dark.png',
-                  width: 100,
-                ),
-                const SizedBox(
-                  height: 8,
-                ),
-                const Text('Asegura tus cuentas'),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(
-          height: 16,
-        ),
-        _buildDrawerItem(
-            kyTheme: kyTheme,
-            onTap: () => context.pushNamed(KyRoutes.keyEditor.name),
-            label: 'Cambiar clave',
-            icon: const Icon(CupertinoIcons.lock)),
-        _buildDrawerItem(
-            kyTheme: kyTheme,
-            onTap: () => listBloc.syncWithFile(),
-            label: 'Sincronizar con archivo',
-            icon: const Icon(CupertinoIcons.arrow_down_doc)),
-        _buildDrawerItem(
-            kyTheme: kyTheme,
-            label: 'Exportar bóveda',
-            icon: const Icon(CupertinoIcons.share),
-            onTap: () async {
-              String path =
-                  await context.read<AccountListPageBloc>().exportFile();
-              if (context.mounted) {
-                showDialog(
-                  context: context,
-                  builder: (context) => AlertDialog(
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16)),
-                    content: Text(
-                        'Tu archivo de cuentas ha sido exportado a: $path'),
-                    actions: [
-                      InkWell(
-                        borderRadius: BorderRadius.circular(16),
-                        child: const Padding(
-                          padding: EdgeInsets.all(12),
-                          child: Text('Copiar directorio'),
-                        ),
-                        onTap: () {
-                          Clipboard.setData(
-                              ClipboardData(text: File(path).parent.path));
-                        },
-                      ),
-                      InkWell(
-                        borderRadius: BorderRadius.circular(16),
-                        child: const Padding(
-                          padding: EdgeInsets.all(12),
-                          child: Text('Compartir'),
-                        ),
-                        onTap: () {
-                          shareFile(path, 'Cuentas Kiure',
-                              'Archivo Encriptado de cuentas de Kiure');
-                        },
-                      )
-                    ],
-                  ),
-                );
-              }
-            }),
-        _buildDrawerItem(
-          kyTheme: kyTheme,
-          label: 'Eliminar bóveda',
-          icon: const Icon(CupertinoIcons.delete),
-          onTap: () {
-            _showDeleteVaultConfirmDialog(context);
-          },
-        ),
-        _buildDrawerItem(
-            kyTheme: kyTheme,
-            label: 'Donar :)',
-            icon: const Icon(CupertinoIcons.heart),
-            onTap: () {}),
-      ],
-    );
-  }
-
-  ContextMenuTileMolecule _buildDrawerItem(
-      {required KyTheme kyTheme,
-      required String label,
-      required Widget icon,
-      required Function() onTap}) {
-    return ContextMenuTileMolecule(
-        onTap: onTap,
-        label: label,
-        textStyle: TextStyle(color: kyTheme.colorOnBackground, fontSize: 16),
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-        separation: 16,
-        icon: icon);
-  }
-
-  void _showDeleteVaultConfirmDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      useSafeArea: true,
-      builder: (context) => AlertDialog(
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const Text(
-                'Eliminar Bóveda',
-                style: TextStyle(fontSize: 18),
-              ),
-              const SizedBox(
-                height: 16,
-              ),
-              const Text(
-                'Si eliminas la bóveda, se perderán todas las cuentas y grupos. ¿Deseas eliminarla?',
-                style: TextStyle(fontSize: 16),
-              ),
-              const SizedBox(
-                height: 16,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  TextButton(
-                      onPressed: () {
-                        context.pop();
-                      },
-                      child: const Text('No')),
-                  TextButton(
-                      onPressed: () {
-                        context.pop();
-                        serviceLocator.getVaultService().deleteVault(false);
-                        context.goNamed(KyRoutes.lockPage.name,
-                            queryParameters: {'blockedByUser': 'true'});
-                      },
-                      child: const Text('Si')),
-                ],
-              )
-            ],
-          )),
-    );
-  }
 }

@@ -20,13 +20,15 @@ class AlertMessage {
   });
 }
 
-showQuickAlertDialog(BuildContext context, AlertMessage alertMessage) {
-  QuickAlert.show(
-      context: context,
-      type: alertMessage.type,
-      title: alertMessage.text,
-      confirmBtnText: alertMessage.confirmBtnText,
-      cancelBtnText: alertMessage.cancelBtnText ?? 'Cancelar',
-      onConfirmBtnTap: alertMessage.onConfirm ?? () => context.pop(),
-      onCancelBtnTap: alertMessage.onCancel);
+extension AlertDialogExtension on BuildContext {
+  showQuickAlertDialog(AlertMessage alertMessage) {
+    QuickAlert.show(
+        context: this,
+        type: alertMessage.type,
+        title: alertMessage.text,
+        confirmBtnText: alertMessage.confirmBtnText,
+        cancelBtnText: alertMessage.cancelBtnText ?? 'Cancelar',
+        onConfirmBtnTap: alertMessage.onConfirm ?? () => pop(),
+        onCancelBtnTap: alertMessage.onCancel);
+  }
 }

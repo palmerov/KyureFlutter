@@ -1,6 +1,6 @@
 import 'package:get_it/get_it.dart';
 import 'package:kyure/data/repositories/data_provider.dart';
-import 'package:kyure/data/repositories/local_data_provider.dart';
+import 'package:kyure/data/repositories/local/local_data_provider.dart';
 import 'package:kyure/services/kiure_service.dart';
 import 'package:kyure/services/vault_service.dart';
 

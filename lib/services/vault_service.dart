@@ -7,7 +7,7 @@ import 'package:kyure/data/models/vault.dart';
 import 'package:kyure/data/models/vault_data.dart';
 import 'package:kyure/data/models/vault_register.dart';
 import 'package:kyure/data/repositories/data_provider.dart';
-import 'package:kyure/data/repositories/local_data_provider.dart';
+import 'package:kyure/data/repositories/local/local_data_provider.dart';
 import 'package:kyure/data/repositories/remote_data_provider.dart';
 import 'package:kyure/data/utils/account_utils.dart';
 import 'package:kyure/data/utils/encrypt_utils.dart';
