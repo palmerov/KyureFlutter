@@ -31,7 +31,7 @@ class KiureService {
     // services
     String rootPath = (await getLocalInternalRootDir()).path;
     _vaultService = serviceLocator.getVaultService();
-    await _vaultService.init(rootPath, null);
+    await _vaultService.init(rootPath);
 
     // recent accounts
     _recentAccountIds = jsonDecode(_prefs.getString('recent_accounts') ?? '{}');

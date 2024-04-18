@@ -8,7 +8,6 @@ import 'package:kyure/data/models/vault_data.dart';
 import 'package:kyure/data/models/vault_register.dart';
 import 'package:kyure/data/repositories/data_provider.dart';
 import 'package:kyure/data/repositories/local/local_data_provider.dart';
-import 'package:kyure/data/repositories/remote_data_provider.dart';
 import 'package:kyure/data/utils/account_utils.dart';
 import 'package:kyure/data/utils/encrypt_utils.dart';
 import 'package:kyure/data/utils/file_utils.dart';
@@ -48,7 +47,7 @@ class VaultService {
 
   get localVaultNames => _localVaultRegisters.map((e) => e.name).toList();
 
-  init(String localPath, RemoteInitData? remoteInitData) async {
+  init(String localPath) async {
     vaultVersionSystemService = VaultVersionSystemService();
     // local
     localDataProvider = serviceLocator.getLocalDataProvider();

@@ -14,8 +14,11 @@ class LocalDataProvider implements DataProvider {
 
   @override
   Future init(String rootPath) async {
+    // init and create root path
     _rootVaultDir = Directory(concatPath(rootPath, VAULTS_DIR_NAME));
     await _rootVaultDir.create(recursive: true);
+
+    // init and create register poth
     _vaultRegisterFile =
         File(concatPath(_rootVaultDir.path, VAULT_REGISTER_FILE_NAME));
     await _updateRegister();
@@ -23,32 +26,64 @@ class LocalDataProvider implements DataProvider {
 
   get rootVaultDir => _rootVaultDir;
 
-  _updateRegister() async {
+  Future<List<VaultRegister>> _updateRegister() async {
     List<VaultRegister> vaultRegisters = [];
-    final list = (await _rootVaultDir.list().toList());
-    for (var element in list) {
-      if (element is File) {
-        if (element.path.endsWith(VAULT_FILE_EXTENSION)) {
-          try {
-            Vault vault = Vault.fromJson(
-                jsonDecode(element.readAsStringSync()) as Map<String, dynamic>);
-            vaultRegisters.add(VaultRegister(
-                name: vault.vaultName,
-                modifDate: element.lastModifiedSync(),
-                path: element.absolute.path
-                    .substring(_rootVaultDir.absolute.path.length + 1)));
-          } catch (e) {}
+
+    bool update = false;
+    if (_vaultRegisterFile.existsSync()) {
+      RepositoryRegister register = RepositoryRegister.fromJson(
+          jsonDecode(_vaultRegisterFile.readAsStringSync()));
+      // get registered vault path list
+      vaultRegisters = register.registers;
+      final registerVaultPathList =
+          vaultRegisters.map<String>((e) => e.path).toList();
+      // get real file path list
+      final fileVaultPathList = _rootVaultDir
+          .listSync()
+          .map<String>((e) =>
+              e.absolute.path.substring(_rootVaultDir.absolute.path.length + 1))
+          .toList();
+      //delete register path from real list
+      fileVaultPathList.remove(VAULT_REGISTER_FILE_NAME);
+
+      // get the lists differences
+      final difList = [
+        ...registerVaultPathList
+            .where((element) => !fileVaultPathList.contains(element)),
+        ...fileVaultPathList
+            .where((element) => !registerVaultPathList.contains(element))
+      ];
+      update = difList.isNotEmpty;
+    } else {
+      update = true;
+    }
+
+    if (update) {
+      final list = (await _rootVaultDir.list().toList());
+      for (var element in list) {
+        if (element is File) {
+          if (element.path.endsWith(VAULT_FILE_EXTENSION)) {
+            try {
+              Vault vault = Vault.fromJson(
+                  jsonDecode(element.readAsStringSync())
+                      as Map<String, dynamic>);
+              vaultRegisters.add(VaultRegister(
+                  name: vault.vaultName,
+                  modifDate: element.lastModifiedSync(),
+                  path: element.absolute.path
+                      .substring(_rootVaultDir.absolute.path.length + 1)));
+            } catch (e) {}
+          }
         }
       }
-    }
-    String strRegister =
-        jsonEncode(RepositoryRegister(registers: vaultRegisters).toJson());
-    if (!(await _vaultRegisterFile.exists()) ||
-        _vaultRegisterFile.readAsStringSync() != strRegister) {
+      String strRegister =
+          jsonEncode(RepositoryRegister(registers: vaultRegisters).toJson());
       await _vaultRegisterFile.writeAsString(strRegister);
     }
+    return vaultRegisters;
   }
 
+  /// returns (<the new file>, <was created>)
   Future<(File?, bool)> _getVaultFile(String vaultName, bool create) async {
     VaultRegister vaultRegister;
     try {

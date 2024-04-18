@@ -8,9 +8,12 @@ class DropboxValues {
   // url
   static const String baseUrl = 'https://api.dropboxapi.com/';
   static const String _oauthTokenUrl = 'oauth2/token';
+  static const String _createFolderUrl = '2/files/create_folder_v2';
 
   static get authorizationUrl =>
       '$_authorizationUrl?client_id=$apkKey&response_type=code';
 
   static get oauthTokenUrl => '$baseUrl$_oauthTokenUrl';
+
+  static get createFolderUrl => '$baseUrl$_createFolderUrl';
 }
