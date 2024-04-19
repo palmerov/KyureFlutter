@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:developer';
 import 'package:dio/dio.dart';
 import 'package:kyure/config/dropbox_values.dart';
@@ -8,7 +9,9 @@ import 'package:kyure/data/repositories/remote_data_provider.dart';
 import 'package:kyure/data/utils/encrypt_utils.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import '../../../config/values.dart';
+import '../../models/vault_data.dart';
 import '../../utils/file_utils.dart';
+import '../data_provider.dart';
 
 class DropboxDataProvider implements RemoteDataProvider {
   late final Dio dio;
@@ -36,35 +39,12 @@ class DropboxDataProvider implements RemoteDataProvider {
 
   @override
   Future authorize(Map<String, String> values) async {
-    String url = DropboxValues.authorizationUrl;
-    await launchUrlString(url);
+
   }
 
   @override
   Future getToken(Map<String, String> values) async {
-    _authCompleter = Completer();
-    if (authorizationCode == null) {
-      throw Exception('Authorization code is null');
-    }
-    final apiResponse = await dio.post(DropboxValues.oauthTokenUrl, data: {
-      'code': authorizationCode,
-      'grant_type': 'authorization_code',
-      'token_access_type': 'offline',
-      'client_id': DropboxValues.apkKey,
-      'client_secret': DropboxValues.appSecret,
-    });
-    if (apiResponse.data == null) {
-      throw Exception('Null response exception');
-    }
-    _accessToken = apiResponse.data['access_token'];
-    _expirationTimeInSeconds = apiResponse.data['expires_in'];
-    _refresh_token = apiResponse.data['refresh_token'];
 
-    dio.options = dio.options.copyWith(headers: {
-      'Authorization': 'Bearer $_accessToken',
-    });
-    _authCompleter!.complete();
-    _startRefreshTokenTimer();
   }
 
   Future _refreshToken() async {
@@ -121,22 +101,30 @@ class DropboxDataProvider implements RemoteDataProvider {
 
   @override
   Future<Vault> decryptVault(
-      EncryptAlgorithm algorithm, String key, Vault vault) async {
-    await _authOperations();
-    // TODO: implement decryptVault
-    throw UnimplementedError();
+      EncryptAlgorithm algorithm, String key, Vault vault) {
+    try {
+      vault.data = VaultData.fromJson(
+          jsonDecode(EncryptUtils.decrypt(algorithm, key, vault.datacrypt)));
+    } catch (e) {
+      throw const InvalidKeyException();
+    }
+    return Future.value(vault);
   }
 
   @override
-  Future<void> deleteVault(String vaultName)async {
+  Future<void> deleteVault(String vaultName) async {
     await _authOperations();
+    /*{
+        "ids": [
+            "oaCAVmEyrqYnkZX9955Y",
+            "BaZmehYoXMPtaRmfTbSG"
+        ]
+      }*/
 
-    // TODO: implement deleteVault
-    throw UnimplementedError();
   }
 
   @override
-  Future<List<VaultRegister>> listVaults() async{
+  Future<List<VaultRegister>> listVaults() async {
     await _authOperations();
 
     // TODO: implement listVaults
@@ -145,7 +133,7 @@ class DropboxDataProvider implements RemoteDataProvider {
 
   @override
   Future<Vault?> readVault(
-      EncryptAlgorithm algorithm, String key, String vaultName)async {
+      EncryptAlgorithm algorithm, String key, String vaultName) async {
     await _authOperations();
 
     // TODO: implement readVault
@@ -153,11 +141,12 @@ class DropboxDataProvider implements RemoteDataProvider {
   }
 
   @override
-  Future<void> writeVault(
-      EncryptAlgorithm algorithm, String key, String vaultName, Vault vault)async {
+  Future<void> writeVault(EncryptAlgorithm algorithm, String key,
+      String vaultName, Vault vault) async {
     await _authOperations();
 
     // TODO: implement writeVault
     throw UnimplementedError();
   }
+
 }
