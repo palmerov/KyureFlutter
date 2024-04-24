@@ -1,10 +1,8 @@
 import 'dart:async';
 import 'dart:developer';
-import 'dart:io';
-
 import 'package:dio/dio.dart';
+import 'package:kyure/config/http_content_types.dart';
 import 'package:url_launcher/url_launcher_string.dart';
-
 import '../../../config/dropbox_values.dart';
 
 class DropboxService {
@@ -21,7 +19,6 @@ class DropboxService {
       connectTimeout: const Duration(seconds: 30),
       receiveTimeout: const Duration(seconds: 30),
       sendTimeout: const Duration(seconds: 30),
-      contentType: 'application/json',
     ));
   }
 
@@ -35,13 +32,17 @@ class DropboxService {
     if (authorizationCode == null) {
       throw Exception('Authorization code is null');
     }
-    final apiResponse = await _dio.post(DropboxValues.oauthTokenUrl, data: {
-      'code': authorizationCode,
-      'grant_type': 'authorization_code',
-      'token_access_type': 'offline',
-      'client_id': DropboxValues.apkKey,
-      'client_secret': DropboxValues.appSecret,
-    });
+    final apiResponse = await _dio.post(
+      DropboxValues.oauthTokenUrl,
+      options: Options(contentType: HttpContentType.xWwwFormUrlencoded.value),
+      data: {
+        'code': authorizationCode,
+        'grant_type': 'authorization_code',
+        'token_access_type': 'offline',
+        'client_id': DropboxValues.apkKey,
+        'client_secret': DropboxValues.appSecret,
+      },
+    );
     if (apiResponse.data == null) {
       throw Exception('Null response exception');
     }
@@ -58,12 +59,14 @@ class DropboxService {
 
   Future _refreshToken() async {
     _authCompleter = Completer();
-    final apiResponse = await _dio.post(DropboxValues.oauthTokenUrl, data: {
-      'refresh_token': _refresh_token,
-      'grant_type': 'refresh_token',
-      'client_id': DropboxValues.apkKey,
-      'client_secret': DropboxValues.appSecret,
-    });
+    final apiResponse = await _dio.post(DropboxValues.oauthTokenUrl,
+        options: Options(contentType: HttpContentType.xWwwFormUrlencoded.value),
+        data: {
+          'refresh_token': _refresh_token,
+          'grant_type': 'refresh_token',
+          'client_id': DropboxValues.apkKey,
+          'client_secret': DropboxValues.appSecret,
+        });
     if (apiResponse.data == null) {
       throw Exception('Null response exception');
     }
@@ -96,6 +99,7 @@ class DropboxService {
     await _authOperations();
     try {
       final response = await _dio.post(DropboxValues.createFolderUrl,
+          options: Options(contentType: HttpContentType.json.value),
           data: {"autorename": false, "path": path});
       return response;
     } on Exception catch (e) {
@@ -107,8 +111,9 @@ class DropboxService {
   Future<Response<dynamic>?> deleteFile(String path) async {
     await _authOperations();
     try {
-      final response =
-          await _dio.post(DropboxValues.deleteFileUrl, data: {'path': path});
+      final response = await _dio.post(DropboxValues.deleteFileUrl,
+          options: Options(contentType: HttpContentType.json.value),
+          data: {'path': path});
       return response;
     } on Exception catch (e) {
       log('Exception deleting file in dropbox cloud', error: e.toString());
@@ -120,9 +125,11 @@ class DropboxService {
       String remotePath, String localPath) async {
     await _authOperations();
     try {
-      final response = await _dio.download(
-          DropboxValues.downloadFileUrl, localPath,
-          data: {'path': remotePath});
+      final response =
+          await _dio.download(DropboxValues.downloadFileUrl, localPath,
+              options: Options(headers: {
+                'Dropbox-API-Arg': '{"path": "$remotePath"}',
+              }));
       return response;
     } on Exception catch (e) {
       log('Exception downloading file from dropbox cloud', error: e.toString());
@@ -134,14 +141,12 @@ class DropboxService {
       [bool replace = true]) async {
     await _authOperations();
     try {
-      final response = await _dio.post(DropboxValues.uploadFileUrl, data: {
-        'autorename': false,
-        'mode': replace ? 'add' : 'overwrite',
-        'mute': false,
-        'path': remotePath,
-        'strict_conflict': false
-      });
-      //TODO
+      final response = await _dio.put(DropboxValues.uploadFileUrl,
+          data: await MultipartFile.fromFile(localPath),
+          options: Options(headers: {
+            'Dropbox-API-Arg':
+                '{autorename: false,mode: ${replace ? 'add,' : 'overwrite,'}mute: false,path: "$remotePath",strict_conflict: false}'
+          }, contentType: 'application/octet-stream'));
       return response;
     } on Exception catch (e) {
       log('Exception deleting file in dropbox cloud', error: e.toString());

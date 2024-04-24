@@ -1,13 +1,12 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:developer';
 import 'package:dio/dio.dart';
 import 'package:kyure/config/dropbox_values.dart';
 import 'package:kyure/data/models/vault.dart';
 import 'package:kyure/data/models/vault_register.dart';
 import 'package:kyure/data/repositories/remote_data_provider.dart';
+import 'package:kyure/data/service/dropbox/dropbox_service.dart';
 import 'package:kyure/data/utils/encrypt_utils.dart';
-import 'package:url_launcher/url_launcher_string.dart';
 import '../../../config/values.dart';
 import '../../models/vault_data.dart';
 import '../../utils/file_utils.dart';
@@ -15,11 +14,8 @@ import '../data_provider.dart';
 
 class DropboxDataProvider implements RemoteDataProvider {
   late final Dio dio;
-  String? _accessToken, _refresh_token;
-  int _expirationTimeInSeconds = 0;
-  String? authorizationCode = '';
   late String _rootVaultDir, _vaultRegisterFilePath;
-  Completer? _authCompleter;
+  late final DropboxService _dropboxService;
 
   @override
   Future<void> init(String rootPath) async {
@@ -39,64 +35,16 @@ class DropboxDataProvider implements RemoteDataProvider {
 
   @override
   Future authorize(Map<String, String> values) async {
-
+    return _dropboxService.startAuthorization();
   }
 
   @override
   Future getToken(Map<String, String> values) async {
-
+    return _dropboxService.getToken();
   }
 
-  Future _refreshToken() async {
-    _authCompleter = Completer();
-    final apiResponse = await dio.post(DropboxValues.oauthTokenUrl, data: {
-      'refresh_token': _refresh_token,
-      'grant_type': 'refresh_token',
-      'client_id': DropboxValues.apkKey,
-      'client_secret': DropboxValues.appSecret,
-    });
-    if (apiResponse.data == null) {
-      throw Exception('Null response exception');
-    }
-    dio.options = dio.options.copyWith(headers: {
-      'Authorization': 'Bearer $_accessToken',
-    });
-    _accessToken = apiResponse.data['access_token'];
-    _expirationTimeInSeconds = apiResponse.data['expires_in'];
-    _authCompleter!.complete();
-    _startRefreshTokenTimer();
-  }
-
-  _startRefreshTokenTimer() {
-    Future.delayed(
-        Duration(
-            seconds: (_expirationTimeInSeconds > 1)
-                ? (_expirationTimeInSeconds - 1)
-                : 0), () async {
-      await _refreshToken();
-    });
-  }
-
-  _authOperations() async {
-    if (!_authCompleter!.isCompleted) {
-      await _authCompleter!.future;
-    }
-  }
-
-  Future<bool> createRootDirectory() async {
-    await _authOperations();
-    try {
-      final response = await dio.post(DropboxValues.createFolderUrl,
-          data: {"autorename": false, "path": '/kiure/$VAULTS_DIR_NAME'});
-      if (response.data.contains('metadata')) {
-        return true;
-      }
-      return false;
-    } on Exception catch (e) {
-      log('Exception creating RootDirectory in dropbox cloud',
-          error: e.toString());
-      return false;
-    }
+  Future<Response<dynamic>?> createRootDirectory() async {
+    return await _dropboxService.createDirectory(_rootVaultDir);
   }
 
   @override
@@ -113,29 +61,17 @@ class DropboxDataProvider implements RemoteDataProvider {
 
   @override
   Future<void> deleteVault(String vaultName) async {
-    await _authOperations();
-    /*{
-        "ids": [
-            "oaCAVmEyrqYnkZX9955Y",
-            "BaZmehYoXMPtaRmfTbSG"
-        ]
-      }*/
-
+    await _dropboxService.deleteFile(concatPath(_rootVaultDir, vaultName));
   }
 
   @override
   Future<List<VaultRegister>> listVaults() async {
-    await _authOperations();
-
-    // TODO: implement listVaults
-    throw UnimplementedError();
+    return [];
   }
 
   @override
   Future<Vault?> readVault(
       EncryptAlgorithm algorithm, String key, String vaultName) async {
-    await _authOperations();
-
     // TODO: implement readVault
     throw UnimplementedError();
   }
@@ -143,10 +79,7 @@ class DropboxDataProvider implements RemoteDataProvider {
   @override
   Future<void> writeVault(EncryptAlgorithm algorithm, String key,
       String vaultName, Vault vault) async {
-    await _authOperations();
-
     // TODO: implement writeVault
     throw UnimplementedError();
   }
-
 }
