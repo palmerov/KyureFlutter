@@ -155,7 +155,7 @@ class _AccountDetailsView extends StatelessWidget {
                                   decoration: const InputDecoration(
                                       alignLabelWithHint: true,
                                       isDense: true,
-                                      label: Text('Nombre del sitio'),
+                                      label: Text('Nombre de la cuenta'),
                                       border: OutlineInputBorder(
                                           borderRadius: BorderRadius.all(
                                               Radius.circular(12)))),
@@ -277,7 +277,7 @@ class _AccountDetailsView extends StatelessWidget {
                                 final field = AccountField(
                                     name: 'Nombre del campo',
                                     data: '',
-                                    visible: false);
+                                    visible: true);
                                 bloc.accountCopy!.fieldList!.add(field);
                                 keyAccountForm.currentState?.addField(field);
                               },

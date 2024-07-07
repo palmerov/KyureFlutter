@@ -13,21 +13,24 @@ class CopyAreaMolecule extends StatefulWidget {
       this.showBorder = true,
       this.iconSize = 30,
       this.animate = true,
-      this.animateToIcon});
+      this.animateToIcon,
+      this.instantCopy=true
+      });
   final Widget icon;
   final Widget? animateToIcon;
   final bool animate;
   final Color color;
   final EdgeInsets padding;
   final bool showBorder;
-  final Function(TapDownDetails details)? onTap;
+  final Function(TapDownDetails details, CopyAreaMoleculeState state)? onTap;
+  final bool instantCopy;
   final double iconSize;
 
   @override
-  State<CopyAreaMolecule> createState() => _CopyAreaMoleculeState();
+  State<CopyAreaMolecule> createState() => CopyAreaMoleculeState();
 }
 
-class _CopyAreaMoleculeState extends State<CopyAreaMolecule> {
+class CopyAreaMoleculeState extends State<CopyAreaMolecule> {
   Widget? icon;
   bool copied = false;
 
@@ -93,8 +96,8 @@ class _CopyAreaMoleculeState extends State<CopyAreaMolecule> {
       child: InkWell(
           borderRadius: const BorderRadius.all(Radius.circular(10)),
           onTapDown: (TapDownDetails details) {
-            setCopiedState();
-            if (widget.onTap != null) widget.onTap!(details);
+            if(widget.instantCopy) setCopiedState();
+            if (widget.onTap != null) widget.onTap!(details, this);
           },
           child: SizedBox(
             height:

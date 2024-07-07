@@ -26,18 +26,24 @@ class LockPageBloc extends Cubit<LockPageState> {
     final result = await FilePicker.platform
         .pickFiles(allowMultiple: false, type: FileType.any);
     if (result != null) {
-      File file = File(result.files.single.path!);
+      File? file = File(result.files.single.path!);
       try {
         bool possible = !vaultService.existVaultFileInLocal(file);
         if (possible) {
-          emit(LockPageState(
-              vaultNames: vaultService.localVaultNames,
-              selectedVault: vaultService.vaultName));
+          file = await vaultService.tryToImportVaultFile(file);
+          if (file == null) {
+            emit(LockMessageState(
+                message:
+                    'Ha habido un error al importar la bóveda llamada "${vaultService.vaultName!}'));
+          } else {
+            emit(LockPageState(
+                vaultNames: vaultService.localVaultNames,
+                selectedVault: vaultService.vaultName));
+          }
         } else {
           String name = vaultService.getVaultNameFromFile(file);
           emit(LockMessageState(
-              message:
-                  """La bóveda "$name" ya existe localmente.
+              message: """La bóveda "$name" ya existe localmente.
 Debes ingresar en ella y usar la opción "Sincronizar desde archivo" para actualizarla."""));
         }
       } catch (exception) {
@@ -111,6 +117,7 @@ class LockPageState extends Equatable {
       this.loaded = true}) {
     this.vaultNames = [...vaultNames];
   }
+
   late final List<String> vaultNames;
   final String? selectedVault;
   final bool loaded;

@@ -38,12 +38,12 @@ class AccountFormDataOrganismState extends State<AccountFormDataOrganism> {
     onAccountDelete = widget.onAccountDelete;
 
     accountList = [
-      AccountFieldWrapper(1, account.fieldUsername),
-      AccountFieldWrapper(2, account.fieldPassword)
+      AccountFieldWrapper(1, account.fieldUsername, false),
+      AccountFieldWrapper(2, account.fieldPassword, false)
     ];
     int i = 3;
     for (var element in account.fieldList ?? []) {
-      accountList.add(AccountFieldWrapper(i++, element));
+      accountList.add(AccountFieldWrapper(i++, element, true));
     }
   }
 
@@ -56,7 +56,7 @@ class AccountFormDataOrganismState extends State<AccountFormDataOrganism> {
   }
 
   void addField(AccountField accountField) {
-    accountList.add(AccountFieldWrapper(accountList.last.id + 1, accountField));
+    accountList.add(AccountFieldWrapper(accountList.last.id + 1, accountField, true));
     keyList.currentState!.insertItem(accountList.length - 1);
   }
 
@@ -115,13 +115,15 @@ class AccountFormDataOrganismState extends State<AccountFormDataOrganism> {
                     duration: const Duration(milliseconds: 300));
               }
             : null,
+        editableVisibility: accountField.editableVisibility,
       ),
     );
   }
 }
 
 class AccountFieldWrapper {
-  AccountFieldWrapper(this.id, this.accountField);
+  AccountFieldWrapper(this.id, this.accountField, this.editableVisibility);
   final AccountField accountField;
   final int id;
+  final bool editableVisibility;
 }

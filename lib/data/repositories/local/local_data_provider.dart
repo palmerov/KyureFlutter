@@ -48,10 +48,12 @@ class LocalDataProvider implements DataProvider {
 
       // get the lists differences
       final difList = [
-        ...registerVaultPathList
-            .where((element) => !fileVaultPathList.contains(element)),
-        ...fileVaultPathList
-            .where((element) => !registerVaultPathList.contains(element))
+        ...registerVaultPathList.where((element) =>
+            !fileVaultPathList.contains(element) &&
+            element.endsWith(VAULT_FILE_EXTENSION)),
+        ...fileVaultPathList.where((element) =>
+            !registerVaultPathList.contains(element) &&
+            element.endsWith(VAULT_FILE_EXTENSION))
       ];
       update = difList.isNotEmpty;
     } else {
@@ -59,6 +61,7 @@ class LocalDataProvider implements DataProvider {
     }
 
     if (update) {
+      vaultRegisters = [];
       final list = (await _rootVaultDir.list().toList());
       for (var element in list) {
         if (element is File) {
@@ -81,6 +84,16 @@ class LocalDataProvider implements DataProvider {
       await _vaultRegisterFile.writeAsString(strRegister);
     }
     return vaultRegisters;
+  }
+
+  Future<File?> tryToImportVaultFromFile(File file)async{
+    try {
+      final localFile= await file.copy(concatPath(_rootVaultDir.path, file.path.split('/').last));
+      await _updateRegister();
+      return localFile;
+    } catch (e) {
+      return null;
+    }
   }
 
   /// returns (<the new file>, <was created>)

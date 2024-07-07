@@ -17,11 +17,14 @@ class AccountFieldMolecule extends StatefulWidget {
       this.nameEditable = true,
       this.onTapDelete,
       this.onFieldChanged,
-      required this.onCopy});
+      required this.onCopy,
+      required this.editableVisibility});
+
   final Function() onCopy;
   final bool editting;
   final bool nameEditable;
   final AccountField accountField;
+  final bool editableVisibility;
   final Function()? onTapDelete;
   final Function(String name, String data, bool visible)? onFieldChanged;
 
@@ -174,7 +177,7 @@ class _AccountFieldMoleculeState extends State<AccountFieldMolecule> {
                   color: kyTheme.colorPassword,
                   onTap: widget.editting && widget.onTapDelete == null
                       ? null
-                      : (_) {
+                      : (_, __) {
                           if (!widget.editting) {
                             _copyData(context);
                           } else {
@@ -207,32 +210,34 @@ class _AccountFieldMoleculeState extends State<AccountFieldMolecule> {
           : TextInputType.visiblePassword,
       obscureText: !visible && !widget.editting,
       decoration: InputDecoration(
-        suffixIcon: !widget.accountField.visible || widget.editting
-            ? InkWell(
-                onTap: () {
-                  setState(() {
-                    visible = !visible;
-                    if (widget.editting) {
-                      widget.onFieldChanged?.call(controllerLabel!.text,
-                          controllerField!.text, visible);
-                    }
-                  });
-                },
-                child: Padding(
-                  padding: const EdgeInsets.only(right: 4),
-                  child: Icon(
-                      size: 20,
-                      widget.editting
-                          ? (visible
-                              ? CupertinoIcons.lock_open
-                              : CupertinoIcons.lock)
-                          : (visible
-                              ? CupertinoIcons.eye
-                              : CupertinoIcons.eye_slash),
-                      color: kyTheme.colorOnBackgroundOpacity60),
-                ),
-              )
-            : null,
+        suffixIcon: widget.editting && !widget.editableVisibility
+            ? const SizedBox.shrink()
+            : !widget.accountField.visible || widget.editting
+                ? InkWell(
+                    onTap: () {
+                      setState(() {
+                        visible = !visible;
+                        if (widget.editting) {
+                          widget.onFieldChanged?.call(controllerLabel!.text,
+                              controllerField!.text, visible);
+                        }
+                      });
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.only(right: 4),
+                      child: Icon(
+                          size: 20,
+                          widget.editting
+                              ? (visible
+                                  ? CupertinoIcons.lock_open
+                                  : CupertinoIcons.lock)
+                              : (visible
+                                  ? CupertinoIcons.eye
+                                  : CupertinoIcons.eye_slash),
+                          color: kyTheme.colorOnBackgroundOpacity60),
+                    ),
+                  )
+                : null,
         contentPadding: const EdgeInsets.all(14),
         focusedBorder: OutlineInputBorder(
             borderSide: BorderSide(

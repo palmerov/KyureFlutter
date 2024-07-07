@@ -53,6 +53,9 @@ class VaultService {
     localDataProvider = serviceLocator.getLocalDataProvider();
     await localDataProvider.init(localPath);
     _localVaultRegisters = await localDataProvider.listVaults();
+    if (_localVaultRegisters.isNotEmpty) {
+      _vaultName = _localVaultRegisters[0].name;
+    }
 
     try {
       remoteDataProvider = serviceLocator.getRemoteDataProvider();
@@ -73,6 +76,15 @@ class VaultService {
     return (_remoteVaultRegisters ?? [])
         .where((element) => element.name == vaultName)
         .isNotEmpty;
+  }
+
+  Future<File?> tryToImportVaultFile(File file) async {
+    final localFile =  await localDataProvider.tryToImportVaultFromFile(file);
+    if (localFile != null) {
+      await _fetchLocalVaultRegisters();
+      return localFile;
+    }
+    return null;
   }
 
   bool existVaultFileInLocal(File file) {

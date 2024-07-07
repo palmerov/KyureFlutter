@@ -18,12 +18,22 @@ class AccountItemMolecule extends StatelessWidget {
   final Function()? onTap;
   final Function()? onLongTap;
 
-  copyUser(BuildContext context, Offset offset) {
+  copyValue(
+      BuildContext context, CopyAreaMoleculeState state, AccountField? field) {
     final kyTheme = KyTheme.of(context)!;
-    ClipboardUtils.copy(account.fieldUsername.data);
+    if (field == null) {
+      final fields = getFieldList(true);
+      if (fields.length == 1) {
+        return copyValue(context, state, fields.first);
+      }
+      showCopyBottomSheet(context, state, fields);
+      return;
+    }
+    ClipboardUtils.copy(field.data);
+    state.setCopiedState();
     BotToast.showCustomText(
       toastBuilder: (cancelFunc) => ToastWidgetMolecule(
-        text: 'Copied!',
+        text: 'Copiado: ${field.name}',
         prefix: const Icon(Icons.check),
         backgroundColor: kyTheme.colorToastBackground,
         textStyle: TextStyle(color: kyTheme.colorToastText),
@@ -32,17 +42,80 @@ class AccountItemMolecule extends StatelessWidget {
     serviceLocator.getKiureService().addToRecents(account);
   }
 
-  copyPassword(BuildContext context, Offset offset) {
-    ClipboardUtils.copy(account.fieldPassword.data);
+  copyPassword(
+      BuildContext context, CopyAreaMoleculeState state, AccountField? field) {
+    if (field == null) {
+      final fields = getFieldList(false);
+      if (fields.length == 1) {
+        return copyValue(context, state, fields.first);
+      }
+      showCopyBottomSheet(context, state, fields);
+      return;
+    }
     final kyTheme = KyTheme.of(context)!;
+    ClipboardUtils.copy(field.data);
+    state.setCopiedState();
     BotToast.showCustomText(
         toastBuilder: (cancelFunc) => ToastWidgetMolecule(
-              text: 'Copied!',
+              text: 'Copiado: ${field.name}',
               prefix: const Icon(Icons.check),
               backgroundColor: kyTheme.colorToastBackground,
               textStyle: TextStyle(color: kyTheme.colorToastText),
             ));
     serviceLocator.getKiureService().addToRecents(account);
+  }
+
+  List<AccountField> getFieldList(bool visible) {
+    if (account.fieldList?.isNotEmpty ?? false) {
+      return [
+        visible ? account.fieldUsername : account.fieldPassword,
+        ...account.fieldList!
+            .where((element) =>
+                element.visible == visible && element.data.isNotEmpty)
+            .toList()
+      ];
+    } else {
+      return visible ? [account.fieldUsername] : [account.fieldPassword];
+    }
+  }
+
+  showCopyBottomSheet(BuildContext context, CopyAreaMoleculeState state,
+      List<AccountField> fields) {
+    showModalBottomSheet(
+        context: context,
+        builder: (context) {
+          return Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text('Copiar el valor de:',
+                    style: TextStyle(fontSize: 18)),
+                const SizedBox(height: 16),
+                ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: fields.length,
+                  itemBuilder: (context, index) {
+                    return ListTile(
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16)),
+                      title: Text(fields[index].name),
+                      onTap: () {
+                        Navigator.pop(context);
+                        if (fields.first.visible) {
+                          copyValue(context, state, fields[index]);
+                        } else {
+                          copyPassword(context, state, fields[index]);
+                        }
+                      },
+                    );
+                  },
+                ),
+              ],
+            ),
+          );
+        });
   }
 
   @override
@@ -90,14 +163,16 @@ class AccountItemMolecule extends StatelessWidget {
               ),
             ),
             CopyAreaMolecule(
-              icon: SvgPicture.asset('assets/svg_icons/person.svg',
+              icon: SvgPicture.asset(
+                  'assets/svg_icons/badge_24dp_E8EAED_FILL0_wght300_GRAD0_opsz24.svg',
                   height: 30,
                   width: 30,
                   colorFilter:
                       ColorFilter.mode(kyTheme.colorAccount, BlendMode.srcIn)),
               padding: const EdgeInsets.all(8),
               color: kyTheme.colorAccount,
-              onTap: (details) => copyUser(context, details.globalPosition),
+              onTap: (details, state) => copyValue(context, state, null),
+              instantCopy: false,
             ),
             const SizedBox(width: 6),
             CopyAreaMolecule(
@@ -108,7 +183,8 @@ class AccountItemMolecule extends StatelessWidget {
                       ColorFilter.mode(kyTheme.colorPassword, BlendMode.srcIn)),
               padding: const EdgeInsets.all(8),
               color: kyTheme.colorPassword,
-              onTap: (details) => copyPassword(context, details.globalPosition),
+              instantCopy: false,
+              onTap: (details, state) => copyPassword(context, state, null),
             )
           ],
         ),

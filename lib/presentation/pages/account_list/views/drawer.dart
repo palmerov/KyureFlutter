@@ -38,10 +38,14 @@ class KiureDrawer extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               InkWell(
+                borderRadius: BorderRadius.circular(16),
                 onTap: () => appBloc.toogleTheme(),
-                child: Icon(appBloc.state.light
-                    ? CupertinoIcons.sun_max
-                    : CupertinoIcons.moon),
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Icon(appBloc.state.light
+                      ? CupertinoIcons.sun_max
+                      : CupertinoIcons.moon),
+                ),
               )
             ],
           ),

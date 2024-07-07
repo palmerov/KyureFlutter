@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
 import 'package:kyure/clipboard_utils.dart';
 import 'package:kyure/data/models/vault_data.dart';
 import 'package:kyure/presentation/theme/ky_theme.dart';
@@ -134,6 +135,7 @@ class _GlobalImageSelectorOrganismState
                           textEdController.text = '';
                           imageSourceType = ImageSourceType.asset;
                           path = assetImage;
+                          widget.onImageSelected(path!, imageSourceType!);
                         })),
               ),
             ),
