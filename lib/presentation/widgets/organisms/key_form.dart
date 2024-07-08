@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:kyure/main.dart';
 import 'package:vibration/vibration.dart';
 
@@ -12,6 +13,7 @@ class KeyFormOrganism extends StatefulWidget {
       required this.onTapEnter,
       this.error,
       required this.obscureText});
+
   final String? title;
   final Color onBackgroundColor;
   final Future Function(String key) onTapEnter;
@@ -73,7 +75,7 @@ class _KeyFormOrganismState extends State<KeyFormOrganism> {
               textAlign: TextAlign.center,
               style: TextStyle(color: widget.onBackgroundColor, fontSize: 16),
             ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 16),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: TextFormField(
@@ -144,89 +146,176 @@ class _KeyFormOrganismState extends State<KeyFormOrganism> {
           Padding(
             padding: const EdgeInsets.all(4),
             child: Text(error ?? '',
-            style: TextStyle(color: Colors.red.shade200),
-            textAlign: TextAlign.center),
+                style: TextStyle(color: Colors.red.shade200),
+                textAlign: TextAlign.center),
           ),
           if (keyboard || isPC) const Expanded(child: SizedBox.expand()),
           if (!keyboard && isMobile)
             Expanded(
-              child: GridView.builder(
-                padding: const EdgeInsets.all(0),
-                physics: const NeverScrollableScrollPhysics(),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    mainAxisExtent: 66, crossAxisCount: 3),
-                itemBuilder: (context, index) {
-                  if (index < 9) {
-                    return SizedBox(
-                      height: 20,
-                      child: InkWell(
-                        onTap: () {
-                          controller.text += '${index + 1}';
-                          vibrate();
-                        },
-                        child: Center(
-                          child: Text(
-                            '${index + 1}',
-                            style: TextStyle(
-                                color: widget.onBackgroundColor, fontSize: 24),
-                          ),
-                        ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Container(
+                  decoration: BoxDecoration(
+                      color: Colors.black.withAlpha(30),
+                      borderRadius: BorderRadius.circular(16)),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.max,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Expanded(
+                        child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              KeyButton(
+                                  onBackgroundColor: widget.onBackgroundColor,
+                                  text: '1',
+                                  onTap: (text, icon) {
+                                    controller.text += text!;
+                                    vibrate();
+                                  }),
+                              KeyButton(
+                                  onBackgroundColor: widget.onBackgroundColor,
+                                  text: '2',
+                                  onTap: (text, icon) {
+                                    controller.text += text!;
+                                    vibrate();
+                                  }),
+                              KeyButton(
+                                  onBackgroundColor: widget.onBackgroundColor,
+                                  text: '3',
+                                  onTap: (text, icon) {
+                                    controller.text += text!;
+                                    vibrate();
+                                  }),
+                            ]),
                       ),
-                    );
-                  } else {
-                    if (index == 9) {
-                      return InkWell(
-                        onLongPress: () {
-                          controller.text = '';
-                          vibrate();
-                        },
-                        onTap: () {
-                          if (controller.text.isNotEmpty) {
-                            controller.text = controller.text
-                                .substring(0, controller.text.length - 1);
-                            vibrate();
-                          }
-                        },
-                        child: Center(
-                          child: Icon(
-                            CupertinoIcons.delete_left_fill,
-                            color: widget.onBackgroundColor,
-                          ),
-                        ),
-                      );
-                    }
-                    if (index == 10) {
-                      return InkWell(
-                        onTap: () {
-                          controller.text += '${0}';
-                          vibrate();
-                        },
-                        child: Center(
-                          child: Text(
-                            '0',
-                            style: TextStyle(
-                                color: widget.onBackgroundColor, fontSize: 24),
-                          ),
-                        ),
-                      );
-                    }
-                    if (index == 11) {
-                      return InkWell(
-                        onTap: submit,
-                        child: Center(
-                          child: Icon(
-                            CupertinoIcons.check_mark,
-                            color: widget.onBackgroundColor,
-                          ),
-                        ),
-                      );
-                    }
-                  }
-                },
-                itemCount: 12,
+                      Expanded(
+                        child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              KeyButton(
+                                  onBackgroundColor: widget.onBackgroundColor,
+                                  text: '4',
+                                  onTap: (text, icon) {
+                                    controller.text += text!;
+                                    vibrate();
+                                  }),
+                              KeyButton(
+                                  onBackgroundColor: widget.onBackgroundColor,
+                                  text: '5',
+                                  onTap: (text, icon) {
+                                    controller.text += text!;
+                                    vibrate();
+                                  }),
+                              KeyButton(
+                                  onBackgroundColor: widget.onBackgroundColor,
+                                  text: '6',
+                                  onTap: (text, icon) {
+                                    controller.text += text!;
+                                    vibrate();
+                                  }),
+                            ]),
+                      ),
+                      Expanded(
+                        child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              KeyButton(
+                                  onBackgroundColor: widget.onBackgroundColor,
+                                  text: '7',
+                                  onTap: (text, icon) {
+                                    controller.text += text!;
+                                    vibrate();
+                                  }),
+                              KeyButton(
+                                  onBackgroundColor: widget.onBackgroundColor,
+                                  text: '8',
+                                  onTap: (text, icon) {
+                                    controller.text += text!;
+                                    vibrate();
+                                  }),
+                              KeyButton(
+                                  onBackgroundColor: widget.onBackgroundColor,
+                                  text: '9',
+                                  onTap: (text, icon) {
+                                    controller.text += text!;
+                                    vibrate();
+                                  }),
+                            ]),
+                      ),
+                      Expanded(
+                        child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              KeyButton(
+                                  onBackgroundColor: widget.onBackgroundColor,
+                                  icon: Icons.backspace,
+                                  onLongTap: () {
+                                    controller.text = '';
+                                    vibrate();
+                                  },
+                                  onTap: (text, icon) {
+                                    if (controller.text.isNotEmpty) {
+                                      controller.text = controller.text
+                                          .substring(
+                                              0, controller.text.length - 1);
+                                      vibrate();
+                                    }
+                                  }),
+                              KeyButton(
+                                  onBackgroundColor: widget.onBackgroundColor,
+                                  text: '0',
+                                  onTap: (text, icon) {
+                                    controller.text += text!;
+                                    vibrate();
+                                  }),
+                              KeyButton(
+                                  onBackgroundColor: widget.onBackgroundColor,
+                                  icon: Icons.check,
+                                  onTap: (text, icon) {
+                                    submit();
+                                  }),
+                            ]),
+                      )
+                    ],
+                  ),
+                ),
               ),
             )
         ],
+      ),
+    );
+  }
+}
+
+class KeyButton extends StatelessWidget {
+  const KeyButton(
+      {super.key, this.text,
+      this.icon,
+      required this.onBackgroundColor,
+      required this.onTap,
+      this.onLongTap});
+
+  final String? text;
+  final IconData? icon;
+  final Function(String? text, IconData? icon) onTap;
+  final Function()? onLongTap;
+  final Color onBackgroundColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: InkWell(
+        onLongPress: onLongTap,
+        onTap: () => onTap(text, icon),
+        child: Center(
+          child: text == null
+              ? Icon(icon, color: onBackgroundColor)
+              : Text(
+                  text!,
+                  style: TextStyle(color: onBackgroundColor, fontSize: 24),
+                ),
+        ),
       ),
     );
   }

@@ -103,13 +103,13 @@ class _LockView extends StatelessWidget {
                               ),
                               Image.asset(
                                 'assets/app_icons/kiure_icon_name_dark.png',
-                                width: 90,
+                                width: 60,
                               ),
                               Padding(
                                 padding: const EdgeInsets.only(
                                     left: 32, right: 32, top: 12, bottom: 8),
                                 child: Text(
-                                  'Kyure es una aplicación para guardar tus contraseñas de forma segura.',
+                                  'Kyure es una aplicación para guardar tus cuentas de forma segura.',
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
                                       fontSize: 14,
@@ -154,7 +154,7 @@ class _LockView extends StatelessWidget {
                                 child: NotVaultFoundView(bloc: bloc));
                           }
                           return Expanded(
-                            flex: 2,
+                            flex: 3,
                             child: VaultSelectorView(
                                 bloc: bloc, vaultNames: state.vaultNames),
                           );
@@ -189,7 +189,7 @@ class VaultSelectorView extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         VaultFileMenu(bloc: bloc),
-        const SizedBox(height: 32),
+        const SizedBox(height: 24),
         const Text(
           'Selecciona una bóveda:',
           textAlign: TextAlign.center,
@@ -459,7 +459,7 @@ class OptionButton extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 icon,
-                const SizedBox(height: 8),
+                const SizedBox(height: 4),
                 Text(text,
                     textAlign: TextAlign.center,
                     style: TextStyle(
