@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -24,7 +22,8 @@ import 'package:kyure/presentation/widgets/molecules/search_bar.dart';
 import 'package:kyure/presentation/theme/ky_theme.dart';
 import 'package:kyure/presentation/widgets/molecules/svg_icon.dart';
 import 'package:blur/blur.dart';
-import 'package:kyure/services/service_locator.dart';
+import 'package:kyure/utils/extensions.dart';
+import 'package:kyure/utils/extensions_classes.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 class AccountListPage extends StatelessWidget {
@@ -51,160 +50,52 @@ class _AccountListView extends StatelessWidget {
 
   _showAccountContextMenuDialog(
       AccountListPageBloc bloc, BuildContext context, Account account) {
-    showDialog(
-      context: context,
-      useSafeArea: true,
-      builder: (context) => AlertDialog(
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Row(
-                children: [
-                  ImageRounded(
-                      radius: 8,
-                      image: AnyImage(
-                          source: AnyImageSource.fromJson(
-                              account.image.source.toJson()),
-                          image: account.image.path),
-                      size: 24),
-                  const SizedBox(
-                    width: 8,
-                  ),
-                  Text(
-                    account.name,
-                    style: const TextStyle(fontSize: 18),
-                  ),
-                ],
-              ),
-              const SizedBox(
-                height: 16,
-              ),
-              ContextMenuTileMolecule(
-                  onTap: () {
-                    context.pop();
-                    _openAccountDetails(bloc, context, account, true);
-                  },
-                  label: 'Editar',
-                  icon: const Icon(Icons.edit)),
-              ContextMenuTileMolecule(
-                  onTap: () {
-                    bloc.deleteAccount(account);
-                    context.pop();
-                  },
-                  label: 'Eliminar',
-                  icon: const Icon(CupertinoIcons.delete)),
-            ],
-          )),
-    );
+    context.showOptionListDialog(
+        account.name,
+        ImageRounded(
+            radius: 8,
+            image: AnyImage(
+                source: AnyImageSource.fromJson(account.image.source.toJson()),
+                image: account.image.path),
+            size: 24),
+        [
+          Option('Editar', const Icon(Icons.edit), () {
+            context.pop();
+            _openAccountDetails(bloc, context, account, true);
+          }),
+          Option('Eliminar', const Icon(CupertinoIcons.delete), () {
+            context.pop();
+            context.showYesOrNoDialog('Eliminar cuenta',
+                'Estás a punto de eliminar la cuenta "${account.name}".', () {
+              bloc.deleteAccount(account);
+              return true;
+            }, () => true, 'Eliminar', 'Conservar');
+          }),
+        ]);
   }
 
   _showGroupContextMenuDialog(
       AccountListPageBloc bloc, BuildContext context, AccountGroup group) {
-    showDialog(
-      context: context,
-      useSafeArea: true,
-      builder: (context) => AlertDialog(
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Row(
-                children: [
-                  SvgIcon(svgAsset: group.iconName),
-                  const SizedBox(
-                    width: 8,
-                  ),
-                  Text(
-                    group.name,
-                    style: const TextStyle(fontSize: 18),
-                  ),
-                ],
-              ),
-              const SizedBox(
-                height: 16,
-              ),
-              ContextMenuTileMolecule(
-                  onTap: () async {
-                    context.pop();
-                    final edited = await context
-                        .pushNamed(KyRoutes.groupEditor.name, queryParameters: {
-                      'name': group.name,
-                      'editting': 'true'
-                    });
-                    if (edited != null && (edited as bool)) {
-                      bloc.reload(true);
-                    }
-                  },
-                  label: 'Editar',
-                  icon: const Icon(Icons.edit)),
-              ContextMenuTileMolecule(
-                  onTap: () {
-                    context.pop();
-                    _showYesOrNoDialog(
-                        context,
-                        'Eliminar grupo',
-                        'Si eliminas el grupo, se perderán todas las cuentas vinculadas. ¿Deseas eliminarlo?',
-                        () => bloc.deleteGroup(group),
-                        () => context.pop());
-                  },
-                  label: 'Eliminar',
-                  icon: const Icon(CupertinoIcons.delete)),
-            ],
-          )),
-    );
-  }
-
-  _showYesOrNoDialog(BuildContext buildContext, String title, String message,
-      Function() onYes, Function() onNo) {
-    showDialog(
-      context: buildContext,
-      useSafeArea: true,
-      builder: (context) => AlertDialog(
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                title,
-                style: const TextStyle(fontSize: 18),
-              ),
-              const SizedBox(
-                height: 16,
-              ),
-              Text(
-                message,
-                style: const TextStyle(fontSize: 16),
-              ),
-              const SizedBox(
-                height: 16,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  TextButton(
-                      onPressed: () {
-                        context.pop();
-                        onNo();
-                      },
-                      child: const Text('No')),
-                  TextButton(
-                      onPressed: () {
-                        context.pop();
-                        onYes();
-                      },
-                      child: const Text('Si')),
-                ],
-              )
-            ],
-          )),
-    );
+    context
+        .showOptionListDialog(group.name, SvgIcon(svgAsset: group.iconName), [
+      Option('Editar', const Icon(Icons.edit_outlined), () async {
+        context.pop();
+        final edited = await context.pushNamed(KyRoutes.groupEditor.name,
+            queryParameters: {'id': '${group.id}'});
+        if (edited != null && (edited as bool)) {
+          bloc.reload(true);
+        }
+      }),
+      Option('Eliminar', const Icon(CupertinoIcons.delete), () {
+        context.pop();
+        context.showYesOrNoDialog('Eliminar grupo',
+            'Si eliminas el grupo, se perderán todas las cuentas vinculadas. ¿Deseas eliminarlo?',
+            () {
+          bloc.deleteGroup(group);
+          return true;
+        });
+      }),
+    ]);
   }
 
   _openAccountDetails(AccountListPageBloc bloc, BuildContext context,
@@ -337,16 +228,8 @@ class _AccountListView extends StatelessWidget {
                                       previous.version != current.version ||
                                       current is AccountListPageFilteredState,
                                   builder: (context, state) {
-                                    AccountGroup pageGroup =
-                                        state.groups[state.selectedGroupIndex];
-                                    List<Account> pageAccounts = state
-                                                .selectedGroupIndex ==
-                                            0
-                                        ? state.accounts
-                                        : state.accounts
-                                            .where((element) =>
-                                                element.groupId == pageGroup.id)
-                                            .toList();
+                                    List<Account> pageAccounts = bloc
+                                        .getAccountsFromGroupIndex(groupIndex);
                                     return ListView.builder(
                                       physics: const BouncingScrollPhysics(),
                                       padding: const EdgeInsets.only(
@@ -482,7 +365,6 @@ class _AccountListView extends StatelessWidget {
                                 color: kyTheme.colorOnBackgroundOpacity60),
                             text: 'Sincronizar',
                             onTap: () {
-
                               appBloc.lock();
                             },
                           ),

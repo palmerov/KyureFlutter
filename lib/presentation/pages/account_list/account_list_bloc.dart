@@ -107,6 +107,28 @@ class AccountListPageBloc extends Cubit<AccountListPageState> {
       }
     }
   }
+
+  List<Account> getAccountListByGroupId(int groupId) {
+    if (groupId < 0) {
+      return vaultService.accounts!;
+    }
+    return vaultService.accounts!
+        .where((account) => account.groupId == groupId)
+        .toList();
+  }
+
+  AccountGroup getSelectedGroup() {
+    return vaultService.groups![state.selectedGroupIndex];
+  }
+
+  List<Account> getAccountsFromSelectedGroup() {
+    return getAccountListByGroupId(getSelectedGroup().id);
+  }
+
+  List<Account> getAccountsFromGroupIndex(int groupIndex) {
+    if(groupIndex==0) return vaultService.accounts!;
+    return getAccountListByGroupId(vaultService.groups![groupIndex].id);
+  }
 }
 
 class AccountListPageState extends Equatable {
@@ -117,6 +139,7 @@ class AccountListPageState extends Equatable {
       this.filter = '',
       this.version = 0,
       this.alertMessage});
+
   final List<Account> accounts;
   final List<AccountGroup> groups;
   final int selectedGroupIndex;

@@ -1,6 +1,7 @@
 import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:go_router/go_router.dart';
 import 'package:kyure/clipboard_utils.dart';
 import 'package:kyure/data/models/vault_data.dart';
 import 'package:kyure/presentation/widgets/atoms/any_image.dart';
@@ -81,6 +82,7 @@ class AccountItemMolecule extends StatelessWidget {
 
   showCopyBottomSheet(BuildContext context, CopyAreaMoleculeState state,
       List<AccountField> fields) {
+    final kyTheme = KyTheme.of(context)!;
     showModalBottomSheet(
         context: context,
         builder: (context) {
@@ -94,24 +96,13 @@ class AccountItemMolecule extends StatelessWidget {
                     style: TextStyle(fontSize: 18)),
                 const SizedBox(height: 16),
                 ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: fields.length,
-                  itemBuilder: (context, index) {
-                    return ListTile(
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16)),
-                      title: Text(fields[index].name),
-                      onTap: () {
-                        Navigator.pop(context);
-                        if (fields.first.visible) {
-                          copyValue(context, state, fields[index]);
-                        } else {
-                          copyPassword(context, state, fields[index]);
-                        }
-                      },
-                    );
-                  },
-                ),
+                    shrinkWrap: true,
+                    itemCount: fields.length,
+                    itemBuilder: (context, index) => FieldValueItem(
+                        field: fields[index],
+                        onTap: (field) {
+                          copyValue(context, state, field);
+                        })),
               ],
             ),
           );
@@ -132,7 +123,7 @@ class AccountItemMolecule extends StatelessWidget {
       splashColor: kyTheme.colorPrimarySmooth,
       highlightColor: kyTheme.colorPrimarySmooth,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 20),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 18),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
@@ -151,13 +142,12 @@ class AccountItemMolecule extends StatelessWidget {
                         fontWeight: FontWeight.w300,
                         fontSize: 18),
                   ),
-                  const SizedBox(height: 8),
                   Text(
                     account.fieldUsername.data,
                     softWrap: false,
                     maxLines: 1,
                     overflow: TextOverflow.fade,
-                    style: TextStyle(color: kyTheme.colorHint),
+                    style: TextStyle(color: kyTheme.colorHint, fontWeight: FontWeight.w300),
                   )
                 ],
               ),
@@ -165,8 +155,8 @@ class AccountItemMolecule extends StatelessWidget {
             CopyAreaMolecule(
               icon: SvgPicture.asset(
                   'assets/svg_icons/badge_24dp_E8EAED_FILL0_wght300_GRAD0_opsz24.svg',
-                  height: 30,
-                  width: 30,
+                  height: 36,
+                  width: 36,
                   colorFilter:
                       ColorFilter.mode(kyTheme.colorAccount, BlendMode.srcIn)),
               padding: const EdgeInsets.all(8),
@@ -174,11 +164,11 @@ class AccountItemMolecule extends StatelessWidget {
               onTap: (details, state) => copyValue(context, state, null),
               instantCopy: false,
             ),
-            const SizedBox(width: 6),
+            const SizedBox(width: 8),
             CopyAreaMolecule(
               icon: SvgPicture.asset('assets/svg_icons/key.svg',
-                  height: 30,
-                  width: 30,
+                  height: 36,
+                  width: 36,
                   colorFilter:
                       ColorFilter.mode(kyTheme.colorPassword, BlendMode.srcIn)),
               padding: const EdgeInsets.all(8),
@@ -189,6 +179,56 @@ class AccountItemMolecule extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class FieldValueItem extends StatefulWidget {
+  const FieldValueItem({super.key, required this.field, required this.onTap});
+
+  final AccountField field;
+  final Function(AccountField field) onTap;
+
+  @override
+  State<FieldValueItem> createState() => _FieldValueItemState();
+}
+
+class _FieldValueItemState extends State<FieldValueItem> {
+  bool visible = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final kyTheme = KyTheme.of(context)!;
+    return ListTile(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      horizontalTitleGap: 12,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
+      leading: SvgPicture.asset(
+          widget.field.visible
+              ? 'assets/svg_icons/badge_24dp_E8EAED_FILL0_wght300_GRAD0_opsz24.svg'
+              : 'assets/svg_icons/key.svg',
+          height: 30,
+          width: 30,
+          colorFilter: ColorFilter.mode(
+              widget.field.visible
+                  ? kyTheme.colorAccount
+                  : kyTheme.colorPassword,
+              BlendMode.srcIn)),
+      title: Text(widget.field.name,
+          style: const TextStyle(fontWeight: FontWeight.w400)),
+      subtitle: Text(
+          widget.field.visible || visible
+              ? widget.field.data
+              : widget.field.data.replaceAll(RegExp(r'.'), '*'),
+          style: const TextStyle(fontWeight: FontWeight.w300)),
+      trailing: !widget.field.visible
+          ? IconButton(
+              icon: Icon(!visible
+                  ? Icons.visibility_off_outlined
+                  : Icons.visibility_outlined),
+              onPressed: () => setState(() => visible = !visible))
+          : null,
+      onTap: () => widget.onTap(widget.field),
     );
   }
 }
