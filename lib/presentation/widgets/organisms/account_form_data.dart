@@ -89,7 +89,7 @@ class AccountFormDataOrganismState extends State<AccountFormDataOrganism> {
 
   Widget _buildField(int index, AccountFieldWrapper accountField) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.only(bottom: 4),
       child: AccountFieldMolecule(
         onCopy: () => serviceLocator.getKiureService().addToRecents(account),
         editting: widget.editting,

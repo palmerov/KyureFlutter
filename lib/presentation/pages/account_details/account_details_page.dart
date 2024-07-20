@@ -37,6 +37,7 @@ class _AccountDetailsView extends StatelessWidget {
   _AccountDetailsView({required Account account}) {
     tecName = TextEditingController(text: account.name);
   }
+
   late final TextEditingController tecName;
   final GlobalKey<AnimatedListState> keyFormAnimatedList = GlobalKey();
   final GlobalKey<FormFieldState> keyNameField = GlobalKey();
@@ -141,7 +142,7 @@ class _AccountDetailsView extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               SizedBox(
-                                height: 48,
+                                height: 50,
                                 child: TextFormField(
                                   key: keyNameField,
                                   controller: tecName,
@@ -152,20 +153,35 @@ class _AccountDetailsView extends StatelessWidget {
                                     }
                                     return null;
                                   },
-                                  decoration: const InputDecoration(
+                                  decoration: InputDecoration(
                                       alignLabelWithHint: true,
                                       isDense: true,
-                                      label: Text('Nombre de la cuenta'),
+                                      label: const Text('Nombre de la cuenta'),
+                                      enabledBorder: OutlineInputBorder(
+                                          borderRadius: const BorderRadius.all(
+                                              Radius.circular(12)),
+                                          borderSide: BorderSide(
+                                              color: kytheme
+                                                  .colorOnBackgroundOpacity30)),
+                                      focusedBorder: OutlineInputBorder(
+                                          borderRadius: const BorderRadius.all(
+                                              Radius.circular(12)),
+                                          borderSide: BorderSide(
+                                              color: kytheme
+                                                  .colorOnBackgroundOpacity50)),
                                       border: OutlineInputBorder(
-                                          borderRadius: BorderRadius.all(
-                                              Radius.circular(12)))),
+                                          borderSide: BorderSide(
+                                              color: kytheme
+                                                  .colorOnBackgroundOpacity30),
+                                          borderRadius:
+                                              const BorderRadius.all(Radius.circular(12)))),
                                 ),
                               ),
                               const SizedBox(
-                                height: 8,
+                                height: 4,
                               ),
                               SizedBox(
-                                height: 36,
+                                height: 40,
                                 child: PopupMenuButton<AccountGroup>(
                                   enabled: state.editting,
                                   onSelected: (value) =>
@@ -224,7 +240,7 @@ class _AccountDetailsView extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(
-                  height: 16,
+                  height: 24,
                 ),
                 BlocBuilder<AccountDetailsBloc, AccountDetailsState>(
                   buildWhen: (previous, current) =>

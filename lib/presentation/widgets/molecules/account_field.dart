@@ -147,12 +147,12 @@ class _AccountFieldMoleculeState extends State<AccountFieldMolecule> {
             controller: controllerLabel,
             textAlignVertical: TextAlignVertical.center,
             readOnly: !widget.editting,
-            style: TextStyle(fontSize: 13, color: kyTheme.colorHint),
+            style: TextStyle(fontSize: 14, color: kyTheme.colorHint),
             decoration: InputDecoration(
                 hintText: 'Field name',
                 border: const UnderlineInputBorder(borderSide: BorderSide.none),
                 contentPadding:
-                    isPC ? const EdgeInsets.all(4) : EdgeInsets.all(1),
+                    isPC ? const EdgeInsets.all(4) : const EdgeInsets.all(1),
                 isDense: true),
           ),
         ),
@@ -251,14 +251,14 @@ class _AccountFieldMoleculeState extends State<AccountFieldMolecule> {
         enabledBorder: OutlineInputBorder(
             borderSide: BorderSide(
                 color: widget.editting
-                    ? kyTheme.colorOnBackgroundOpacity60
+                    ? kyTheme.colorOnBackgroundOpacity50
                     : kyTheme.colorSeparatorLine),
             borderRadius: const BorderRadius.all(Radius.circular(12)),
             gapPadding: 4),
         border: OutlineInputBorder(
             borderSide: BorderSide(
                 color: widget.editting
-                    ? kyTheme.colorOnBackgroundOpacity60
+                    ? kyTheme.colorOnBackgroundOpacity50
                     : kyTheme.colorSeparatorLine),
             borderRadius: const BorderRadius.all(Radius.circular(12)),
             gapPadding: 4),
