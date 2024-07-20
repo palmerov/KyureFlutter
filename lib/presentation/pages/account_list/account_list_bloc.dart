@@ -110,9 +110,9 @@ class AccountListPageBloc extends Cubit<AccountListPageState> {
 
   List<Account> getAccountListByGroupId(int groupId) {
     if (groupId < 0) {
-      return vaultService.accounts!;
+      return state.accounts;
     }
-    return vaultService.accounts!
+    return state.accounts
         .where((account) => account.groupId == groupId)
         .toList();
   }
@@ -126,7 +126,7 @@ class AccountListPageBloc extends Cubit<AccountListPageState> {
   }
 
   List<Account> getAccountsFromGroupIndex(int groupIndex) {
-    if(groupIndex==0) return vaultService.accounts!;
+    if (groupIndex == 0) return state.accounts;
     return getAccountListByGroupId(vaultService.groups![groupIndex].id);
   }
 }
@@ -197,6 +197,10 @@ class AccountListPageFilteredState extends AccountListPageState {
             selectedGroupIndex: selectedGroupIndex,
             filter: filter,
             version: 1);
+
+  @override
+  List<Object?> get props =>
+      [selectedGroupIndex, accounts.length, filter, version];
 }
 
 class AccountListPageStateError extends AccountListPageState {

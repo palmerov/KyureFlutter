@@ -186,7 +186,8 @@ class _AccountListView extends StatelessWidget {
                             (previous is AccountListPageStateLoading ||
                                 current is AccountListPageStateLoaded ||
                                 current is AccountListPageFilteredState) ||
-                        previous.version != current.version,
+                        previous.version != current.version ||
+                        previous != current,
                     builder: (context, state) {
                       if (state is AccountListPageStateLoading ||
                           state is AccountListPageStateInitial) {
