@@ -5,4 +5,6 @@ abstract class RemoteDataProvider extends DataProvider {
   Future<dynamic> authorize(Map<String, String> values);
 
   Future<dynamic> getToken(Map<String, String> values);
+
+  Future<dynamic> createRootDirectory();
 }

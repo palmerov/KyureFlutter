@@ -5,6 +5,7 @@ import 'package:kyure/data/utils/account_utils.dart';
 import 'package:kyure/data/utils/group_utils.dart';
 import 'package:kyure/presentation/pages/account_details/account_details_page.dart';
 import 'package:kyure/presentation/pages/account_list/account_list_page.dart';
+import 'package:kyure/presentation/pages/cloud_page/cloud_page.dart';
 import 'package:kyure/presentation/pages/group_details/group_details_page.dart';
 import 'package:kyure/presentation/pages/key_updater/key_updater_page.dart';
 import 'package:kyure/presentation/pages/lock_page/lock_page.dart';
@@ -27,6 +28,12 @@ final routerConfig = GoRouter(navigatorKey: kiureNavigatorKey, routes: [
                         'true'),
           )),
   GoRoute(
+      path: KyRoutes.cloudSettings.routePath,
+      name: KyRoutes.cloudSettings.name,
+      pageBuilder: (context, state) => const MaterialPage(
+            child: CloudPage(),
+          )),
+  GoRoute(
       path: KyRoutes.main.routePath,
       name: KyRoutes.main.name,
       pageBuilder: (context, state) => const MaterialPage(
@@ -41,7 +48,8 @@ final routerConfig = GoRouter(navigatorKey: kiureNavigatorKey, routes: [
               int id = int.parse(state.uri.queryParameters['id'] ?? '-1');
               bool? editting =
                   state.uri.queryParameters['editting'] == 'true' ? true : null;
-              int groupId = int.parse(state.uri.queryParameters['groupId'] ?? '-1');
+              int groupId =
+                  int.parse(state.uri.queryParameters['groupId'] ?? '-1');
               return MaterialPage(
                   child: AccountDetailsPage(
                       editing: editting ?? id < 0,
@@ -76,8 +84,10 @@ enum KyRoutes {
   main('/main', '/main'),
   accountEditor('account-editor', '/main/account-editor'),
   groupEditor('group-editor', '/main/group-editor'),
-  keyEditor('key-editor', '/main/key-editor');
+  keyEditor('key-editor', '/main/key-editor'),
+  cloudSettings('cloud-settings', '/main/cloud-settings');
 
   const KyRoutes(this.name, this.routePath);
+
   final String name, routePath;
 }

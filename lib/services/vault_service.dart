@@ -58,7 +58,7 @@ class VaultService {
     }
 
     try {
-      remoteDataProvider = serviceLocator.getRemoteDataProvider();
+      remoteDataProvider = serviceLocator.getRemoteDataProvider(RemoteProviders.Dropbox);
       if (remoteDataProvider != null) {
         await remoteDataProvider!.init(localPath);
       }

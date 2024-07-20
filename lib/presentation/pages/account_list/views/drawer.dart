@@ -75,6 +75,11 @@ class KiureDrawer extends StatelessWidget {
         ),
         _buildDrawerItem(
             kyTheme: kyTheme,
+            onTap: () => context.pushNamed(KyRoutes.cloudSettings.name),
+            label: 'Configurar nube',
+            icon: const Icon(CupertinoIcons.cloud)),
+        _buildDrawerItem(
+            kyTheme: kyTheme,
             onTap: () => context.pushNamed(KyRoutes.keyEditor.name),
             label: 'Cambiar clave',
             icon: const Icon(CupertinoIcons.lock)),

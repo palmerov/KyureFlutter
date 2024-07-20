@@ -7,6 +7,7 @@ import 'package:kyure/data/models/vault_register.dart';
 import 'package:kyure/data/repositories/remote_data_provider.dart';
 import 'package:kyure/data/service/dropbox/dropbox_service.dart';
 import 'package:kyure/data/utils/encrypt_utils.dart';
+import 'package:kyure/services/service_locator.dart';
 import '../../../config/values.dart';
 import '../../models/vault_data.dart';
 import '../../utils/file_utils.dart';
@@ -27,6 +28,7 @@ class DropboxDataProvider implements RemoteDataProvider {
       sendTimeout: const Duration(seconds: 30),
       contentType: 'application/json',
     ));
+    _dropboxService = serviceLocator.getDropboxService();
     // init root and register paths
     _rootVaultDir = rootPath;
     _vaultRegisterFilePath =
@@ -40,9 +42,11 @@ class DropboxDataProvider implements RemoteDataProvider {
 
   @override
   Future getToken(Map<String, String> values) async {
+    _dropboxService.authorizationCode = values['authorizationCode'];
     return _dropboxService.getToken();
   }
 
+  @override
   Future<Response<dynamic>?> createRootDirectory() async {
     return await _dropboxService.createDirectory(_rootVaultDir);
   }

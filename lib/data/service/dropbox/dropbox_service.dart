@@ -27,7 +27,7 @@ class DropboxService {
     await launchUrlString(url);
   }
 
-  getToken() async {
+  Future getToken() async {
     _authCompleter = Completer();
     if (authorizationCode == null) {
       throw Exception('Authorization code is null');
@@ -38,7 +38,6 @@ class DropboxService {
       data: {
         'code': authorizationCode,
         'grant_type': 'authorization_code',
-        'token_access_type': 'offline',
         'client_id': DropboxValues.apkKey,
         'client_secret': DropboxValues.appSecret,
       },
@@ -152,5 +151,9 @@ class DropboxService {
       log('Exception deleting file in dropbox cloud', error: e.toString());
       return null;
     }
+  }
+
+  bool isAuthorized() {
+    return _accessToken != null && _accessToken!.isNotEmpty;
   }
 }
