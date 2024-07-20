@@ -109,47 +109,26 @@ class _AccountListView extends StatelessWidget {
 
   void _showSortDialog(BuildContext context) {
     final bloc = BlocProvider.of<AccountListPageBloc>(context);
-    showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                ContextMenuTileMolecule(
-                    onTap: () {
-                      bloc.sort(SortBy.nameDesc);
-                      context.pop();
-                    },
-                    label: 'Nombre: A -> Z',
-                    icon: const Icon(Icons.sort_by_alpha_rounded)),
-                ContextMenuTileMolecule(
-                    onTap: () {
-                      bloc.sort(SortBy.nameAsc);
-                      context.pop();
-                    },
-                    label: 'Nombre: Z -> A',
-                    icon: const Icon(Icons.sort_by_alpha_rounded)),
-                ContextMenuTileMolecule(
-                    onTap: () {
-                      bloc.sort(SortBy.modifDateDesc);
-                      context.pop();
-                    },
-                    label: 'Creación: reciente -> anterior',
-                    icon: const Icon(Icons.sort_rounded)),
-                ContextMenuTileMolecule(
-                    onTap: () {
-                      bloc.sort(SortBy.modifDateAsc);
-                      context.pop();
-                    },
-                    label: 'Creación: anterior -> reciente',
-                    icon: const Icon(Icons.sort_rounded)),
-              ],
-            ),
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          );
-        });
+    context.showOptionListDialog('Ordenamiento', const SizedBox.shrink(), [
+      Option('Nombre: A -> Z', const Icon(Icons.sort_by_alpha_rounded), () {
+        bloc.sort(SortBy.nameDesc);
+        context.pop();
+      }),
+      Option('Nombre: Z -> A', const Icon(Icons.sort_by_alpha_rounded), () {
+        bloc.sort(SortBy.nameAsc);
+        context.pop();
+      }),
+      Option('Creación: reciente -> anterior', const Icon(Icons.sort_rounded),
+          () {
+        bloc.sort(SortBy.modifDateDesc);
+        context.pop();
+      }),
+      Option('Creación: anterior -> reciente', const Icon(Icons.sort_rounded),
+          () {
+        bloc.sort(SortBy.modifDateAsc);
+        context.pop();
+      }),
+    ]);
   }
 
   @override
@@ -403,8 +382,11 @@ class _AccountListView extends StatelessWidget {
                                 color: kyTheme.colorOnBackgroundOpacity60),
                             text: '+ Cuenta',
                             onTap: () async {
-                              final result = await context
-                                  .pushNamed(KyRoutes.accountEditor.name);
+                              final result = await context.pushNamed(
+                                  KyRoutes.accountEditor.name,
+                                  queryParameters: {
+                                    'groupId': '${bloc.getSelectedGroup().id}'
+                                  });
                               if (result != null && (result as bool)) {
                                 bloc.reload(true);
                               }

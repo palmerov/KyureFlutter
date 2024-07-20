@@ -61,10 +61,10 @@ class AccountUtils {
         .replaceAll('ñ', 'n');
   }
 
-  static Account generateEmptyAccount() {
+  static Account generateEmptyAccount(int groupId) {
     return Account(
         id: -1,
-        groupId: -1,
+        groupId: groupId,
         modifDate: DateTime.now(),
         status: LifeStatus.active,
         name: '',

@@ -214,6 +214,7 @@ class _AccountFieldMoleculeState extends State<AccountFieldMolecule> {
             ? const SizedBox.shrink()
             : !widget.accountField.visible || widget.editting
                 ? InkWell(
+                    customBorder: const CircleBorder(),
                     onTap: () {
                       setState(() {
                         visible = !visible;
