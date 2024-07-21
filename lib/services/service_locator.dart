@@ -15,9 +15,9 @@ enum RemoteProvider {
   OneDrive;
 
   static RemoteProvider? fromName(String name) {
-    name=name.toLowerCase();
+    name = name.toLowerCase();
     for (var element in RemoteProvider.values) {
-      if(element.name.toLowerCase() == name) return element;
+      if (element.name.toLowerCase() == name) return element;
     }
     return null;
   }
@@ -34,7 +34,7 @@ class ServiceLocator {
     _getit.registerSingleton<LocalDataProvider>(LocalDataProvider());
     _getit.registerLazySingleton(() => DropboxApiService()..init());
     _getit.registerLazySingleton<DropboxDataProvider>(
-        () => DropboxDataProvider()..init('/Kiure/vaults'));
+        () => DropboxDataProvider());
     _getit.registerSingleton(VaultService());
     _getit.registerSingleton(KiureService());
   }

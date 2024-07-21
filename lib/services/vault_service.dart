@@ -48,11 +48,11 @@ class VaultService {
 
   get localVaultNames => _localVaultRegisters.map((e) => e.name).toList();
 
-  init(String localPath) async {
+  init(String localPath, String remotePath) async {
     vaultVersionSystemService = VaultVersionSystemService();
     // local
     localDataProvider = serviceLocator.getLocalDataProvider();
-    await localDataProvider.init(localPath);
+    await localDataProvider.init({'localRootPath': localPath});
     _localVaultRegisters = await localDataProvider.listVaults();
     if (_localVaultRegisters.isNotEmpty) {
       _vaultName = _localVaultRegisters[0].name;
@@ -62,7 +62,8 @@ class VaultService {
       remoteDataProvider =
           serviceLocator.getRemoteDataProvider(RemoteProvider.Dropbox);
       if (remoteDataProvider != null) {
-        await remoteDataProvider!.init(localPath);
+        await remoteDataProvider!
+            .init({'localRootPath': localPath, 'remoteRootPath': remotePath});
       }
     } catch (e) {}
   }

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:kyure/config/dropbox_values.dart';
 import 'package:kyure/data/models/vault.dart';
@@ -15,11 +16,14 @@ import '../data_provider.dart';
 
 class DropboxDataProvider implements RemoteDataProvider {
   late final Dio dio;
-  late String _rootVaultDir, _vaultRegisterFilePath;
+  late String _remoteVaultPath,
+      _remoteRegisterFilePath,
+      _localCacheRegisterFilePath;
+  late String _localCacheVaultPath;
   late final DropboxApiService _dropboxService;
 
   @override
-  Future<void> init(String rootPath) async {
+  Future<void> init(Map<String, dynamic> values) async {
     // init dio
     dio = Dio(BaseOptions(
       baseUrl: DropboxValues.baseUrl,
@@ -30,9 +34,13 @@ class DropboxDataProvider implements RemoteDataProvider {
     ));
     _dropboxService = serviceLocator.getDropboxService();
     // init root and register paths
-    _rootVaultDir = rootPath;
-    _vaultRegisterFilePath =
-        concatPath(_rootVaultDir, VAULT_REGISTER_FILE_NAME);
+    _remoteVaultPath = values['remoteRootPath'];
+    _remoteRegisterFilePath =
+        concatPath(_remoteVaultPath, VAULT_REGISTER_FILE_NAME, true);
+    _localCacheVaultPath = concatPathNames(
+        [values['localRootPath'], LOCAL_CACHE_DIR_NAME, VAULTS_DIR_NAME]);
+    _localCacheRegisterFilePath =
+        concatPathNames([_localCacheVaultPath, VAULT_REGISTER_FILE_NAME]);
   }
 
   @override
@@ -47,7 +55,7 @@ class DropboxDataProvider implements RemoteDataProvider {
 
   @override
   Future<Response<dynamic>?> createRootDirectory() async {
-    return await _dropboxService.createDirectory(_rootVaultDir);
+    return await _dropboxService.createDirectory(_remoteVaultPath);
   }
 
   @override
@@ -63,27 +71,71 @@ class DropboxDataProvider implements RemoteDataProvider {
   }
 
   @override
-  Future<void> deleteVault(String vaultName) async {
-    await _dropboxService.deleteFile(concatPath(_rootVaultDir, vaultName));
+  Future<bool> deleteVault(String vaultName) async {
+    return await _dropboxService
+            .deleteFile(concatPath(_remoteVaultPath, vaultName)) !=
+        null;
   }
 
   @override
   Future<List<VaultRegister>> listVaults() async {
-    return [];
+    final response = await _dropboxService.downloadFileUrl(
+        _remoteRegisterFilePath, _localCacheRegisterFilePath);
+    if (response == null) {
+      return [];
+    }
+    return RepositoryRegister.fromJson(jsonDecode(
+            await (File(_localCacheRegisterFilePath)).readAsString()))
+        .registers;
+  }
+
+  String _getRemoteVaultFilePath(String vaultName) {
+    return concatPath(_remoteVaultPath, vaultName + VAULT_FILE_EXTENSION);
+  }
+
+  String _getLocalVaultCacheFilePath(String vaultName) {
+    return concatPath(_localCacheVaultPath, vaultName + VAULT_FILE_EXTENSION);
+  }
+
+  Future<File?> _downloadRemoteVaultFileToCache(String vaultName) async {
+    String remoteFilePath = _getRemoteVaultFilePath(vaultName);
+    String localCacheFilePath = _getLocalVaultCacheFilePath(vaultName);
+    await File(localCacheFilePath).delete();
+    final response = await _dropboxService.downloadFileUrl(
+        remoteFilePath, localCacheFilePath);
+    if (response != null) {
+      return File(localCacheFilePath);
+    }
+    return null;
   }
 
   @override
   Future<Vault?> readVault(
       EncryptAlgorithm algorithm, String key, String vaultName) async {
-    // TODO: implement readVault
-    throw UnimplementedError();
+    File? cachedFile = await _downloadRemoteVaultFileToCache(vaultName);
+    if (cachedFile != null) {
+      String? text = await cachedFile.readAsString();
+      Map<String, dynamic> json = jsonDecode(text);
+      Vault vault = Vault.fromJson(json);
+      vault.data = VaultData.fromJson(
+          jsonDecode(EncryptUtils.decrypt(algorithm, key, vault.datacrypt)));
+      return vault;
+    } else {
+      return null;
+    }
   }
 
   @override
-  Future<void> writeVault(EncryptAlgorithm algorithm, String key,
+  Future<bool> writeVault(EncryptAlgorithm algorithm, String key,
       String vaultName, Vault vault) async {
-    // TODO: implement writeVault
-    throw UnimplementedError();
+    final response = await _dropboxService.uploadFile(
+        (await serviceLocator
+                .getLocalDataProvider()
+                .getVaultFile(vaultName, false))
+            .$1!
+            .path,
+        _getRemoteVaultFilePath(vaultName));
+    return response != null;
   }
 
   @override

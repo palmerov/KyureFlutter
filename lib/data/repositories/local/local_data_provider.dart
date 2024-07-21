@@ -13,9 +13,9 @@ class LocalDataProvider implements DataProvider {
   late File _vaultRegisterFile;
 
   @override
-  Future init(String rootPath) async {
+  Future init(Map<String, dynamic> values) async {
     // init and create root path
-    _rootVaultDir = Directory(concatPath(rootPath, VAULTS_DIR_NAME));
+    _rootVaultDir = Directory(concatPath(values['localRootPath'], VAULTS_DIR_NAME));
     await _rootVaultDir.create(recursive: true);
 
     // init and create register poth
@@ -97,7 +97,7 @@ class LocalDataProvider implements DataProvider {
   }
 
   /// returns (<the new file>, <was created>)
-  Future<(File?, bool)> _getVaultFile(String vaultName, bool create) async {
+  Future<(File?, bool)> getVaultFile(String vaultName, bool create) async {
     VaultRegister vaultRegister;
     try {
       vaultRegister = (await listVaults())
@@ -120,28 +120,29 @@ class LocalDataProvider implements DataProvider {
   Future<Vault?> readVault(
       EncryptAlgorithm algorithm, String key, String vaultName) async {
     String? text =
-        await (await _getVaultFile(vaultName, false)).$1?.readAsString();
+        await (await getVaultFile(vaultName, false)).$1?.readAsString();
     if (text != null) {
       Map<String, dynamic> json = jsonDecode(text);
-      Vault userData = Vault.fromJson(json);
-      userData.data = VaultData.fromJson(
-          jsonDecode(EncryptUtils.decrypt(algorithm, key, userData.datacrypt)));
-      return userData;
+      Vault vault = Vault.fromJson(json);
+      vault.data = VaultData.fromJson(
+          jsonDecode(EncryptUtils.decrypt(algorithm, key, vault.datacrypt)));
+      return vault;
     }
     return null;
   }
 
   @override
-  Future<void> writeVault(EncryptAlgorithm algorithm, String key,
+  Future<bool> writeVault(EncryptAlgorithm algorithm, String key,
       String vaultName, Vault vault) async {
     vault.datacrypt =
         EncryptUtils.encrypt(algorithm, key, jsonEncode(vault.data!.toJson()));
     String strUserData = jsonEncode(vault);
-    final fileResult = (await _getVaultFile(vaultName, true));
+    final fileResult = (await getVaultFile(vaultName, true));
     fileResult.$1!.writeAsString(strUserData);
     if (fileResult.$2) {
       _updateRegister();
     }
+    return true;
   }
 
   @override

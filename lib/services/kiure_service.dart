@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
+import 'package:kyure/config/values.dart';
 import 'package:kyure/data/models/cloud_settings.dart';
 import 'package:kyure/data/models/vault_data.dart';
 import 'package:kyure/data/utils/file_utils.dart';
@@ -34,7 +35,7 @@ class KiureService {
     // services
     String rootPath = (await getLocalInternalRootDir()).path;
     _vaultService = serviceLocator.getVaultService();
-    await _vaultService.init(rootPath);
+    await _vaultService.init(rootPath, VAULTS_DIR_NAME);
 
     // recent accounts
     _recentAccountIds = jsonDecode(_prefs.getString('recent_accounts') ?? '{}');

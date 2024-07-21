@@ -4,14 +4,14 @@ import 'package:kyure/data/models/vault_register.dart';
 import 'package:kyure/data/utils/encrypt_utils.dart';
 
 abstract class DataProvider {
-  Future<void> init(String rootPath);
-  Future<void> writeVault(
+  Future<void> init(Map<String, dynamic> values);
+  Future<bool> writeVault(
       EncryptAlgorithm algorithm, String key, String vaultName, Vault vault);
   Future<Vault?> readVault(
       EncryptAlgorithm algorithm, String key, String vaultName);
   Future<Vault> decryptVault(
       EncryptAlgorithm algorithm, String key, Vault vault);
-  Future<void> deleteVault(String vaultName);
+  Future<bool> deleteVault(String vaultName);
   Future<List<VaultRegister>> listVaults();
 }
 
