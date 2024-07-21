@@ -3,13 +3,25 @@ import 'package:kyure/data/repositories/data_provider.dart';
 import 'package:kyure/data/repositories/dropbox/dropbox_data_provider.dart';
 import 'package:kyure/data/repositories/local/local_data_provider.dart';
 import 'package:kyure/data/repositories/remote_data_provider.dart';
-import 'package:kyure/data/service/dropbox/dropbox_service.dart';
+import 'package:kyure/data/service/dropbox/dropbox_api_service.dart';
 import 'package:kyure/services/kiure_service.dart';
 import 'package:kyure/services/vault_service.dart';
 
 final ServiceLocator serviceLocator = ServiceLocator();
 
-enum RemoteProviders { Dropbox, GoogleDrive, OneDrive}
+enum RemoteProvider {
+  Dropbox,
+  GoogleDrive,
+  OneDrive;
+
+  static RemoteProvider? fromName(String name) {
+    name=name.toLowerCase();
+    for (var element in RemoteProvider.values) {
+      if(element.name.toLowerCase() == name) return element;
+    }
+    return null;
+  }
+}
 
 class ServiceLocator {
   late final GetIt _getit;
@@ -20,8 +32,9 @@ class ServiceLocator {
 
   void registerAll() {
     _getit.registerSingleton<LocalDataProvider>(LocalDataProvider());
-    _getit.registerLazySingleton(() => DropboxService()..init());
-    _getit.registerLazySingleton<DropboxDataProvider>(() => DropboxDataProvider()..init('/Kiure/vaults'));
+    _getit.registerLazySingleton(() => DropboxApiService()..init());
+    _getit.registerLazySingleton<DropboxDataProvider>(
+        () => DropboxDataProvider()..init('/Kiure/vaults'));
     _getit.registerSingleton(VaultService());
     _getit.registerSingleton(KiureService());
   }
@@ -29,7 +42,6 @@ class ServiceLocator {
   void registerRemoteDataProvider<T extends DataProvider>(T instance) {
     _getit.registerSingleton<T>(instance);
   }
-
 
   KiureService getKiureService() {
     return _getit.get<KiureService>();
@@ -43,16 +55,16 @@ class ServiceLocator {
     return _getit.get<VaultService>();
   }
 
-  RemoteDataProvider getRemoteDataProvider(RemoteProviders provider) {
+  RemoteDataProvider getRemoteDataProvider(RemoteProvider provider) {
     switch (provider) {
-      case RemoteProviders.Dropbox:
+      case RemoteProvider.Dropbox:
         return _getit.get<DropboxDataProvider>();
       default:
         throw Exception('Provider not found');
     }
   }
 
-  DropboxService getDropboxService() {
-    return _getit.get<DropboxService>();
+  DropboxApiService getDropboxService() {
+    return _getit.get<DropboxApiService>();
   }
 }

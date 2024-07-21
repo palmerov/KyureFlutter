@@ -32,6 +32,7 @@ bool get isMobile => Platform.isAndroid || Platform.isIOS;
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key, required this.light});
+
   final bool light;
 
   // This widget is the root of your application.
@@ -148,10 +149,15 @@ class ApplicationBloc extends Cubit<ApplicationState> {
       });
     }
   }
+
+  void syncVault() async {
+    serviceLocator.getVaultService().syncWithRemote(null);
+  }
 }
 
 class ApplicationState extends Equatable {
   const ApplicationState({required this.light});
+
   final bool light;
 
   @override

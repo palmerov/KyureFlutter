@@ -1,5 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/foundation.dart';
+import 'package:kyure/data/models/cloud_settings.dart';
 import 'package:kyure/data/models/vault_data.dart';
 import 'package:kyure/data/utils/file_utils.dart';
 import 'package:kyure/main.dart';
@@ -11,6 +13,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class KiureService {
   late SharedPreferences _prefs;
   late VaultService _vaultService;
+  RemoteSettings? remoteSettings;
   bool initialized = false;
   Map<String, dynamic> _recentAccountIds = {};
   List<Account> _vaultRecentAccounts = [];
@@ -44,6 +47,49 @@ class KiureService {
       _prefs.remove('vaultName');
     } else {
       _prefs.setString('vaultName', name);
+    }
+  }
+
+  void loadRemoteSettings() {
+    String? provider = _prefs.getString('remote_provider');
+    if (provider == null) return;
+    RemoteProvider? remoteProvider = RemoteProvider.fromName(provider);
+    if (remoteProvider == null) return;
+
+    remoteSettings = RemoteSettings(
+        provider: remoteProvider,
+        authorizationCode: _prefs.getString('remote_authorization_code') ?? '',
+        refreshToken: _prefs.getString('refresh_token') ?? '');
+    _vaultService.remoteDataProvider =
+        serviceLocator.getRemoteDataProvider(remoteProvider);
+    _vaultService.remoteDataProvider!.authorizationCode =
+        remoteSettings!.authorizationCode;
+    _vaultService.remoteDataProvider!.refreshToken =
+        remoteSettings!.refreshToken;
+    if ((remoteSettings!.refreshToken ?? '').isNotEmpty) {
+      try {
+        _vaultService.remoteDataProvider!.refreshAccessToken({});
+      } catch (e) {
+        if (kDebugMode) {
+          print(e.toString());
+        }
+      }
+    }
+  }
+
+  void saveRemoteSettings() {
+    if (_vaultService.remoteDataProvider!.authorizationCode != null) {
+      remoteSettings = RemoteSettings(
+          provider: RemoteProvider.fromName(
+                  _vaultService.remoteDataProvider!.providerName) ??
+              RemoteProvider.Dropbox,
+          authorizationCode:
+              _vaultService.remoteDataProvider!.authorizationCode!,
+          refreshToken: _vaultService.remoteDataProvider!.refreshToken!);
+      _prefs.setString('remote_provider', remoteSettings!.provider.name);
+      _prefs.setString('refresh_token', remoteSettings!.provider.name);
+      _prefs.setString(
+          'remote_authorization_code', remoteSettings!.authorizationCode);
     }
   }
 

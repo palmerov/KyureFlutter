@@ -5,9 +5,9 @@ import 'package:kyure/config/http_content_types.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import '../../../config/dropbox_values.dart';
 
-class DropboxService {
+class DropboxApiService {
   late final Dio _dio;
-  String? _accessToken, _refresh_token;
+  String? _accessToken, refresh_token;
   int _expirationTimeInSeconds = 0;
   String? authorizationCode = '';
   Completer? _authCompleter;
@@ -47,7 +47,7 @@ class DropboxService {
     }
     _accessToken = apiResponse.data['access_token'];
     _expirationTimeInSeconds = apiResponse.data['expires_in'];
-    _refresh_token = apiResponse.data['refresh_token'];
+    refresh_token = apiResponse.data['refresh_token'];
 
     _dio.options = _dio.options.copyWith(headers: {
       'Authorization': 'Bearer $_accessToken',
@@ -56,12 +56,12 @@ class DropboxService {
     _startRefreshTokenTimer();
   }
 
-  Future _refreshToken() async {
+  Future refreshAccessToken() async {
     _authCompleter = Completer();
     final apiResponse = await _dio.post(DropboxValues.oauthTokenUrl,
         options: Options(contentType: HttpContentType.xWwwFormUrlencoded.value),
         data: {
-          'refresh_token': _refresh_token,
+          'refresh_token': refresh_token,
           'grant_type': 'refresh_token',
           'client_id': DropboxValues.apkKey,
           'client_secret': DropboxValues.appSecret,
@@ -84,7 +84,7 @@ class DropboxService {
             seconds: (_expirationTimeInSeconds > 1)
                 ? (_expirationTimeInSeconds - 1)
                 : 0), () async {
-      await _refreshToken();
+      await refreshAccessToken();
     });
   }
 

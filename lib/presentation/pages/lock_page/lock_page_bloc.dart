@@ -62,6 +62,7 @@ Detalles del error ${exception.toString()}."""));
     try {
       await vaultService.openVault(
           state.selectedVault ?? '', EncryptAlgorithm.AES, key);
+      kiureService.loadRemoteSettings();
       emitLoginState();
     } catch (exception) {
       print(exception.toString());

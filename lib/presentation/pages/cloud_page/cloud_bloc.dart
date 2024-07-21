@@ -1,32 +1,38 @@
 import 'package:bloc/bloc.dart';
+import 'package:equatable/equatable.dart';
 import 'package:kyure/data/repositories/remote_data_provider.dart';
+import 'package:kyure/services/kiure_service.dart';
 import 'package:kyure/services/service_locator.dart';
+import 'package:kyure/services/vault_service.dart';
 import '../../../data/models/cloud_settings.dart';
 
 class CloudSettingsCubit extends Cubit<CloudSettingsState> {
   RemoteDataProvider get remoteDataProvider =>
-      serviceLocator.getRemoteDataProvider(RemoteProviders.Dropbox);
+      serviceLocator.getRemoteDataProvider(RemoteProvider.Dropbox);
 
-  CloudSettingsCubit() : super(CloudSettingsState.initial());
+  KiureService get kiureService => serviceLocator.getKiureService();
 
-  Future<void> loadSettings() async {}
-
-  Future<void> saveSettings(CloudSettings settings) async {}
+  CloudSettingsCubit() : super(CloudSettingsState.initial()) {
+    if (kiureService.remoteSettings != null) {
+      emit(CloudSettingsState(settings: kiureService.remoteSettings));
+    }
+  }
 
   void setupDropBoxToken(String authorizationCode) async {
-    emit(CloudSettingsState(
+    emit(const CloudSettingsState(
         settings: null, waitingForToken: false, loading: true));
     try {
-      await remoteDataProvider
-          .getToken({'authorizationCode': authorizationCode});
+      remoteDataProvider.authorizationCode = authorizationCode;
+      await remoteDataProvider.getAccessToken({});
       final response = await remoteDataProvider.createRootDirectory();
+      kiureService.saveRemoteSettings();
       emit(CloudSettingsState(
-          settings: CloudSettings(rootPath: '', o2token: authorizationCode),
+          settings: kiureService.remoteSettings,
           waitingForToken: false,
           loading: false));
     } catch (ex) {
       emit(CloudSettingsState(
-          settings: CloudSettings(rootPath: '', o2token: authorizationCode),
+          settings: null,
           waitingForToken: false,
           loading: false,
           error: ex.toString()));
@@ -38,21 +44,19 @@ class CloudSettingsCubit extends Cubit<CloudSettingsState> {
   }
 
   void startWithDropBox() {
-    emit(CloudSettingsState(
-        settings: CloudSettings(rootPath: '', o2token: ''),
-        waitingForToken: true));
+    emit(CloudSettingsState(settings: null, waitingForToken: true));
     remoteDataProvider.authorize({});
   }
 }
 
-class CloudSettingsState {
-  CloudSettingsState(
+class CloudSettingsState extends Equatable {
+  const CloudSettingsState(
       {required this.settings,
       this.waitingForToken = false,
       this.loading = false,
       this.error});
 
-  final CloudSettings? settings;
+  final RemoteSettings? settings;
   final bool waitingForToken;
   final bool loading;
   final String? error;
@@ -60,4 +64,13 @@ class CloudSettingsState {
   factory CloudSettingsState.initial() {
     return CloudSettingsState(settings: null);
   }
+
+  @override
+  List<Object?> get props => [
+        settings?.provider.name ?? '',
+        settings?.authorizationCode ?? '',
+        waitingForToken,
+        loading,
+        error ?? ''
+      ];
 }

@@ -5,7 +5,7 @@ import 'package:kyure/config/dropbox_values.dart';
 import 'package:kyure/data/models/vault.dart';
 import 'package:kyure/data/models/vault_register.dart';
 import 'package:kyure/data/repositories/remote_data_provider.dart';
-import 'package:kyure/data/service/dropbox/dropbox_service.dart';
+import 'package:kyure/data/service/dropbox/dropbox_api_service.dart';
 import 'package:kyure/data/utils/encrypt_utils.dart';
 import 'package:kyure/services/service_locator.dart';
 import '../../../config/values.dart';
@@ -16,7 +16,7 @@ import '../data_provider.dart';
 class DropboxDataProvider implements RemoteDataProvider {
   late final Dio dio;
   late String _rootVaultDir, _vaultRegisterFilePath;
-  late final DropboxService _dropboxService;
+  late final DropboxApiService _dropboxService;
 
   @override
   Future<void> init(String rootPath) async {
@@ -41,8 +41,7 @@ class DropboxDataProvider implements RemoteDataProvider {
   }
 
   @override
-  Future getToken(Map<String, String> values) async {
-    _dropboxService.authorizationCode = values['authorizationCode'];
+  Future getAccessToken(Map<String, String> values) async {
     return _dropboxService.getToken();
   }
 
@@ -85,5 +84,29 @@ class DropboxDataProvider implements RemoteDataProvider {
       String vaultName, Vault vault) async {
     // TODO: implement writeVault
     throw UnimplementedError();
+  }
+
+  @override
+  String? get authorizationCode => _dropboxService.authorizationCode;
+
+  @override
+  set authorizationCode(String? code) {
+    _dropboxService.authorizationCode = code;
+  }
+
+  @override
+  String get providerName => RemoteProvider.Dropbox.name;
+
+  @override
+  String? get refreshToken => _dropboxService.refresh_token;
+
+  @override
+  set refreshToken(String? token) {
+    refreshToken = token;
+  }
+
+  @override
+  Future refreshAccessToken(Map<String, String> values) {
+    return _dropboxService.refreshAccessToken();
   }
 }

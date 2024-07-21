@@ -51,9 +51,7 @@ class CloudView extends StatelessWidget {
                   children: <Widget>[
                     Icon(CupertinoIcons.cloud,
                         size: 60,
-                        color: bloc.isAuthorized()
-                            ? Colors.blue
-                            : Colors.grey),
+                        color: bloc.isAuthorized() ? Colors.blue : Colors.grey),
                     const SizedBox(height: 16),
                     if (state.settings == null)
                       const Text(
@@ -61,23 +59,24 @@ class CloudView extends StatelessWidget {
                         textAlign: TextAlign.center,
                       ),
                     if (bloc.isAuthorized())
-                      const Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                        Text(
-                          'Nube configurada',
-                          textAlign: TextAlign.center,
-                        ),
-                        SizedBox(width: 4),
-                        Icon(Icons.check, color: Colors.green),
-                      ]),
+                      const Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              'Nube configurada',
+                              textAlign: TextAlign.center,
+                            ),
+                            SizedBox(width: 4),
+                            Icon(Icons.check, color: Colors.green),
+                          ]),
                     const SizedBox(height: 16),
-                    if (state.settings == null)
-                      Text(
-                        state.waitingForToken
-                            ? 'Insertar token de autorización'
-                            : 'Proveedor configurado: ninguno',
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                      ),
+                    Text(
+                      state.waitingForToken
+                          ? 'Insertar token de autorización'
+                          : 'Proveedor configurado: ${state.settings?.provider.name ?? 'ninguno'}',
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
                     const SizedBox(height: 16),
                     if (state.waitingForToken)
                       TextFormField(

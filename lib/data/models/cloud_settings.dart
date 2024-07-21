@@ -1,5 +1,12 @@
-class CloudSettings{
-  CloudSettings({required this.rootPath, required this.o2token});
-  final String rootPath;
-  final String o2token;
+import '../../services/service_locator.dart';
+
+class RemoteSettings {
+  RemoteSettings(
+      {required this.provider,
+      required this.authorizationCode,
+      required this.refreshToken});
+
+  final RemoteProvider provider;
+  final String authorizationCode;
+  final String refreshToken;
 }

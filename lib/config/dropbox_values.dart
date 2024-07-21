@@ -17,7 +17,7 @@ class DropboxValues {
   static const String _getFileUrl = '2/file_requests/get';
 
   static get authorizationUrl =>
-      '$_authorizationUrl?client_id=$apkKey&response_type=code';
+      '$_authorizationUrl?client_id=$apkKey&response_type=code&token_access_type=offline';
 
   static get oauthTokenUrl => '$baseUrl$_oauthTokenUrl';
 

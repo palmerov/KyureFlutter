@@ -8,6 +8,7 @@ import 'package:kyure/data/models/vault_data.dart';
 import 'package:kyure/data/models/vault_register.dart';
 import 'package:kyure/data/repositories/data_provider.dart';
 import 'package:kyure/data/repositories/local/local_data_provider.dart';
+import 'package:kyure/data/repositories/remote_data_provider.dart';
 import 'package:kyure/data/utils/account_utils.dart';
 import 'package:kyure/data/utils/encrypt_utils.dart';
 import 'package:kyure/data/utils/file_utils.dart';
@@ -18,7 +19,7 @@ import 'package:kyure/services/version/vault_version_system_service.dart';
 class VaultService {
   late VaultVersionSystemService vaultVersionSystemService;
   late LocalDataProvider localDataProvider;
-  DataProvider? remoteDataProvider;
+  RemoteDataProvider? remoteDataProvider;
   List<VaultRegister> _localVaultRegisters = [];
   List<VaultRegister>? _remoteVaultRegisters;
 
@@ -58,7 +59,8 @@ class VaultService {
     }
 
     try {
-      remoteDataProvider = serviceLocator.getRemoteDataProvider(RemoteProviders.Dropbox);
+      remoteDataProvider =
+          serviceLocator.getRemoteDataProvider(RemoteProvider.Dropbox);
       if (remoteDataProvider != null) {
         await remoteDataProvider!.init(localPath);
       }
@@ -79,7 +81,7 @@ class VaultService {
   }
 
   Future<File?> tryToImportVaultFile(File file) async {
-    final localFile =  await localDataProvider.tryToImportVaultFromFile(file);
+    final localFile = await localDataProvider.tryToImportVaultFromFile(file);
     if (localFile != null) {
       await _fetchLocalVaultRegisters();
       return localFile;

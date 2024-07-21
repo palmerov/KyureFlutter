@@ -344,9 +344,7 @@ class _AccountListView extends StatelessWidget {
                             icon: Icon(CupertinoIcons.cloud,
                                 color: kyTheme.colorOnBackgroundOpacity60),
                             text: 'Sincronizar',
-                            onTap: () {
-                              appBloc.lock();
-                            },
+                            onTap: () => appBloc.syncVault(),
                           ),
                           BottomItemActionMolecule(
                             icon: Icon(CupertinoIcons.list_number,
