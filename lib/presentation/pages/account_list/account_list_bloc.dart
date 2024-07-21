@@ -129,6 +129,15 @@ class AccountListPageBloc extends Cubit<AccountListPageState> {
     if (groupIndex == 0) return state.accounts;
     return getAccountListByGroupId(vaultService.groups![groupIndex].id);
   }
+
+  void syncVault() async {
+    emit(const AccountListPageStateLoading());
+    await serviceLocator.getVaultService().syncWithRemote(null);
+    emit(AccountListPageStateLoaded(
+        accounts: vaultService.accounts!,
+        groups: vaultService.groups!,
+        selectedGroupIndex: 0));
+  }
 }
 
 class AccountListPageState extends Equatable {

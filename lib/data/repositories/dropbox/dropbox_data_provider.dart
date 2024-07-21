@@ -97,10 +97,13 @@ class DropboxDataProvider implements RemoteDataProvider {
     return concatPath(_localCacheVaultPath, vaultName + VAULT_FILE_EXTENSION);
   }
 
-  Future<File?> _downloadRemoteVaultFileToCache(String vaultName) async {
+  @override
+  Future<File?> downloadRemoteVaultFileToCache(String vaultName) async {
     String remoteFilePath = _getRemoteVaultFilePath(vaultName);
     String localCacheFilePath = _getLocalVaultCacheFilePath(vaultName);
-    await File(localCacheFilePath).delete();
+    try {
+      await File(localCacheFilePath).delete();
+    } catch (ex) {}
     final response = await _dropboxService.downloadFileUrl(
         remoteFilePath, localCacheFilePath);
     if (response != null) {
@@ -112,7 +115,7 @@ class DropboxDataProvider implements RemoteDataProvider {
   @override
   Future<Vault?> readVault(
       EncryptAlgorithm algorithm, String key, String vaultName) async {
-    File? cachedFile = await _downloadRemoteVaultFileToCache(vaultName);
+    File? cachedFile = await downloadRemoteVaultFileToCache(vaultName);
     if (cachedFile != null) {
       String? text = await cachedFile.readAsString();
       Map<String, dynamic> json = jsonDecode(text);

@@ -22,6 +22,7 @@ import 'package:kyure/presentation/widgets/molecules/search_bar.dart';
 import 'package:kyure/presentation/theme/ky_theme.dart';
 import 'package:kyure/presentation/widgets/molecules/svg_icon.dart';
 import 'package:blur/blur.dart';
+import 'package:kyure/services/service_locator.dart';
 import 'package:kyure/utils/extensions.dart';
 import 'package:kyure/utils/extensions_classes.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
@@ -283,12 +284,14 @@ class _AccountListView extends StatelessWidget {
                                       AccountListPageState>(
                                     buildWhen: (previous, current) =>
                                         (previous != current &&
-                                                current
+                                            (current
                                                     is AccountListPageFilteredState ||
-                                            current
-                                                is AccountListPageSelectedGroupState ||
-                                            current
-                                                is AccountListPageStateLoaded) ||
+                                                current
+                                                    is AccountListPageSelectedGroupState ||
+                                                current
+                                                    is AccountListPageStateLoaded ||
+                                                current
+                                                    is AccountListPageStateLoading)) ||
                                         previous.version != current.version,
                                     builder: (context, state) {
                                       if (state
@@ -344,7 +347,16 @@ class _AccountListView extends StatelessWidget {
                             icon: Icon(CupertinoIcons.cloud,
                                 color: kyTheme.colorOnBackgroundOpacity60),
                             text: 'Sincronizar',
-                            onTap: () => appBloc.syncVault(),
+                            onTap: () {
+                              if (serviceLocator
+                                      .getKiureService()
+                                      .remoteSettings !=
+                                  null) {
+                                bloc.syncVault();
+                              } else {
+                                context.pushNamed(KyRoutes.cloudSettings.name);
+                              }
+                            },
                           ),
                           BottomItemActionMolecule(
                             icon: Icon(CupertinoIcons.list_number,

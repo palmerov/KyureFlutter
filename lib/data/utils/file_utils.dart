@@ -12,9 +12,9 @@ String concatPath(String parent, String child, [bool remote = false]) {
 
 String concatPathNames(List<String> names, [bool remote = false]) {
   if (Platform.isWindows && !remote) {
-    return names.fold('', (previousValue, element) => '$previousValue\\$element');
+    return names.fold('', (previousValue, element) => '$previousValue\\$element').substring(1);
   } else {
-    return names.fold('', (previousValue, element) => '$previousValue/$element');
+    return names.fold('', (previousValue, element) => '$previousValue/$element').substring(1);
   }
 }
 

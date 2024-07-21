@@ -7,6 +7,7 @@ class DropboxValues {
 
   // url
   static const String baseUrl = 'https://api.dropboxapi.com/';
+  static const String baseContentUrl = 'https://content.dropboxapi.com/';
   static const String _oauthTokenUrl = 'oauth2/token';
   static const String _createFolderUrl = '2/files/create_folder_v2';
   static const String _listFilesUrl = '2/file_requests/list_v2';
@@ -31,7 +32,7 @@ class DropboxValues {
 
   static get getFileUrl => '$baseUrl$_getFileUrl';
 
-  static get downloadFileUrl => '$baseUrl$_downloadFileUrl';
+  static get downloadFileUrl => '$baseContentUrl$_downloadFileUrl';
 
-  static get uploadFileUrl => '$baseUrl$_uploadFileUrl';
+  static get uploadFileUrl => '$baseContentUrl$_uploadFileUrl';
 }

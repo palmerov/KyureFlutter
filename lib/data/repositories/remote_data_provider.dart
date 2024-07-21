@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:kyure/data/repositories/data_provider.dart';
 
 abstract class RemoteDataProvider extends DataProvider {
@@ -9,6 +11,8 @@ abstract class RemoteDataProvider extends DataProvider {
   Future<dynamic> refreshAccessToken(Map<String, String> values);
 
   Future<dynamic> createRootDirectory();
+
+  Future<File?> downloadRemoteVaultFileToCache(String vaultName);
 
   String? get authorizationCode;
 

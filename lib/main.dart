@@ -149,10 +149,6 @@ class ApplicationBloc extends Cubit<ApplicationState> {
       });
     }
   }
-
-  void syncVault() async {
-    serviceLocator.getVaultService().syncWithRemote(null);
-  }
 }
 
 class ApplicationState extends Equatable {

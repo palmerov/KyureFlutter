@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:developer';
+import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:kyure/config/http_content_types.dart';
 import 'package:url_launcher/url_launcher_string.dart';
@@ -69,11 +70,12 @@ class DropboxApiService {
     if (apiResponse.data == null) {
       throw Exception('Null response exception');
     }
-    _dio.options = _dio.options.copyWith(headers: {
-      'Authorization': 'Bearer $_accessToken',
-    });
     _accessToken = apiResponse.data['access_token'];
     _expirationTimeInSeconds = apiResponse.data['expires_in'];
+
+    _dio.options = _dio.options.copyWith(headers: {
+      HttpHeaders.authorizationHeader: 'Bearer $_accessToken',
+    });
     _authCompleter!.complete();
     _startRefreshTokenTimer();
   }
@@ -136,15 +138,14 @@ class DropboxApiService {
     }
   }
 
-  Future<Response<dynamic>?> uploadFile(String localPath, String remotePath,
-      [bool replace = true]) async {
+  Future<Response<dynamic>?> uploadFile(String localPath, String remotePath) async {
     await _authOperations();
     try {
-      final response = await _dio.put(DropboxValues.uploadFileUrl,
-          data: await MultipartFile.fromFile(localPath),
+      final response = await _dio.post(DropboxValues.uploadFileUrl,
+          data: File(localPath).readAsStringSync(),
           options: Options(headers: {
             'Dropbox-API-Arg':
-                '{autorename: false,mode: ${replace ? 'add,' : 'overwrite,'}mute: false,path: "$remotePath",strict_conflict: false}'
+                '{"autorename": false,"mode": "overwrite","mute": false,"path": "$remotePath","strict_conflict": false}'
           }, contentType: 'application/octet-stream'));
       return response;
     } on Exception catch (e) {

@@ -21,7 +21,6 @@ class VaultService {
   late LocalDataProvider localDataProvider;
   RemoteDataProvider? remoteDataProvider;
   List<VaultRegister> _localVaultRegisters = [];
-  List<VaultRegister>? _remoteVaultRegisters;
 
   String? _key;
   String? _vaultName;
@@ -74,13 +73,6 @@ class VaultService {
         .isNotEmpty;
   }
 
-  bool existVaultInRemote(String vaultName) {
-    _fetchRemoteVaultRegisters();
-    return (_remoteVaultRegisters ?? [])
-        .where((element) => element.name == vaultName)
-        .isNotEmpty;
-  }
-
   Future<File?> tryToImportVaultFile(File file) async {
     final localFile = await localDataProvider.tryToImportVaultFromFile(file);
     if (localFile != null) {
@@ -98,10 +90,6 @@ class VaultService {
     Vault vault = Vault.fromJson(
         jsonDecode(file.readAsStringSync()) as Map<String, dynamic>);
     return vault.vaultName;
-  }
-
-  _fetchRemoteVaultRegisters() async {
-    _remoteVaultRegisters = await remoteDataProvider?.listVaults();
   }
 
   _fetchLocalVaultRegisters() async {
@@ -183,18 +171,6 @@ class VaultService {
     }
   }
 
-  bool hasToSync() {
-    if (_remoteVaultRegisters == null) return false;
-    bool existRemoteVault =
-        (_remoteVaultRegisters?.any((element) => element.name == _vaultName) ??
-            false);
-    bool outOfDateWithRemote = (_remoteVaultRegisters?.any((element) =>
-            element.name == _vaultName &&
-            element.modifDate != _vault!.modifDate) ??
-        false);
-    return !existRemoteVault || outOfDateWithRemote;
-  }
-
   Future<void> createNewVault(
       String vaultName, EncryptAlgorithm algorithm, String key) async {
     _vaultName = vaultName;
@@ -241,42 +217,34 @@ class VaultService {
 
   Future<SyncResult> syncWithRemote(String? remoteKey) async {
     try {
-      await _fetchRemoteVaultRegisters();
-      if (_remoteVaultRegisters == null) return SyncResult.accessError;
       remoteKey ??= _key;
-      bool existRemoteVault = (_remoteVaultRegisters
-              ?.any((element) => element.name == _vaultName) ??
-          false);
-      bool outOfDateWithRemote = (_remoteVaultRegisters?.any((element) =>
-              element.name == _vaultName &&
-              element.modifDate != _vault!.modifDate) ??
-          false);
-      if (!existRemoteVault || outOfDateWithRemote) {
-        if (existRemoteVault) {
-          Vault? remoteVault;
-          try {
-            remoteVault = await remoteDataProvider?.readVault(
-                _algorithm!, _key!, _vaultName!);
-          } on AccessibilityException {
-            return SyncResult.accessError;
-          } on InvalidKeyException {
-            return SyncResult.wrongRemoteKey;
-          }
-          if (remoteVault != null) {
-            final updateDirection = await mergeVault(remoteVault, remoteKey!);
-            if (updateDirection == UpdateDirection.toRemote ||
-                updateDirection == UpdateDirection.toRemoteAndLocal) {
-              await remoteDataProvider?.writeVault(
-                  _algorithm!, _key!, _vaultName!, _vault!);
-            }
-          } else {
-            return SyncResult.accessError;
+      await remoteDataProvider!.createRootDirectory();
+      Vault? vault = await remoteDataProvider?.readVault(
+          _algorithm!, remoteKey!, _vault!.vaultName);
+      if (vault != null) {
+        Vault? remoteVault;
+        try {
+          remoteVault = await remoteDataProvider?.readVault(
+              _algorithm!, _key!, _vaultName!);
+        } on AccessibilityException {
+          return SyncResult.accessError;
+        } on InvalidKeyException {
+          return SyncResult.wrongRemoteKey;
+        }
+        if (remoteVault != null) {
+          final updateDirection = await mergeVault(remoteVault, remoteKey!);
+          if (updateDirection == UpdateDirection.toRemote ||
+              updateDirection == UpdateDirection.toRemoteAndLocal) {
+            await remoteDataProvider?.writeVault(
+                _algorithm!, _key!, _vaultName!, _vault!);
           }
         } else {
-          await remoteDataProvider?.writeVault(
-              _algorithm!, _key!, _vaultName!, _vault!);
-          return SyncResult.success;
+          return SyncResult.accessError;
         }
+      } else {
+        await remoteDataProvider?.writeVault(
+            _algorithm!, _key!, _vaultName!, _vault!);
+        return SyncResult.success;
       }
       return SyncResult.success;
     } catch (exception) {
@@ -301,6 +269,8 @@ class VaultService {
             updatekey) {
           _vaultData = mergedVaultData;
           _vault!.data = mergedVaultData;
+          _accounts=_vaultData!.accounts.values.toList();
+          _groups=_vaultData!.groups.values.toList();
           if (updatekey) {
             // update the current vault key with the newer
             _key = vaultKey;
