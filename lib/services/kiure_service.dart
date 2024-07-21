@@ -55,24 +55,30 @@ class KiureService {
     if (provider == null) return;
     RemoteProvider? remoteProvider = RemoteProvider.fromName(provider);
     if (remoteProvider == null) return;
-
-    remoteSettings = RemoteSettings(
-        provider: remoteProvider,
-        authorizationCode: _prefs.getString('remote_authorization_code') ?? '',
-        refreshToken: _prefs.getString('refresh_token') ?? '');
-    _vaultService.remoteDataProvider =
-        serviceLocator.getRemoteDataProvider(remoteProvider);
-    _vaultService.remoteDataProvider!.authorizationCode =
-        remoteSettings!.authorizationCode;
-    _vaultService.remoteDataProvider!.refreshToken =
-        remoteSettings!.refreshToken;
-    if ((remoteSettings!.refreshToken ?? '').isNotEmpty) {
-      try {
-        _vaultService.remoteDataProvider!.refreshAccessToken({});
-      } catch (e) {
-        if (kDebugMode) {
-          print(e.toString());
+    try {
+      remoteSettings = RemoteSettings(
+          provider: remoteProvider,
+          authorizationCode:
+              _prefs.getString('remote_authorization_code') ?? '',
+          refreshToken: _prefs.getString('refresh_token') ?? '');
+      _vaultService.remoteDataProvider =
+          serviceLocator.getRemoteDataProvider(remoteProvider);
+      _vaultService.remoteDataProvider!.authorizationCode =
+          remoteSettings!.authorizationCode;
+      _vaultService.remoteDataProvider!.refreshToken =
+          remoteSettings!.refreshToken;
+      if (remoteSettings!.refreshToken.isNotEmpty) {
+        try {
+          _vaultService.remoteDataProvider!.refreshAccessToken({});
+        } catch (e) {
+          if (kDebugMode) {
+            print(e.toString());
+          }
         }
+      }
+    } catch (ex) {
+      if (kDebugMode) {
+        print(ex.toString());
       }
     }
   }
@@ -87,7 +93,7 @@ class KiureService {
               _vaultService.remoteDataProvider!.authorizationCode!,
           refreshToken: _vaultService.remoteDataProvider!.refreshToken!);
       _prefs.setString('remote_provider', remoteSettings!.provider.name);
-      _prefs.setString('refresh_token', remoteSettings!.provider.name);
+      _prefs.setString('refresh_token', remoteSettings!.refreshToken);
       _prefs.setString(
           'remote_authorization_code', remoteSettings!.authorizationCode);
     }

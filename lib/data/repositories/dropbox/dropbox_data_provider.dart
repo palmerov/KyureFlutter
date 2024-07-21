@@ -102,7 +102,7 @@ class DropboxDataProvider implements RemoteDataProvider {
 
   @override
   set refreshToken(String? token) {
-    refreshToken = token;
+    _dropboxService.refresh_token = token;
   }
 
   @override
