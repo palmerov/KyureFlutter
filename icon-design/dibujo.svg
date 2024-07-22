@@ -28,15 +28,15 @@
      inkscape:document-units="mm"
      showgrid="false"
      showguides="true"
-     inkscape:zoom="0.80532378"
-     inkscape:cx="415.98175"
-     inkscape:cy="-242.13863"
+     inkscape:zoom="0.37006311"
+     inkscape:cx="-102.68519"
+     inkscape:cy="-118.89864"
      inkscape:window-width="1728"
      inkscape:window-height="989"
      inkscape:window-x="0"
      inkscape:window-y="38"
      inkscape:window-maximized="0"
-     inkscape:current-layer="layer1">
+     inkscape:current-layer="g1">
     <sodipodi:guide
        position="72.491115,276.137"
        orientation="1,0"
@@ -325,6 +325,46 @@
              style="font-weight:800;font-size:105.471px;font-family:'League Spartan';-inkscape-font-specification:'League Spartan, Ultra-Bold';fill:#325186;fill-opacity:1;stroke-width:1.00049;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:0.274612;paint-order:stroke markers fill"
              id="path4"
              sodipodi:nodetypes="sccsssccsss" />
+        </g>
+        <g
+           id="g2">
+          <rect
+             style="fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1.09047;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:0.274612;paint-order:stroke markers fill"
+             id="rect2371-1"
+             width="163.02673"
+             height="163.02673"
+             x="-255.24698"
+             y="-37.26881"
+             ry="20.737795" />
+          <g
+             id="g4-7"
+             transform="matrix(1.7780586,0,0,1.6017307,337.47544,-340.54779)"
+             style="fill:#e5e5e5;fill-opacity:1;stroke-width:1.00049;stroke-dasharray:none">
+            <g
+               id="g3-2"
+               style="fill:#e5e5e5;fill-opacity:1;stroke-width:1.00049;stroke-dasharray:none">
+              <path
+                 d="M -265.14668,282.54486 V 270.8422 h -21.58542 v 11.70266 c 15.91822,0 13.93455,0.0932 21.58542,0 z"
+                 style="font-weight:800;font-size:68.6373px;font-family:'League Spartan';-inkscape-font-specification:'League Spartan, Ultra-Bold';fill:#e68807;fill-opacity:1;stroke-width:1.00049;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:0.274612;paint-order:stroke markers fill"
+                 id="path1-3"
+                 sodipodi:nodetypes="ccccc" />
+              <path
+                 d="m -293.26756,259.02518 14.74179,-17.11451 h -13.17836 l -11.72175,13.20218 -0.11818,-13.20218 h -11.70266 l 0.11818,40.69142 h 11.70266 v -19.45868 l 12.97245,19.45868 h 13.93337 z"
+                 style="font-weight:800;font-size:68.6373px;font-family:'League Spartan';-inkscape-font-specification:'League Spartan, Ultra-Bold';fill:#e68807;fill-opacity:1;stroke-width:1.00049;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:0.274612;paint-order:stroke markers fill"
+                 id="path2-6"
+                 sodipodi:nodetypes="cccccccccccc" />
+              <path
+                 d="m -266.36181,254.86017 c 3.60346,0 6.58918,-2.95141 6.58918,-6.52055 0,-3.60346 -3.05436,-6.58918 -6.58918,-6.58918 -3.63778,0 -6.52054,3.02004 -6.52054,6.58918 0,3.56914 2.88276,6.52055 6.52054,6.52055 z m -6.0744,27.74192 h 11.87425 l -0.11818,-23.56641 h -11.87425 z"
+                 style="font-weight:800;font-size:68.6373px;font-family:'League Spartan';-inkscape-font-specification:'League Spartan, Ultra-Bold';fill:#e68807;fill-opacity:1;stroke-width:1.00049;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:0.274612;paint-order:stroke markers fill"
+                 id="path3-5"
+                 sodipodi:nodetypes="sssssccccc" />
+            </g>
+            <path
+               d="m -272.32859,222.03429 v 12.63792 h 12.27269 v -12.78646 c 0,-11.84684 -9.94619,-24.01713 -27.33785,-24.01713 -17.44849,0 -27.45153,11.2385 -27.45153,23.08533 v 13.71826 c 0,0 10.77716,0.1751 11.51358,0 V 221.7787 c 0,-7.26769 7.3558,-12.30683 15.87266,-12.30683 6.89422,0 15.13045,4.97851 15.13045,12.56242 z"
+               style="font-weight:800;font-size:105.471px;font-family:'League Spartan';-inkscape-font-specification:'League Spartan, Ultra-Bold';fill:#325186;fill-opacity:1;stroke-width:1.00049;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:0.274612;paint-order:stroke markers fill"
+               id="path4-5"
+               sodipodi:nodetypes="sccsssccsss" />
+          </g>
         </g>
       </g>
     </g>

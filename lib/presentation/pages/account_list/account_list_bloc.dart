@@ -35,13 +35,16 @@ class AccountListPageBloc extends Cubit<AccountListPageState> {
               filter.apply(account.fieldPassword.data)))
           .toList();
       if (accounts.length != state.accounts.length) {
-        emit(AccountListPageFilteredState(
-            accounts, state.groups, state.selectedGroupIndex, filter.filter));
+        AccountGroup searchGroup = vaultService.groups![0].copyWith(
+            name: 'Resultados',
+            iconName: 'assets/svg_icons/code_FILL0_wght300_GRAD-25_opsz24.svg');
+        emit(AccountListPageFilteredState(accounts, [searchGroup],
+            state.selectedGroupIndex, filter.filter));
       }
     } else {
       emit(AccountListPageStateLoaded(
           accounts: vaultService.accounts!,
-          groups: state.groups,
+          groups: vaultService.groups!,
           selectedGroupIndex: state.selectedGroupIndex));
     }
   }

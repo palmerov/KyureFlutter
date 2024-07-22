@@ -172,7 +172,10 @@ class _AccountListView extends StatelessWidget {
                     builder: (context, state) {
                       if (state is AccountListPageStateLoading ||
                           state is AccountListPageStateInitial) {
-                        return const AccountListShimmerMolecule();
+                        return const Padding(
+                          padding: EdgeInsets.only(top: 100, bottom: 60),
+                          child: AccountListShimmerMolecule(),
+                        );
                       } else {
                         return Positioned.fill(
                           child: BlocListener<AccountListPageBloc,
