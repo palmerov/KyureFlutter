@@ -48,6 +48,7 @@ class _AccountListView extends StatelessWidget {
   late final GlobalKey<ScaffoldState> _keyScaffold;
   late final PageController _pageController;
   final ItemScrollController _itemScrollController = ItemScrollController();
+  final FocusNode _searchBarFocusNode = FocusNode();
 
   _showAccountContextMenuDialog(
       AccountListPageBloc bloc, BuildContext context, Account account) {
@@ -211,23 +212,32 @@ class _AccountListView extends StatelessWidget {
                                   builder: (context, state) {
                                     List<Account> pageAccounts = bloc
                                         .getAccountsFromGroupIndex(groupIndex);
-                                    return ListView.builder(
-                                      physics: const BouncingScrollPhysics(),
-                                      padding: const EdgeInsets.only(
-                                          top: 100, bottom: 60),
-                                      itemBuilder: (context, accountIndex) {
-                                        Account account =
-                                            pageAccounts[accountIndex];
-                                        return AccountItemMolecule(
-                                          account: account,
-                                          onTap: () => _openAccountDetails(
-                                              bloc, context, account, false),
-                                          onLongTap: () =>
-                                              _showAccountContextMenuDialog(
-                                                  bloc, context, account),
-                                        );
+                                    return RefreshIndicator(
+                                      onRefresh: () async {
+                                        bloc.syncVault();
                                       },
-                                      itemCount: pageAccounts.length,
+                                      edgeOffset: 120,
+                                      strokeWidth: 2,
+                                      triggerMode:
+                                          RefreshIndicatorTriggerMode.onEdge,
+                                      child: ListView.builder(
+                                        physics: const BouncingScrollPhysics(),
+                                        padding: const EdgeInsets.only(
+                                            top: 100, bottom: 60),
+                                        itemBuilder: (context, accountIndex) {
+                                          Account account =
+                                              pageAccounts[accountIndex];
+                                          return AccountItemMolecule(
+                                            account: account,
+                                            onTap: () => _openAccountDetails(
+                                                bloc, context, account, false),
+                                            onLongTap: () =>
+                                                _showAccountContextMenuDialog(
+                                                    bloc, context, account),
+                                          );
+                                        },
+                                        itemCount: pageAccounts.length,
+                                      ),
                                     );
                                   },
                                 ),
@@ -263,6 +273,7 @@ class _AccountListView extends StatelessWidget {
                                     previous is AccountListPageStateInitial,
                                 builder: (context, state) {
                                   return SearchBarMolecule(
+                                    focusNode: _searchBarFocusNode,
                                     enabled:
                                         state is! AccountListPageStateLoading,
                                     onSearchChanged: (text) =>
@@ -344,7 +355,15 @@ class _AccountListView extends StatelessWidget {
                       child: BluredBottomAppBarMolecule(
                         items: [
                           BottomItemActionMolecule(
-                            icon: Icon(CupertinoIcons.cloud,
+                            icon: Icon(CupertinoIcons.list_number,
+                                color: kyTheme.colorOnBackgroundOpacity60),
+                            text: 'Orden',
+                            onTap: () {
+                              _showSortDialog(context);
+                            },
+                          ),
+                          BottomItemActionMolecule(
+                            icon: Icon(CupertinoIcons.arrow_2_circlepath,
                                 color: kyTheme.colorOnBackgroundOpacity60),
                             text: 'Sincronizar',
                             onTap: () {
@@ -359,20 +378,10 @@ class _AccountListView extends StatelessWidget {
                             },
                           ),
                           BottomItemActionMolecule(
-                            icon: Icon(CupertinoIcons.list_number,
+                            icon: Icon(CupertinoIcons.search,
                                 color: kyTheme.colorOnBackgroundOpacity60),
-                            text: 'Orden',
-                            onTap: () {
-                              _showSortDialog(context);
-                            },
-                          ),
-                          BottomItemActionMolecule(
-                            icon: Icon(CupertinoIcons.lock,
-                                color: kyTheme.colorOnBackgroundOpacity60),
-                            text: 'Bloquear',
-                            onTap: () {
-                              appBloc.lock();
-                            },
+                            text: 'Buscar',
+                            onTap: () => _searchBarFocusNode.requestFocus(),
                           ),
                           BottomItemActionMolecule(
                             icon: Icon(

@@ -49,7 +49,10 @@ class CloudView extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: <Widget>[
-                    Icon(CupertinoIcons.cloud,
+                    Icon(
+                        bloc.isAuthorized()
+                            ? Icons.cloud_done_outlined
+                            : Icons.cloud_outlined,
                         size: 60,
                         color: bloc.isAuthorized() ? Colors.blue : Colors.grey),
                     const SizedBox(height: 16),
@@ -62,12 +65,20 @@ class CloudView extends StatelessWidget {
                       const Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text(
-                              'Nube configurada',
-                              textAlign: TextAlign.center,
-                            ),
+                            Text('Autorización concedida',
+                                textAlign: TextAlign.center),
                             SizedBox(width: 4),
-                            Icon(Icons.check, color: Colors.green),
+                            Icon(Icons.check, color: Colors.green)
+                          ]),
+                    if (!bloc.isAuthorized())
+                      const Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text('Aún sin autorizar',
+                                textAlign: TextAlign.center),
+                            SizedBox(width: 4),
+                            Icon(Icons.question_mark_rounded,
+                                color: Colors.grey)
                           ]),
                     const SizedBox(height: 16),
                     Text(

@@ -171,21 +171,18 @@ class _KeyFormOrganismState extends State<KeyFormOrganism> {
                                   text: '1',
                                   onTap: (text, icon) {
                                     controller.text += text!;
-                                    vibrate();
                                   }),
                               KeyButton(
                                   onBackgroundColor: widget.onBackgroundColor,
                                   text: '2',
                                   onTap: (text, icon) {
                                     controller.text += text!;
-                                    vibrate();
                                   }),
                               KeyButton(
                                   onBackgroundColor: widget.onBackgroundColor,
                                   text: '3',
                                   onTap: (text, icon) {
                                     controller.text += text!;
-                                    vibrate();
                                   }),
                             ]),
                       ),
@@ -198,21 +195,18 @@ class _KeyFormOrganismState extends State<KeyFormOrganism> {
                                   text: '4',
                                   onTap: (text, icon) {
                                     controller.text += text!;
-                                    vibrate();
                                   }),
                               KeyButton(
                                   onBackgroundColor: widget.onBackgroundColor,
                                   text: '5',
                                   onTap: (text, icon) {
                                     controller.text += text!;
-                                    vibrate();
                                   }),
                               KeyButton(
                                   onBackgroundColor: widget.onBackgroundColor,
                                   text: '6',
                                   onTap: (text, icon) {
                                     controller.text += text!;
-                                    vibrate();
                                   }),
                             ]),
                       ),
@@ -225,21 +219,18 @@ class _KeyFormOrganismState extends State<KeyFormOrganism> {
                                   text: '7',
                                   onTap: (text, icon) {
                                     controller.text += text!;
-                                    vibrate();
                                   }),
                               KeyButton(
                                   onBackgroundColor: widget.onBackgroundColor,
                                   text: '8',
                                   onTap: (text, icon) {
                                     controller.text += text!;
-                                    vibrate();
                                   }),
                               KeyButton(
                                   onBackgroundColor: widget.onBackgroundColor,
                                   text: '9',
                                   onTap: (text, icon) {
                                     controller.text += text!;
-                                    vibrate();
                                   }),
                             ]),
                       ),
@@ -267,13 +258,13 @@ class _KeyFormOrganismState extends State<KeyFormOrganism> {
                                   text: '0',
                                   onTap: (text, icon) {
                                     controller.text += text!;
-                                    vibrate();
                                   }),
                               KeyButton(
                                   onBackgroundColor: widget.onBackgroundColor,
                                   icon: Icons.check,
                                   onTap: (text, icon) {
                                     submit();
+                                    vibrate();
                                   }),
                             ]),
                       )

@@ -29,6 +29,7 @@ class GroupDetailsBloc extends Cubit<GroupDetailsState> {
     group.name = groupCopy.name;
     group.iconName = groupCopy.iconName;
     group.color = groupCopy.color;
+    group.modifDate=DateTime.now();
     saved = true;
     if (isNew) {
       serviceLocator.getVaultService().addNewGroup(group);

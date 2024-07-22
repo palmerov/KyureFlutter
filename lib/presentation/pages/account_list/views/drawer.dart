@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:kyure/utils/extensions.dart';
+import 'package:kyure/utils/extensions_classes.dart';
 
 import '../../../../config/router_config.dart';
 import '../../../../main.dart';
@@ -75,68 +77,74 @@ class KiureDrawer extends StatelessWidget {
         ),
         _buildDrawerItem(
             kyTheme: kyTheme,
+            label: 'Cerrar bóveda',
+            icon: const Icon(CupertinoIcons.lock),
+            onTap: () {
+              appBloc.lock();
+            }),
+        _buildDrawerItem(
+            kyTheme: kyTheme,
             onTap: () => context.pushNamed(KyRoutes.cloudSettings.name),
             label: 'Configurar nube',
             icon: const Icon(CupertinoIcons.cloud)),
         _buildDrawerItem(
-            kyTheme: kyTheme,
-            onTap: () => context.pushNamed(KyRoutes.keyEditor.name),
-            label: 'Cambiar clave',
-            icon: const Icon(CupertinoIcons.lock)),
-        _buildDrawerItem(
-            kyTheme: kyTheme,
-            onTap: () => listBloc.syncWithFile(),
-            label: 'Sincronizar con archivo',
-            icon: const Icon(CupertinoIcons.arrow_down_doc)),
-        _buildDrawerItem(
-            kyTheme: kyTheme,
-            label: 'Exportar bóveda',
-            icon: const Icon(CupertinoIcons.share),
-            onTap: () async {
-              String path =
-                  await context.read<AccountListPageBloc>().exportFile();
-              if (context.mounted) {
-                showDialog(
-                  context: context,
-                  builder: (context) => AlertDialog(
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16)),
-                    content: Text(
-                        'Tu archivo de cuentas ha sido exportado a: $path'),
-                    actions: [
-                      InkWell(
-                        borderRadius: BorderRadius.circular(16),
-                        child: const Padding(
-                          padding: EdgeInsets.all(12),
-                          child: Text('Copiar directorio'),
-                        ),
-                        onTap: () {
-                          Clipboard.setData(
-                              ClipboardData(text: File(path).parent.path));
-                        },
-                      ),
-                      InkWell(
-                        borderRadius: BorderRadius.circular(16),
-                        child: const Padding(
-                          padding: EdgeInsets.all(12),
-                          child: Text('Compartir'),
-                        ),
-                        onTap: () {
-                          shareFile(path, 'Cuentas Kiure',
-                              'Archivo Encriptado de cuentas de Kiure');
-                        },
-                      )
-                    ],
-                  ),
-                );
-              }
-            }),
-        _buildDrawerItem(
           kyTheme: kyTheme,
-          label: 'Eliminar bóveda',
-          icon: const Icon(CupertinoIcons.delete),
+          label: 'Otras opciones',
+          icon: const Icon(Icons.more_horiz),
           onTap: () {
-            _showDeleteVaultConfirmDialog(context);
+            context.showOptionListDialog(
+                'Otras opciones', const Icon(Icons.more_horiz), [
+              Option(
+                  'Cambiar clave',
+                  const Icon(CupertinoIcons.lock_rotation_open),
+                  () => context.pushNamed(KyRoutes.keyEditor.name)),
+              Option(
+                  'Sincronizar con archivo',
+                  const Icon(CupertinoIcons.arrow_down_doc),
+                  () => listBloc.syncWithFile()),
+              Option('Exportar bóveda', const Icon(CupertinoIcons.share),
+                  () async {
+                String path =
+                    await context.read<AccountListPageBloc>().exportFile();
+                if (context.mounted) {
+                  showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16)),
+                      content: Text(
+                          'Tu archivo de cuentas ha sido exportado a: $path'),
+                      actions: [
+                        InkWell(
+                          borderRadius: BorderRadius.circular(16),
+                          child: const Padding(
+                            padding: EdgeInsets.all(12),
+                            child: Text('Copiar directorio'),
+                          ),
+                          onTap: () {
+                            Clipboard.setData(
+                                ClipboardData(text: File(path).parent.path));
+                          },
+                        ),
+                        InkWell(
+                          borderRadius: BorderRadius.circular(16),
+                          child: const Padding(
+                            padding: EdgeInsets.all(12),
+                            child: Text('Compartir'),
+                          ),
+                          onTap: () {
+                            shareFile(path, 'Cuentas Kiure',
+                                'Archivo Encriptado de cuentas de Kiure');
+                          },
+                        )
+                      ],
+                    ),
+                  );
+                }
+              }),
+              Option('Eliminar bóveda', const Icon(CupertinoIcons.delete),
+                  () => _showDeleteVaultConfirmDialog(context)),
+            ]);
           },
         ),
         _buildDrawerItem(

@@ -8,6 +8,7 @@ import 'package:kyure/services/kiure_service.dart';
 import 'package:equatable/equatable.dart';
 import 'package:kyure/services/service_locator.dart';
 import 'package:kyure/services/vault_service.dart';
+import 'package:kyure/utils/filter_utils.dart';
 import 'package:quickalert/models/quickalert_type.dart';
 
 class AccountListPageBloc extends Cubit<AccountListPageState> {
@@ -25,21 +26,17 @@ class AccountListPageBloc extends Cubit<AccountListPageState> {
         accounts: vaultService.accounts!, groups: vaultService.groups!));
   }
 
-  void filter(String filter) {
-    if (filter.trim().isNotEmpty) {
+  void filter(String value) {
+    if (value.trim().isNotEmpty) {
+      Filter filter = Filter(value);
       List<Account> accounts = vaultService.accounts!
-          .where((account) =>
-              (account.name.toLowerCase().contains(filter.toLowerCase()) ||
-                  account.fieldUsername.data
-                      .toLowerCase()
-                      .contains(filter.toLowerCase()) ||
-                  account.fieldPassword.data
-                      .toLowerCase()
-                      .contains(filter.toLowerCase())))
+          .where((account) => (filter.apply(account.name) ||
+              filter.apply(account.fieldUsername.data) ||
+              filter.apply(account.fieldPassword.data)))
           .toList();
       if (accounts.length != state.accounts.length) {
         emit(AccountListPageFilteredState(
-            accounts, state.groups, state.selectedGroupIndex, filter));
+            accounts, state.groups, state.selectedGroupIndex, filter.filter));
       }
     } else {
       emit(AccountListPageStateLoaded(

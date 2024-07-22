@@ -8,12 +8,16 @@ class SearchBarMolecule extends StatefulWidget {
       this.hintText,
       required this.onLeadingTap,
       required this.enabled,
-      required this.showLeading});
+      required this.showLeading,
+      required this.focusNode});
+
   final Function(String text) onSearchChanged;
   final Function() onLeadingTap;
   final String? hintText;
   final bool enabled;
   final bool showLeading;
+  final FocusNode focusNode;
+
   @override
   State<SearchBarMolecule> createState() => _SearchBarMoleculeState();
 }
@@ -21,6 +25,7 @@ class SearchBarMolecule extends StatefulWidget {
 class _SearchBarMoleculeState extends State<SearchBarMolecule> {
   String text = '';
   final TextEditingController textEditingController = TextEditingController();
+  final GlobalKey<FormFieldState> _fieldKey = GlobalKey();
 
   @override
   void initState() {
@@ -68,7 +73,9 @@ class _SearchBarMoleculeState extends State<SearchBarMolecule> {
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.only(bottom: 1),
-                child: TextField(
+                child: TextFormField(
+                  key: _fieldKey,
+                  focusNode: widget.focusNode,
                   enabled: widget.enabled,
                   expands: false,
                   decoration: InputDecoration(

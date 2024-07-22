@@ -108,19 +108,15 @@ class VaultService {
     switch (method) {
       case SortBy.nameDesc:
         _accounts!.sort((a, b) => a.name.compareTo(b.name));
-        _groups!.sort((a, b) => a.name.compareTo(b.name));
         break;
       case SortBy.nameAsc:
         _accounts!.sort((a, b) => b.name.compareTo(a.name));
-        _groups!.sort((a, b) => b.name.compareTo(a.name));
         break;
       case SortBy.modifDateDesc:
         _accounts!.sort((a, b) => a.id.compareTo(b.id));
-        _groups!.sort((a, b) => a.id.compareTo(b.id));
         break;
       case SortBy.modifDateAsc:
         _accounts!.sort((a, b) => b.id.compareTo(a.id));
-        _groups!.sort((a, b) => b.id.compareTo(a.id));
         break;
     }
     if (save) saveVaultData(updateVaultDate: true);
