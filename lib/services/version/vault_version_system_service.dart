@@ -2,42 +2,30 @@ import 'package:kyure/data/models/vault_data.dart';
 import 'package:kyure/services/version/merge_map.dart';
 
 class VaultVersionSystemService {
-
   Future<(VaultData, UpdateDirection)> getMergedData(
       VaultData vdLocal, VaultData vdRemote) async {
-    if (vdLocal.modifDate.isAfter(vdRemote.modifDate)) {
-      // merge with local as after
-      final vdMerged = _mergeVault(vdLocal, vdRemote);
-      if (vdMerged.modifDate != vdLocal.modifDate) {
-        // if the merged modif date != local modf date, have to update in local too
-        return (vdMerged, UpdateDirection.toRemoteAndLocal);
-      } else {
-        // else have to update only remotely
-        return (vdMerged, UpdateDirection.toRemote);
-      }
-    } else if (vdRemote.modifDate.isAfter(vdLocal.modifDate)) {
-      // merge with remote as after
-      final vdMerged = _mergeVault(vdRemote, vdLocal);
-      if (vdMerged.modifDate != vdRemote.modifDate) {
-        // if the merged modif date != remote modf date, have to update in remote too
-        return (vdMerged, UpdateDirection.toRemoteAndLocal);
-      } else {
-        // else have to update only local
-        return (vdMerged, UpdateDirection.toLocal);
-      }
+    final vdMerged = _mergeVault(vdLocal, vdRemote);
+    if (vdMerged.modifDate == vdLocal.modifDate &&
+        vdMerged.modifDate == vdRemote.modifDate) {
+      return (vdMerged, UpdateDirection.noUpdate);
+    } else if (vdMerged.modifDate == vdLocal.modifDate) {
+      return (vdMerged, UpdateDirection.toRemote);
+    } else if (vdMerged.modifDate == vdRemote.modifDate) {
+      return (vdMerged, UpdateDirection.toLocal);
+    } else {
+      return (vdMerged, UpdateDirection.toRemoteAndLocal);
     }
-    return (vdLocal, UpdateDirection.noUpdate);
   }
 
-  VaultData _mergeVault(VaultData vdAfter, VaultData vdBefore) {
+  VaultData _mergeVault(VaultData vdA, VaultData vdB) {
     bool mergedFromA = false, mergedFromB = false;
     VaultData vdMerged = VaultData(
       accounts: {},
       deletedAccounts: {},
       groups: {},
       deletedGroups: {},
-      sort: vdAfter.sort,
-      modifDate: vdAfter.modifDate,
+      sort: vdA.sort,
+      modifDate: vdA.modifDate,
     );
 
     // Merging groups
@@ -51,11 +39,11 @@ class VaultVersionSystemService {
       return (aValue, MergeSource.srcAny);
     });
     mergeMapGroups
-      ..addAllInA(vdAfter.groups)
-      ..addAllInA(vdAfter.deletedGroups);
+      ..addAllInA(vdA.groups)
+      ..addAllInA(vdA.deletedGroups);
     mergeMapGroups
-      ..addAllInB(vdBefore.groups)
-      ..addAllInB(vdBefore.deletedGroups);
+      ..addAllInB(vdB.groups)
+      ..addAllInB(vdB.deletedGroups);
     final mergedMapGroups = mergeMapGroups.getMerged();
     for (var group in mergedMapGroups.values) {
       if (group.status == LifeStatus.active) {
@@ -73,17 +61,17 @@ class VaultVersionSystemService {
       if (aValue.modifDate.isAfter(bValue.modifDate)) {
         return (aValue, MergeSource.srcA);
       } else if (bValue.modifDate.isAfter(aValue.modifDate)) {
-        return (aValue, MergeSource.srcB);
+        return (bValue, MergeSource.srcB);
       } else {
         return (aValue, MergeSource.srcAny);
       }
     });
     mergeMapAccounts
-      ..addAllInA(vdAfter.accounts)
-      ..addAllInA(vdAfter.deletedAccounts);
+      ..addAllInA(vdA.accounts)
+      ..addAllInA(vdA.deletedAccounts);
     mergeMapAccounts
-      ..addAllInB(vdBefore.accounts)
-      ..addAllInB(vdBefore.deletedAccounts);
+      ..addAllInB(vdB.accounts)
+      ..addAllInB(vdB.deletedAccounts);
     final mergedMapAccounts = mergeMapAccounts.getMerged();
     for (var account in mergedMapAccounts.values) {
       if (account.status == LifeStatus.active) {
@@ -98,9 +86,9 @@ class VaultVersionSystemService {
     if (mergedFromA && mergedFromB) {
       vdMerged.modifDate = DateTime.now();
     } else if (mergedFromA) {
-      vdMerged.modifDate = vdAfter.modifDate;
+      vdMerged.modifDate = vdA.modifDate;
     } else {
-      vdMerged.modifDate = vdBefore.modifDate;
+      vdMerged.modifDate = vdB.modifDate;
     }
     return vdMerged;
   }

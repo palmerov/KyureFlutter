@@ -71,6 +71,7 @@ class AccountDetailsBloc extends Cubit<AccountDetailsState> {
       if (await serviceLocator.getVaultService().addNewAccount(accountCopy!)) {
         isNewAccount = false;
         account = accountCopy!;
+        account.modifDate = DateTime.now();
       } else {
         emit(ErrorSavingState(
             dateTime: DateTime.now(),
@@ -83,6 +84,7 @@ class AccountDetailsBloc extends Cubit<AccountDetailsState> {
         return;
       }
     } else {
+      account.modifDate = DateTime.now();
       account.groupId = accountCopy!.groupId;
       account.name = accountCopy!.name;
       account.image = accountCopy!.image;
@@ -101,10 +103,12 @@ class AccountDetailsState extends Equatable {
     required this.imagePath,
     required this.imageSourceType,
   });
+
   final AccountGroup selectedGroup;
   final bool editting;
   final String imagePath;
   final ImageSourceType imageSourceType;
+
   @override
   List<Object?> get props =>
       [selectedGroup.name, editting, imagePath, imageSourceType];
@@ -141,6 +145,7 @@ class ErrorSavingState extends AccountDetailsState {
     required super.imageSourceType,
     required super.selectedGroup,
   });
+
   final String error;
   final DateTime dateTime;
 

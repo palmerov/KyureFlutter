@@ -56,7 +56,7 @@ class AccountListPageBloc extends Cubit<AccountListPageState> {
   }
 
   void reload(bool updateDate) {
-    vaultService.saveVaultData(false, updateDate);
+    vaultService.saveVaultData(updateDataDate: updateDate);
     emit(state.copyWith(version: state.version + 1));
   }
 

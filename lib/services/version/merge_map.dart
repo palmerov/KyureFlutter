@@ -43,10 +43,9 @@ class MergeMap<K, V> {
         _mergedFromA = true;
         break;
       case MergeSource.srcB:
-        _mergedFromA = true;
+        _mergedFromB = true;
         break;
       case MergeSource.srcAny:
-        _mergedFromA = true;
         break;
     }
   }

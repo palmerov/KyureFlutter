@@ -123,7 +123,7 @@ class VaultService {
         _groups!.sort((a, b) => b.id.compareTo(a.id));
         break;
     }
-    saveVaultData(false, true);
+    if (save) saveVaultData(updateVaultDate: true);
   }
 
   File getVaultFile() {
@@ -155,14 +155,11 @@ class VaultService {
     }
   }
 
-  Future<void> saveVaultData(bool updateVault, bool updateVaultData) async {
+  Future<void> saveVaultData(
+      {bool updateVaultDate = false, bool updateDataDate = false}) async {
     try {
-      if (updateVault) {
-        _vault!.modifDate = DateTime.now();
-      }
-      if (updateVaultData) {
-        _vaultData!.modifDate = DateTime.now();
-      }
+      if (updateVaultDate) _vault!.modifDate = DateTime.now();
+      if (updateDataDate) _vaultData!.modifDate = DateTime.now();
       await localDataProvider.writeVault(
           _algorithm!, _key!, _vaultName!, _vault!);
     } catch (exception) {
@@ -190,7 +187,7 @@ class VaultService {
     _vaultData = _vault!.data!;
     _accounts = [];
     _groups = _vaultData!.groups.values.toList();
-    saveVaultData(false, false);
+    saveVaultData();
   }
 
   Future<SyncResult> syncWithFile(String? fileVaultKey, File file) async {
@@ -269,14 +266,14 @@ class VaultService {
             updatekey) {
           _vaultData = mergedVaultData;
           _vault!.data = mergedVaultData;
-          _accounts=_vaultData!.accounts.values.toList();
-          _groups=_vaultData!.groups.values.toList();
+          _accounts = _vaultData!.accounts.values.toList();
+          _groups = _vaultData!.groups.values.toList();
           if (updatekey) {
             // update the current vault key with the newer
             _key = vaultKey;
             _vault!.modifDate = decryptedVault.modifDate;
           }
-          await saveVaultData(false, false);
+          await saveVaultData();
         }
         return updateDirection;
       }
@@ -307,7 +304,7 @@ class VaultService {
         AccountUtils.simplifyName(value) == simpleName &&
         value.fieldUsername.data == account.fieldUsername.data);
     _accounts!.add(account);
-    await saveVaultData(false, true);
+    await saveVaultData(updateDataDate: true);
     return true;
   }
 
@@ -320,13 +317,13 @@ class VaultService {
     _vaultData!.deletedGroups.removeWhere(
         (key, value) => value.name.trim().toLowerCase() == simpleName);
     _groups!.add(group);
-    await saveVaultData(false, true);
+    await saveVaultData(updateDataDate: true);
     return true;
   }
 
   Future updateKey(String key) async {
     _key = key;
-    await saveVaultData(true, false);
+    await saveVaultData(updateVaultDate: true);
   }
 
   Account? findAccountById(int accountId) {
@@ -353,7 +350,7 @@ class VaultService {
     _vaultData!.deletedAccounts[account.id] = account;
     _accounts!
         .removeAt(_accounts!.indexWhere((element) => account.id == element.id));
-    saveVaultData(false, true);
+    saveVaultData(updateDataDate: true);
   }
 
   void deleteGroup(AccountGroup group) {
@@ -361,7 +358,7 @@ class VaultService {
     _vaultData!.groups.remove(group.id);
     _vaultData!.deletedGroups[group.id] = group;
     _groups!.removeAt(_groups!.indexWhere((element) => group.id == element.id));
-    saveVaultData(false, true);
+    saveVaultData(updateDataDate: true);
   }
 }
 
