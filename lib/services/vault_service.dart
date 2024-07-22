@@ -346,18 +346,47 @@ class VaultService {
 
   void deleteAccount(Account account) {
     account.status = LifeStatus.deleted;
+    account.modifDate = DateTime.now();
+    account.fieldList?.clear();
+    account.fieldUsername.data = '';
+    account.fieldUsername.name = '';
+    account.fieldPassword.data = '';
+    account.fieldPassword.name = '';
+    account.name = '';
+    account.image = ImageSource(path: '', source: ImageSourceType.asset);
     _vaultData!.accounts.remove(account.id);
     _vaultData!.deletedAccounts[account.id] = account;
     _accounts!
         .removeAt(_accounts!.indexWhere((element) => account.id == element.id));
+    if (_vaultData!.deletedAccounts.length >= 20) {
+      Account oldestAccount = _vaultData!.deletedAccounts.values.first;
+      for (Account account in _vaultData!.deletedAccounts.values) {
+        if (account.modifDate.isBefore(oldestAccount.modifDate)) {
+          oldestAccount = account;
+        }
+      }
+      _vaultData!.deletedAccounts.remove(oldestAccount.id);
+    }
     saveVaultData(updateDataDate: true);
   }
 
   void deleteGroup(AccountGroup group) {
     group.status = LifeStatus.deleted;
+    group.name = '';
+    group.iconName = '';
+    group.modifDate = DateTime.now();
     _vaultData!.groups.remove(group.id);
     _vaultData!.deletedGroups[group.id] = group;
     _groups!.removeAt(_groups!.indexWhere((element) => group.id == element.id));
+    if (_vaultData!.deletedGroups.length >= 20) {
+      AccountGroup oldestGroup = _vaultData!.deletedGroups.values.first;
+      for (AccountGroup group in _vaultData!.deletedGroups.values) {
+        if (group.modifDate.isBefore(oldestGroup.modifDate)) {
+          oldestGroup = group;
+        }
+      }
+      _vaultData!.deletedGroups.remove(oldestGroup.id);
+    }
     saveVaultData(updateDataDate: true);
   }
 }

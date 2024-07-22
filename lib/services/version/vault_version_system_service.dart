@@ -40,8 +40,7 @@ class VaultVersionSystemService {
     });
     mergeMapGroups
       ..addAllInA(vdA.groups)
-      ..addAllInA(vdA.deletedGroups);
-    mergeMapGroups
+      ..addAllInA(vdA.deletedGroups)
       ..addAllInB(vdB.groups)
       ..addAllInB(vdB.deletedGroups);
     final mergedMapGroups = mergeMapGroups.getMerged();
@@ -68,8 +67,7 @@ class VaultVersionSystemService {
     });
     mergeMapAccounts
       ..addAllInA(vdA.accounts)
-      ..addAllInA(vdA.deletedAccounts);
-    mergeMapAccounts
+      ..addAllInA(vdA.deletedAccounts)
       ..addAllInB(vdB.accounts)
       ..addAllInB(vdB.deletedAccounts);
     final mergedMapAccounts = mergeMapAccounts.getMerged();
