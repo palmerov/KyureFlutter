@@ -29,7 +29,7 @@ class AccountGroupMolecule extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
             color: selected
-                ? kyTheme.colorBackground.withOpacity(0.8)
+                ? color.withOpacity(0.08)
                 : kyTheme.colorBackground,
             border: Border.all(
                 color: selected

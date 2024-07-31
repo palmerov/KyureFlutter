@@ -217,7 +217,7 @@ class _AccountListView extends StatelessWidget {
                                         .getAccountsFromGroupIndex(groupIndex);
                                     return RefreshIndicator(
                                       onRefresh: () async {
-                                        bloc.syncVault();
+                                        syncVault(context);
                                       },
                                       edgeOffset: 120,
                                       strokeWidth: 2,
@@ -276,6 +276,7 @@ class _AccountListView extends StatelessWidget {
                                     previous is AccountListPageStateInitial,
                                 builder: (context, state) {
                                   return SearchBarMolecule(
+                                    hintText: 'Buscar',
                                     focusNode: _searchBarFocusNode,
                                     enabled:
                                         state is! AccountListPageStateLoading,
@@ -369,16 +370,7 @@ class _AccountListView extends StatelessWidget {
                             icon: Icon(CupertinoIcons.arrow_2_circlepath,
                                 color: kyTheme.colorOnBackgroundOpacity60),
                             text: 'Sincronizar',
-                            onTap: () {
-                              if (serviceLocator
-                                      .getKiureService()
-                                      .remoteSettings !=
-                                  null) {
-                                bloc.syncVault();
-                              } else {
-                                context.pushNamed(KyRoutes.cloudSettings.name);
-                              }
-                            },
+                            onTap: () => syncVault(context),
                           ),
                           BottomItemActionMolecule(
                             icon: Icon(CupertinoIcons.search,
@@ -424,6 +416,14 @@ class _AccountListView extends StatelessWidget {
       ),
       drawer: isPcScreen ? null : KiureDrawer(isPcScreen: isPcScreen),
     );
+  }
+
+  void syncVault(BuildContext context) {
+    if (serviceLocator.getKiureService().remoteSettings != null) {
+      context.read<AccountListPageBloc>().syncVault();
+    } else {
+      context.pushNamed(KyRoutes.cloudSettings.name);
+    }
   }
 }
 

@@ -1,4 +1,5 @@
 import 'package:bot_toast/bot_toast.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
@@ -95,14 +96,16 @@ class AccountItemMolecule extends StatelessWidget {
                 const Text('Copiar el valor de:',
                     style: TextStyle(fontSize: 18)),
                 const SizedBox(height: 16),
-                ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: fields.length,
-                    itemBuilder: (context, index) => FieldValueItem(
-                        field: fields[index],
-                        onTap: (field) {
-                          copyValue(context, state, field);
-                        })),
+                Expanded(
+                  child: ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: fields.length,
+                      itemBuilder: (context, index) => FieldValueItem(
+                          field: fields[index],
+                          onTap: (field) {
+                            copyValue(context, state, field);
+                          })),
+                ),
               ],
             ),
           );

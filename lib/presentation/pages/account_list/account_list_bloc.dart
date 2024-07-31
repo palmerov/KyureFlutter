@@ -38,8 +38,8 @@ class AccountListPageBloc extends Cubit<AccountListPageState> {
         AccountGroup searchGroup = vaultService.groups![0].copyWith(
             name: 'Resultados',
             iconName: 'assets/svg_icons/code_FILL0_wght300_GRAD-25_opsz24.svg');
-        emit(AccountListPageFilteredState(accounts, [searchGroup],
-            state.selectedGroupIndex, filter.filter));
+        emit(AccountListPageFilteredState(
+            accounts, [searchGroup], state.selectedGroupIndex, filter.filter));
       }
     } else {
       emit(AccountListPageStateLoaded(
@@ -132,11 +132,41 @@ class AccountListPageBloc extends Cubit<AccountListPageState> {
 
   void syncVault() async {
     emit(const AccountListPageStateLoading());
-    await serviceLocator.getVaultService().syncWithRemote(null);
-    emit(AccountListPageStateLoaded(
-        accounts: vaultService.accounts!,
-        groups: vaultService.groups!,
-        selectedGroupIndex: 0));
+    final result = await serviceLocator.getVaultService().syncWithRemote(null);
+    switch (result) {
+      case SyncResult.success:
+        emit(AccountListSyncResult(
+            accounts: vaultService.accounts!,
+            groups: vaultService.groups!,
+            selectedGroupIndex: 0,
+            message: 'Sincronizado con éxito',
+            result: result));
+        break;
+      case SyncResult.incompatible:
+        emit(AccountListSyncResult(
+            accounts: vaultService.accounts!,
+            groups: vaultService.groups!,
+            selectedGroupIndex: 0,
+            message: 'Vaults incompatibles',
+            result: result));
+        break;
+      case SyncResult.wrongRemoteKey:
+        emit(AccountListSyncResult(
+            accounts: vaultService.accounts!,
+            groups: vaultService.groups!,
+            selectedGroupIndex: 0,
+            message: 'Clave remota incorrecta',
+            result: result));
+        break;
+      case SyncResult.accessError:
+        emit(AccountListSyncResult(
+            accounts: vaultService.accounts!,
+            groups: vaultService.groups!,
+            selectedGroupIndex: 0,
+            message: 'Error al acceder al servidor',
+            result: result));
+        break;
+    }
   }
 }
 
@@ -195,6 +225,22 @@ class AccountListPageStateLoaded extends AccountListPageState {
             groups: groups,
             selectedGroupIndex: selectedGroupIndex,
             version: 1);
+}
+
+class AccountListSyncResult extends AccountListPageState {
+  const AccountListSyncResult(
+      {required List<Account> accounts,
+      required List<AccountGroup> groups,
+      int selectedGroupIndex = 0,
+      required this.message,
+      required this.result})
+      : super(
+            accounts: accounts,
+            groups: groups,
+            selectedGroupIndex: selectedGroupIndex,
+            version: 1);
+  final SyncResult result;
+  final String message;
 }
 
 class AccountListPageFilteredState extends AccountListPageState {

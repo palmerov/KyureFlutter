@@ -1,15 +1,22 @@
+import 'dart:math';
+
 import 'package:blur/blur.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kyure/config/router_config.dart';
+import 'package:kyure/main.dart';
 import 'package:kyure/presentation/pages/lock_page/lock_page_bloc.dart';
 import 'package:kyure/presentation/widgets/organisms/key_form.dart';
+import 'package:kyure/utils/extensions.dart';
+import 'package:kyure/utils/extensions_classes.dart';
 
 class LockPage extends StatelessWidget {
   const LockPage({super.key, required this.blockedByUser});
+
   final bool blockedByUser;
 
   @override
@@ -23,152 +30,147 @@ class LockPage extends StatelessWidget {
 
 class _LockView extends StatelessWidget {
   _LockView({super.key});
+
   final TextEditingController _vaultNameController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     final bloc = BlocProvider.of<LockPageBloc>(context);
     return Scaffold(
-      extendBody: true,
-      extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        systemOverlayStyle: const SystemUiOverlayStyle(
-            statusBarColor: Colors.transparent,
-            statusBarIconBrightness: Brightness.light),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-      ),
-      body: BlocBuilder<LockPageBloc, LockPageState>(
-        buildWhen: (previous, current) =>
-            current is LockPageInitialState ||
-            current is LockPageInitialState ||
-            current.loaded != previous.loaded,
-        builder: (context, state) {
-          if (state is LockPageInitialState) {
-            return Center(
-                child: Column(
+        extendBody: true,
+        extendBodyBehindAppBar: true,
+        appBar: AppBar(
+          systemOverlayStyle: const SystemUiOverlayStyle(
+              statusBarColor: Colors.transparent,
+              statusBarIconBrightness: Brightness.light),
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+        ),
+        body: BlocBuilder<LockPageBloc, LockPageState>(
+            buildWhen: (previous, current) =>
+                current is LockPageInitialState ||
+                current is LockPageInitialState ||
+                current.loaded != previous.loaded,
+            builder: (context, state) {
+              if (state is LockPageInitialState) {
+                return Column(
                     mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                  Image.asset(
-                    'assets/app_icons/kiure_icon_name_dark.png',
-                    width: 90,
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(
-                        left: 32, right: 32, top: 12, bottom: 8),
-                    child: Text(
-                      'Asegura tus cuentas.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                          fontSize: 14, color: Colors.white.withOpacity(0.6)),
-                    ),
-                  )
-                ]));
-          }
-          return Stack(
-            children: [
-              Positioned.fill(
-                  child: Image.asset(
-                'assets/backgrounds/tarde.jpg',
-                fit: BoxFit.cover,
-              )),
-              const Positioned.fill(
-                  child: Blur(
-                blurColor: Colors.transparent,
-                child: SizedBox.expand(),
-              )),
-              Positioned.fill(
-                  child: Padding(
-                padding: const EdgeInsets.all(8),
-                child: BlocConsumer<LockPageBloc, LockPageState>(
-                  listenWhen: (previous, current) =>
-                      previous != current && current is LockPageLoginState,
-                  listener: (context, state) =>
-                      context.goNamed(KyRoutes.main.name),
-                  buildWhen: (previous, current) =>
-                      previous.vaultNames != current.vaultNames,
-                  builder: (context, state) {
-                    return Column(
-                      verticalDirection: VerticalDirection.down,
-                      mainAxisAlignment: state.vaultNames.isNotEmpty
-                          ? MainAxisAlignment.spaceBetween
-                          : MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Expanded(
-                          child: Column(
-                            children: [
-                              const SizedBox(
-                                height: 60,
-                              ),
-                              Image.asset(
-                                'assets/app_icons/kiure_icon_name_dark.png',
-                                width: 60,
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.only(
-                                    left: 32, right: 32, top: 12, bottom: 8),
-                                child: Text(
-                                  'Kyure es una aplicación para guardar tus cuentas de forma segura.',
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                      fontSize: 14,
-                                      color: Colors.white.withOpacity(0.6)),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        BlocBuilder<LockPageBloc, LockPageState>(
+                      Center(
+                        child: Image.asset(
+                            'assets/app_icons/kiure_icon_name_dark.png',
+                            width: 90),
+                      ),
+                      Padding(
+                          padding: const EdgeInsets.only(
+                              left: 32, right: 32, top: 12, bottom: 8),
+                          child: Text('Asegura tus cuentas.',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.white.withOpacity(0.6))))
+                    ]);
+              }
+              return Stack(children: [
+                Positioned.fill(
+                    child: Container(
+                        decoration: const BoxDecoration(
+                            gradient: LinearGradient(
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomLeft,
+                                colors: [
+                      Color(0xff08113b),
+                      Color(0xff21083b),
+                      Color(0xff4f000e),
+                      Color(0xff641f00),
+                    ])))),
+                Positioned.fill(
+                    child: Padding(
+                        padding: const EdgeInsets.all(8),
+                        child: BlocConsumer<LockPageBloc, LockPageState>(
+                            listenWhen: (previous, current) =>
+                                previous != current &&
+                                current is LockPageLoginState,
+                            listener: (context, state) =>
+                                context.goNamed(KyRoutes.main.name),
+                            buildWhen: (previous, current) =>
+                                previous.vaultNames != current.vaultNames,
                             builder: (context, state) {
-                          if (state is LockPageCreatingVaultState) {
-                            if (state.valid) {
-                              return Expanded(
-                                flex: 1,
-                                child: KeyFormOrganism(
-                                  title: 'Crea una llave para tu bóveda',
-                                  obscureText: false,
-                                  onTapEnter: (key) async {
-                                    final error =
-                                        await bloc.createNewVault(key);
-                                    return error;
-                                  },
-                                ),
-                              );
-                            } else {
-                              return Expanded(
-                                child: VaultCreationName(
-                                    vaultNameController: _vaultNameController,
-                                    bloc: bloc),
-                              );
-                            }
-                          }
-                          if (state is LockMessageState) {
-                            return Expanded(
-                              child: LockMessage(
-                                  bloc: bloc, message: state.message),
-                            );
-                          }
-                          if (state.vaultNames.isEmpty) {
-                            return Expanded(
-                                child: NotVaultFoundView(bloc: bloc));
-                          }
-                          return Expanded(
-                            flex: 3,
-                            child: VaultSelectorView(
-                                bloc: bloc, vaultNames: state.vaultNames),
-                          );
-                        }),
-                      ],
-                    );
-                  },
-                ),
-              ))
-            ],
-          );
-        },
-      ),
-    );
+                              return Column(
+                                  verticalDirection: VerticalDirection.down,
+                                  mainAxisAlignment: state.vaultNames.isNotEmpty
+                                      ? MainAxisAlignment.spaceBetween
+                                      : MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Expanded(
+                                        child: Column(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.center,
+                                            children: [
+                                          const SizedBox(height: 60),
+                                          Image.asset(
+                                              'assets/app_icons/kiure_icon_name_dark.png',
+                                              width: 60),
+                                          Padding(
+                                              padding: const EdgeInsets.only(
+                                                  left: 32,
+                                                  right: 32,
+                                                  top: 12,
+                                                  bottom: 8),
+                                              child: Text(
+                                                  'Kyure es una aplicación para guardar tus cuentas de forma segura.',
+                                                  textAlign: TextAlign.center,
+                                                  style: TextStyle(
+                                                      fontSize: 14,
+                                                      color: Colors.white
+                                                          .withOpacity(0.6))))
+                                        ])),
+                                    BlocBuilder<LockPageBloc, LockPageState>(
+                                        builder: (context, state) {
+                                      if (state is LockPageCreatingVaultState) {
+                                        if (state.valid) {
+                                          return Expanded(
+                                              child: KeyFormOrganism(
+                                                  title:
+                                                      'Crea una llave para tu bóveda',
+                                                  obscureText: false,
+                                                  onTapEnter: (key) async {
+                                                    final error = await bloc
+                                                        .createNewVault(key);
+                                                    return error;
+                                                  }));
+                                        } else {
+                                          return Expanded(
+                                              child: VaultCreationName(
+                                                  vaultNameController:
+                                                      _vaultNameController,
+                                                  bloc: bloc));
+                                        }
+                                      }
+                                      if (state is LockMessageState) {
+                                        return Expanded(
+                                          child: LockMessage(
+                                              bloc: bloc,
+                                              message: state.message),
+                                        );
+                                      }
+                                      if (state.vaultNames.isEmpty) {
+                                        return Expanded(
+                                            child:
+                                                NotVaultFoundView(bloc: bloc));
+                                      }
+                                      return VaultSelectorView(
+                                          bloc: bloc,
+                                          vaultNames: state.vaultNames);
+                                    })
+                                  ]);
+                            })))
+              ]);
+            }));
   }
 }
 
@@ -184,70 +186,71 @@ class VaultSelectorView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        VaultFileMenu(bloc: bloc),
-        const SizedBox(height: 24),
-        const Text(
-          'Selecciona una bóveda:',
-          textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 14, color: Colors.white),
-        ),
-        const SizedBox(height: 8),
-        BlocBuilder<LockPageBloc, LockPageState>(
-          buildWhen: (previous, current) =>
-              previous != current &&
-              previous.selectedVault != current.selectedVault,
-          builder: (context, state) {
-            return PopupMenuButton(
-              offset: const Offset(0, 30),
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16)),
-              itemBuilder: (context) {
-                return state.vaultNames
-                    .map((e) => PopupMenuItem(
-                            child: ListTile(
-                          title: Text(e),
-                          onTap: () {
-                            bloc.selectVault(e);
-                            context.pop();
-                          },
-                        )))
-                    .toList();
-              },
-              child: Padding(
-                padding: const EdgeInsets.all(8),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(state.selectedVault ?? 'Bóveda',
-                        style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.white.withOpacity(0.8))),
-                    const SizedBox(width: 8),
-                    Icon(CupertinoIcons.chevron_down,
-                        size: 16, color: Colors.white.withOpacity(0.8)),
-                  ],
-                ),
-              ),
-            );
-          },
-        ),
-        Expanded(
-          child: KeyFormOrganism(
-            obscureText: true,
-            onTapEnter: (key) async {
-              final error = await bloc.openVault(key);
-              return error;
-            },
-          ),
-        ),
-      ],
+    final screenSize = MediaQuery.of(context).size;
+    return ConstrainedBox(
+      constraints: BoxConstraints(maxWidth: isPC ? 500 : double.infinity),
+      child: Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            VaultFileMenu(bloc: bloc),
+            BlocBuilder<LockPageBloc, LockPageState>(
+                buildWhen: (previous, current) =>
+                    previous != current &&
+                    previous.selectedVault != current.selectedVault,
+                builder: (context, state) {
+                  return Column(
+                      mainAxisAlignment: state.selectedVault != null
+                          ? MainAxisAlignment.end
+                          : MainAxisAlignment.center,
+                      children: [
+                        TextButton(
+                            child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 16, vertical: 4),
+                                child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      const Icon(CupertinoIcons.cube,
+                                          color: Colors.white),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                          state.selectedVault ??
+                                              'Seleccionar bóveda',
+                                          style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 16,
+                                              fontWeight:
+                                                  state.selectedVault != null
+                                                      ? FontWeight.normal
+                                                      : FontWeight.bold))
+                                    ])),
+                            onPressed: () => showVaultListDialog(context)),
+                        state.selectedVault != null
+                            ? KeyFormOrganism(
+                                obscureText: true,
+                                onTapEnter: (key) async {
+                                  final error = await bloc.openVault(key);
+                                  return error;
+                                },
+                              )
+                            : const SizedBox(height: 200)
+                      ]);
+                })
+          ]),
     );
+  }
+
+  void showVaultListDialog(BuildContext context) {
+    context.showOptionListDialog(
+        'Tus bóvedas',
+        const SizedBox.shrink(),
+        vaultNames
+            .map<Option>((e) => Option(e, const Icon(CupertinoIcons.cube), () {
+                  bloc.selectVault(e);
+                  context.pop();
+                }))
+            .toList());
   }
 }
 
@@ -294,23 +297,30 @@ class VaultFileMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        OptionButton(
-            icon: const Icon(CupertinoIcons.folder, color: Colors.white),
-            text: 'Importar archivo',
-            onTap: () {
-              bloc.pickFile();
-            }),
-        const SizedBox(width: 8),
-        OptionButton(
-            icon: const Icon(CupertinoIcons.add, color: Colors.white),
-            text: 'Crear nueva bóveda',
-            onTap: () async {
-              bloc.createVault();
-            }),
-      ],
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Expanded(
+            child: OptionButton(
+                icon: const Icon(CupertinoIcons.folder, color: Colors.white),
+                text: 'Importar archivo',
+                onTap: () {
+                  bloc.pickFile();
+                }),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: OptionButton(
+                icon: const Icon(CupertinoIcons.add, color: Colors.white),
+                text: 'Nueva bóveda',
+                onTap: () async {
+                  bloc.createVault();
+                }),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -321,6 +331,7 @@ class LockMessage extends StatelessWidget {
     required this.bloc,
     required this.message,
   });
+
   final LockPageBloc bloc;
   final String message;
 
@@ -446,27 +457,22 @@ class OptionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 100,
-      height: 90,
-      child: Padding(
-        padding: const EdgeInsets.all(8),
-        child: InkWell(
-            borderRadius: BorderRadius.circular(16),
-            onTap: onTap,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                icon,
-                const SizedBox(height: 4),
-                Text(text,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                        fontSize: 12, color: Colors.white.withOpacity(0.8))),
-              ],
-            )),
-      ),
+    return Padding(
+      padding: const EdgeInsets.all(8),
+      child: TextButton(
+          onPressed: onTap,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              icon,
+              const SizedBox(height: 8),
+              Text(text,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                      fontSize: 14, color: Colors.white.withOpacity(0.8))),
+            ],
+          )),
     );
   }
 }

@@ -81,7 +81,7 @@ class _SearchBarMoleculeState extends State<SearchBarMolecule> {
                   decoration: InputDecoration(
                     isDense: true,
                     border: InputBorder.none,
-                    hintText: widget.hintText ?? 'Filter',
+                    hintText: widget.hintText ?? 'Buscar',
                   ),
                   onChanged: changedText,
                   controller: textEditingController,
