@@ -16,6 +16,8 @@ import 'package:kyure/data/utils/group_utils.dart';
 import 'package:kyure/services/service_locator.dart';
 import 'package:kyure/services/version/vault_version_system_service.dart';
 
+import '../data/models/sync_result.dart';
+
 class VaultService {
   late VaultVersionSystemService vaultVersionSystemService;
   late LocalDataProvider localDataProvider;
@@ -192,19 +194,19 @@ class VaultService {
       Vault fileEncryptedVault =
           Vault.fromJson(jsonDecode(file.readAsStringSync()));
       if (fileEncryptedVault.vaultName != _vaultName) {
-        return SyncResult.incompatible;
+        return SyncResult.incompatible('Vaults incompatibles');
       }
       try {
         final fileVault = await localDataProvider.decryptVault(
             _algorithm!, fileVaultKey!, fileEncryptedVault);
         await mergeVault(fileVault, fileVaultKey);
       } on InvalidKeyException {
-        return SyncResult.wrongRemoteKey;
+        return SyncResult.wrongRemoteKey('Clave externa incorrecta');
       }
-      return SyncResult.success;
+      return SyncResult.success('Sincronizado con éxito');
     } catch (exception) {
       log(exception.toString());
-      return SyncResult.accessError;
+      return SyncResult.accessError('Error de acceso');
     }
   }
 
@@ -219,10 +221,12 @@ class VaultService {
         try {
           remoteVault = await remoteDataProvider?.readVault(
               _algorithm!, _key!, _vaultName!);
-        } on AccessibilityException {
-          return SyncResult.accessError;
+        } on AccessibilityException catch (e) {
+          return SyncResult.accessError('Error de acceso');
         } on InvalidKeyException {
-          return SyncResult.wrongRemoteKey;
+          return SyncResult.wrongRemoteKey('Clave remota incorrecta');
+        } on Exception catch (e) {
+          return SyncResult.accessError(e.toString());
         }
         if (remoteVault != null) {
           final updateDirection = await mergeVault(remoteVault, remoteKey!);
@@ -232,17 +236,17 @@ class VaultService {
                 _algorithm!, _key!, _vaultName!, _vault!);
           }
         } else {
-          return SyncResult.accessError;
+          return SyncResult.accessError('Error de acceso');
         }
       } else {
         await remoteDataProvider?.writeVault(
             _algorithm!, _key!, _vaultName!, _vault!);
-        return SyncResult.success;
+        return SyncResult.success('Sincronizado con éxito');
       }
-      return SyncResult.success;
+      return SyncResult.success('Sincronizado con éxito');
     } catch (exception) {
       log(exception.toString());
-      return SyncResult.accessError;
+      return SyncResult.accessError(exception.toString());
     }
   }
 
@@ -386,5 +390,3 @@ class VaultService {
     saveVaultData(updateDataDate: true);
   }
 }
-
-enum SyncResult { accessError, wrongRemoteKey, incompatible, success }

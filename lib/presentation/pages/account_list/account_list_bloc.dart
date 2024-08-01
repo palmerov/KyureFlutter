@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:kyure/data/models/sync_result.dart';
 import 'package:kyure/data/models/vault_data.dart';
 import 'package:kyure/data/utils/dialog_utils.dart';
 import 'package:kyure/services/kiure_service.dart';
@@ -133,8 +134,8 @@ class AccountListPageBloc extends Cubit<AccountListPageState> {
   void syncVault() async {
     emit(const AccountListPageStateLoading());
     final result = await serviceLocator.getVaultService().syncWithRemote(null);
-    switch (result) {
-      case SyncResult.success:
+    switch (result.type) {
+      case SyncResultType.success:
         emit(AccountListSyncResult(
             accounts: vaultService.accounts!,
             groups: vaultService.groups!,
@@ -142,7 +143,7 @@ class AccountListPageBloc extends Cubit<AccountListPageState> {
             message: 'Sincronizado con éxito',
             result: result));
         break;
-      case SyncResult.incompatible:
+      case SyncResultType.incompatible:
         emit(AccountListSyncResult(
             accounts: vaultService.accounts!,
             groups: vaultService.groups!,
@@ -150,7 +151,7 @@ class AccountListPageBloc extends Cubit<AccountListPageState> {
             message: 'Vaults incompatibles',
             result: result));
         break;
-      case SyncResult.wrongRemoteKey:
+      case SyncResultType.wrongRemoteKey:
         emit(AccountListSyncResult(
             accounts: vaultService.accounts!,
             groups: vaultService.groups!,
@@ -158,7 +159,7 @@ class AccountListPageBloc extends Cubit<AccountListPageState> {
             message: 'Clave remota incorrecta',
             result: result));
         break;
-      case SyncResult.accessError:
+      case SyncResultType.accessError:
         emit(AccountListSyncResult(
             accounts: vaultService.accounts!,
             groups: vaultService.groups!,
