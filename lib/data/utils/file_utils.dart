@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter_share/flutter_share.dart';
 import 'package:path_provider/path_provider.dart';
 
 String concatPath(String parent, String child, [bool remote = false]) {
@@ -28,4 +29,12 @@ Future<Directory> getLocalInternalRootDir() async {
             (await getApplicationDocumentsDirectory()).path, 'kiure'))
         .create(recursive: true);
   }
+}
+
+Future<void> shareFile(String filePath, String title, String shareText) async {
+  await FlutterShare.shareFile(
+    title: title,
+    text: shareText,
+    filePath: filePath,
+  );
 }

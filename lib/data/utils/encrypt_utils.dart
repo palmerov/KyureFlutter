@@ -12,10 +12,15 @@ class EncryptUtils {
     String key,
     String data,
   ) {
-    key = Key.fromUtf8(key).base64;
-    final encrypter = _getEncrypter(algorithm, Key.fromUtf8(_makeKey(key, 32)));
-    final iv = _getIVByAlgorithm(algorithm, key);
-    return encrypter.encrypt(data, iv: iv).base64;
+    try {
+      key = Key.fromUtf8(key).base64;
+      final encrypter =
+          _getEncrypter(algorithm, Key.fromUtf8(_makeKey(key, 32)));
+      final iv = _getIVByAlgorithm(algorithm, key);
+      return encrypter.encrypt(data, iv: iv).base64;
+    } catch (e) {
+      throw EncryptionException(e);
+    }
   }
 
   static String decrypt(
@@ -23,10 +28,15 @@ class EncryptUtils {
     String key,
     String data,
   ) {
-    key = Key.fromUtf8(key).base64;
-    final encrypter = _getEncrypter(algorithm, Key.fromUtf8(_makeKey(key, 32)));
-    final iv = _getIVByAlgorithm(algorithm, key);
-    return encrypter.decrypt(Encrypted.fromBase64(data), iv: iv);
+    try {
+      key = Key.fromUtf8(key).base64;
+      final encrypter =
+          _getEncrypter(algorithm, Key.fromUtf8(_makeKey(key, 32)));
+      final iv = _getIVByAlgorithm(algorithm, key);
+      return encrypter.decrypt(Encrypted.fromBase64(data), iv: iv);
+    } catch (e) {
+      throw EncryptionException(e);
+    }
   }
 
   //a method to make the key: string long as 32 bytes
@@ -64,6 +74,12 @@ class EncryptUtils {
         return Encrypter(AES(key));
     }
   }
+}
+
+class EncryptionException implements Exception {
+  final dynamic exception;
+
+  EncryptionException([this.exception]);
 }
 
 void main(List<String> args) {

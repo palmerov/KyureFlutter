@@ -5,7 +5,7 @@ import '../presentation/widgets/molecules/context_menu_tile.dart';
 
 extension BuildContextDialogExtension on BuildContext {
   showYesOrNoDialog(String title, String message, bool Function() onYes,
-      [bool Function()? onNo, String yesText = 'Sí', String noText = 'No']) {
+      [bool Function()? onNo, String yesText = 'Sí', String? noText = 'No']) {
     showDialog(
       context: this,
       useSafeArea: true,
@@ -33,13 +33,14 @@ extension BuildContextDialogExtension on BuildContext {
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  TextButton(
-                      onPressed: () {
-                        if (onNo == null || onNo()) {
-                          pop();
-                        }
-                      },
-                      child: Text(noText)),
+                  if (noText != null)
+                    TextButton(
+                        onPressed: () {
+                          if (onNo == null || onNo()) {
+                            pop();
+                          }
+                        },
+                        child: Text(noText)),
                   TextButton(
                       onPressed: () {
                         if (onYes()) {
@@ -69,7 +70,9 @@ extension BuildContextDialogExtension on BuildContext {
                     children: [
                       icon,
                       const SizedBox(width: 8),
-                      Text(title, style: const TextStyle(fontSize: 18)),
+                      Expanded(
+                          child: Text(title,
+                              style: const TextStyle(fontSize: 18))),
                     ],
                   ),
                   const SizedBox(height: 16),

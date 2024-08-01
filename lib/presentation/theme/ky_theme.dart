@@ -78,7 +78,7 @@ class KyTheme extends InheritedWidget {
   final Color _colorDarkSeparatorLine = const Color.fromARGB(255, 59, 59, 59);
   final Color _colorDarkPassword = const Color.fromARGB(255, 42, 142, 255);
   final Color _colorDarkAccount = const Color.fromARGB(255, 35, 131, 51);
-  final Color _colorDarkToastBackground = const Color.fromARGB(126, 8, 8, 8);
+  final Color _colorDarkToastBackground = const Color.fromARGB(255, 8, 8, 8);
   final Color _colorDarkToastText = const Color.fromARGB(255, 228, 228, 228);
 
   //Getter
@@ -119,4 +119,6 @@ class KyTheme extends InheritedWidget {
 
   Color get colorPrimarySmooth =>
       light ? _colorPrimarySmoothLight : darkTheme.colorScheme.primary;
+
+  get colorError => light ? lightTheme.colorScheme.error : darkTheme.colorScheme.error;
 }

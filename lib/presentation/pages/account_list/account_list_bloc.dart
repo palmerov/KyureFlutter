@@ -131,9 +131,11 @@ class AccountListPageBloc extends Cubit<AccountListPageState> {
     return getAccountListByGroupId(vaultService.groups![groupIndex].id);
   }
 
-  void syncVault() async {
+  void syncVault(KeyConflictResolver? keyConflictResolver) async {
     emit(const AccountListPageStateLoading());
-    final result = await serviceLocator.getVaultService().syncWithRemote(null);
+    final result = await serviceLocator.getVaultService().syncWithRemote(
+        keyConflictResolver: keyConflictResolver,
+        inRetry: keyConflictResolver != null);
     switch (result.type) {
       case SyncResultType.success:
         emit(AccountListSyncResult(

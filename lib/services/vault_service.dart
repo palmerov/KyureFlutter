@@ -121,7 +121,7 @@ class VaultService {
         _accounts!.sort((a, b) => b.id.compareTo(a.id));
         break;
     }
-    if (save) saveVaultData(updateVaultDate: true);
+    if (save) saveVaultData(updateDataDate: true);
   }
 
   File getVaultFile() {
@@ -199,59 +199,118 @@ class VaultService {
       try {
         final fileVault = await localDataProvider.decryptVault(
             _algorithm!, fileVaultKey!, fileEncryptedVault);
-        await mergeVault(fileVault, fileVaultKey);
+        final dir = await mergeVault(fileVault, true);
+        return SyncResult.success('Sincronizado con éxito', dir);
       } on InvalidKeyException {
         return SyncResult.wrongRemoteKey('Clave externa incorrecta');
       }
-      return SyncResult.success('Sincronizado con éxito');
     } catch (exception) {
       log(exception.toString());
       return SyncResult.accessError('Error de acceso');
     }
   }
 
-  Future<SyncResult> syncWithRemote(String? remoteKey) async {
+  Future<SyncResult> syncWithRemote(
+      {KeyConflictResolver? keyConflictResolver, bool inRetry = false}) async {
+    // Start with all keys as the local key
+    String writerRemoteKey = _key!;
+    String readerRemoteKey = _key!;
+    String readerLocalKey = _key!;
+    String writerLocalKey = _key!;
     try {
-      remoteKey ??= _key;
-      await remoteDataProvider!.createRootDirectory();
-      Vault? vault = await remoteDataProvider?.readVault(
-          _algorithm!, remoteKey!, _vault!.vaultName);
-      if (vault != null) {
-        Vault? remoteVault;
-        try {
-          remoteVault = await remoteDataProvider?.readVault(
-              _algorithm!, _key!, _vaultName!);
-        } on AccessibilityException catch (e) {
-          return SyncResult.accessError('Error de acceso');
-        } on InvalidKeyException {
-          return SyncResult.wrongRemoteKey('Clave remota incorrecta');
-        } on Exception catch (e) {
-          return SyncResult.accessError(e.toString());
-        }
-        if (remoteVault != null) {
-          final updateDirection = await mergeVault(remoteVault, remoteKey!);
-          if (updateDirection == UpdateDirection.toRemote ||
-              updateDirection == UpdateDirection.toRemoteAndLocal) {
-            await remoteDataProvider?.writeVault(
-                _algorithm!, _key!, _vaultName!, _vault!);
-          }
-        } else {
-          return SyncResult.accessError('Error de acceso');
-        }
-      } else {
-        await remoteDataProvider?.writeVault(
-            _algorithm!, _key!, _vaultName!, _vault!);
-        return SyncResult.success('Sincronizado con éxito');
+      // If conflict resolver not null, use the remote reader key from it
+      readerRemoteKey = keyConflictResolver?.key ?? _key!;
+      if (keyConflictResolver?.direction == KeyUpdateDirection.toLocal) {
+        // If conflict resolver is set to update the local key, use the remote
+        // reader key as local writer key
+        writerRemoteKey = readerRemoteKey;
+        writerLocalKey = readerRemoteKey;
+      } else if (keyConflictResolver?.direction ==
+          KeyUpdateDirection.toRemote) {
+        // If conflict resolver is set to update the remote key, use the local
+        // key as remote writer key
+        writerLocalKey = readerLocalKey;
+        writerRemoteKey = readerLocalKey;
       }
-      return SyncResult.success('Sincronizado con éxito');
-    } catch (exception) {
+      await remoteDataProvider!.createRootDirectory();
+    } on Exception catch (exception) {
       log(exception.toString());
-      return SyncResult.accessError(exception.toString());
+    }
+
+    if (keyConflictResolver != null &&
+        keyConflictResolver.direction == KeyUpdateDirection.toRemote &&
+        keyConflictResolver.force) {
+      // If conflict resolver is set to update the remote key by force, use the
+      // local key as remote writer key and overwrite the remote vault, then
+      // return success
+      try {
+        await remoteDataProvider?.writeVault(
+            _algorithm!, writerRemoteKey, _vaultName!, _vault!);
+        return SyncResult.success(
+            'Sincronizado con éxito', UpdateDirection.toRemote);
+      } catch (e) {
+        return SyncResult.accessError('Error de acceso');
+      }
+    }
+
+    Vault? remoteVault;
+    try {
+      // Read and decode the remote vault
+      remoteVault = await remoteDataProvider?.readVault(
+          _algorithm!, readerRemoteKey, _vaultName!,
+          data: {'inRetry': inRetry});
+      if (remoteVault == null) {
+        // If the remote vault is null, try to write the local vault to remote
+        try {
+          await remoteDataProvider?.writeVault(
+              _algorithm!, writerRemoteKey, _vaultName!, _vault!);
+          return SyncResult.success(
+              'Sincronizado con éxito', UpdateDirection.toRemote);
+        } catch (e) {
+          return SyncResult.accessError('Error de acceso');
+        }
+      }
+    } on AccessibilityException {
+      return SyncResult.accessError('Error de acceso');
+    } on EncryptionException {
+      // If the remote vault is encrypted with a different key, return wrong key
+      return SyncResult.wrongRemoteKey('Clave remota incorrecta');
+    } on Exception catch (e) {
+      return SyncResult.accessError(e.toString());
+    }
+    String localKeyTemp = _key!;
+    try {
+      _key = writerLocalKey;
+      UpdateDirection updateDirection;
+      try {
+        // Merge the remote vault with the local vault
+        updateDirection = await mergeVault(remoteVault, false);
+        await saveVaultData(updateDataDate: keyConflictResolver != null);
+        if (updateDirection == UpdateDirection.none &&
+            keyConflictResolver?.direction == KeyUpdateDirection.toRemote) {
+          updateDirection = UpdateDirection.toRemote;
+        }
+      } catch (e) {
+        _key = localKeyTemp;
+        return SyncResult.accessError('Error de acceso');
+      }
+      if (updateDirection == UpdateDirection.toRemote ||
+          updateDirection == UpdateDirection.toBoth ||
+          keyConflictResolver?.direction == KeyUpdateDirection.toRemote) {
+        try {
+          await remoteDataProvider?.writeVault(
+              _algorithm!, writerRemoteKey, _vaultName!, _vault!);
+        } catch (e) {
+          return SyncResult.accessError('Error de acceso');
+        }
+      }
+      return SyncResult.success('Sincronizado con éxito', updateDirection);
+    } catch (e) {
+      return SyncResult.accessError('Error de acceso');
     }
   }
 
-  Future<UpdateDirection> mergeVault(
-      Vault decryptedVault, String vaultKey) async {
+  Future<UpdateDirection> mergeVault(Vault decryptedVault, bool save) async {
     try {
       final vaultName = decryptedVault.vaultName;
       if (vaultName == _vaultName) {
@@ -259,28 +318,21 @@ class VaultService {
         VaultData mergedVaultData;
         (mergedVaultData, updateDirection) = await vaultVersionSystemService
             .getMergedData(_vaultData!, decryptedVault.data!);
-        bool updatekey = decryptedVault.modifDate
-            .isAfter(_vault!.modifDate); // has the incomming vault a newer key?
         if (updateDirection == UpdateDirection.toLocal ||
-            updateDirection == UpdateDirection.toRemoteAndLocal ||
-            updatekey) {
+            updateDirection == UpdateDirection.toBoth) {
           _vaultData = mergedVaultData;
           _vault!.data = mergedVaultData;
+          _vault!.modifDate = decryptedVault.modifDate;
           _accounts = _vaultData!.accounts.values.toList();
           _groups = _vaultData!.groups.values.toList();
-          if (updatekey) {
-            // update the current vault key with the newer
-            _key = vaultKey;
-            _vault!.modifDate = decryptedVault.modifDate;
-          }
-          await saveVaultData();
+          if (save) await saveVaultData();
         }
         return updateDirection;
       }
     } catch (exception) {
       rethrow;
     }
-    return UpdateDirection.noUpdate;
+    return UpdateDirection.none;
   }
 
   void deleteVault(bool remote) async {

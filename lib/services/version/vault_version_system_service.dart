@@ -7,13 +7,13 @@ class VaultVersionSystemService {
     final vdMerged = _mergeVault(vdLocal, vdRemote);
     if (vdMerged.modifDate == vdLocal.modifDate &&
         vdMerged.modifDate == vdRemote.modifDate) {
-      return (vdMerged, UpdateDirection.noUpdate);
+      return (vdMerged, UpdateDirection.none);
     } else if (vdMerged.modifDate == vdLocal.modifDate) {
       return (vdMerged, UpdateDirection.toRemote);
     } else if (vdMerged.modifDate == vdRemote.modifDate) {
       return (vdMerged, UpdateDirection.toLocal);
     } else {
-      return (vdMerged, UpdateDirection.toRemoteAndLocal);
+      return (vdMerged, UpdateDirection.toBoth);
     }
   }
 
@@ -92,4 +92,4 @@ class VaultVersionSystemService {
   }
 }
 
-enum UpdateDirection { toRemoteAndLocal, toRemote, toLocal, noUpdate }
+enum UpdateDirection { toBoth, toRemote, toLocal, none }

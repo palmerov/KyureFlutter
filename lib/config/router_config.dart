@@ -7,6 +7,7 @@ import 'package:kyure/presentation/pages/account_details/account_details_page.da
 import 'package:kyure/presentation/pages/account_list/account_list_page.dart';
 import 'package:kyure/presentation/pages/cloud_page/cloud_page.dart';
 import 'package:kyure/presentation/pages/group_details/group_details_page.dart';
+import 'package:kyure/presentation/pages/key_conflict_resolver/key_conflict_resolver_page.dart';
 import 'package:kyure/presentation/pages/key_updater/key_updater_page.dart';
 import 'package:kyure/presentation/pages/lock_page/lock_page.dart';
 import 'package:kyure/services/service_locator.dart';
@@ -76,6 +77,12 @@ final routerConfig = GoRouter(navigatorKey: kiureNavigatorKey, routes: [
             pageBuilder: (context, state) {
               return const MaterialPage(child: KeyUpdaterPage());
             }),
+        GoRoute(
+            path: KyRoutes.keyConflictResolver.name,
+            name: KyRoutes.keyConflictResolver.name,
+            pageBuilder: (context, state) {
+              return const MaterialPage(child: KeyConflictResolverPage());
+            }),
       ]),
 ]);
 
@@ -85,6 +92,7 @@ enum KyRoutes {
   accountEditor('account-editor', '/main/account-editor'),
   groupEditor('group-editor', '/main/group-editor'),
   keyEditor('key-editor', '/main/key-editor'),
+  keyConflictResolver('key-conflict-resolver', '/main/key-conflict-resolver'),
   cloudSettings('cloud-settings', '/main/cloud-settings');
 
   const KyRoutes(this.name, this.routePath);

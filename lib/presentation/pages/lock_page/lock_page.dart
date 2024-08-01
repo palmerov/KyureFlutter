@@ -10,6 +10,8 @@ import 'package:go_router/go_router.dart';
 import 'package:kyure/config/router_config.dart';
 import 'package:kyure/main.dart';
 import 'package:kyure/presentation/pages/lock_page/lock_page_bloc.dart';
+import 'package:kyure/presentation/theme/ky_backgrounds.dart';
+import 'package:kyure/presentation/theme/ky_theme.dart';
 import 'package:kyure/presentation/widgets/organisms/key_form.dart';
 import 'package:kyure/utils/extensions.dart';
 import 'package:kyure/utils/extensions_classes.dart';
@@ -36,6 +38,7 @@ class _LockView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bloc = BlocProvider.of<LockPageBloc>(context);
+    final ktheme = KyTheme.of(context)!;
     return Scaffold(
         extendBody: true,
         extendBodyBehindAppBar: true,
@@ -73,18 +76,7 @@ class _LockView extends StatelessWidget {
                     ]);
               }
               return Stack(children: [
-                Positioned.fill(
-                    child: Container(
-                        decoration: const BoxDecoration(
-                            gradient: LinearGradient(
-                                begin: Alignment.topCenter,
-                                end: Alignment.bottomLeft,
-                                colors: [
-                      Color(0xff08113b),
-                      Color(0xff21083b),
-                      Color(0xff4f000e),
-                      Color(0xff641f00),
-                    ])))),
+                Positioned.fill(child: KyBackgrounds.gradientSunset),
                 Positioned.fill(
                     child: Padding(
                         padding: const EdgeInsets.all(8),
@@ -141,7 +133,13 @@ class _LockView extends StatelessWidget {
                                                   onTapEnter: (key) async {
                                                     final error = await bloc
                                                         .createNewVault(key);
-                                                    return error;
+                                                    return error != null
+                                                        ? Text(error,
+                                                            style: TextStyle(
+                                                                color: ktheme
+                                                                    .colorError,
+                                                                fontSize: 14))
+                                                        : null;
                                                   }));
                                         } else {
                                           return Expanded(
@@ -187,6 +185,7 @@ class VaultSelectorView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
+    final ktheme = KyTheme.of(context)!;
     return ConstrainedBox(
       constraints: BoxConstraints(maxWidth: isPC ? 500 : double.infinity),
       child: Column(
@@ -231,7 +230,12 @@ class VaultSelectorView extends StatelessWidget {
                                 obscureText: true,
                                 onTapEnter: (key) async {
                                   final error = await bloc.openVault(key);
-                                  return error;
+                                  return error != null
+                                      ? Text(error,
+                                          style: TextStyle(
+                                              color: ktheme.colorError,
+                                              fontSize: 14))
+                                      : null;
                                 },
                               )
                             : const SizedBox(height: 200)

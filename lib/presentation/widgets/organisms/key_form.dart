@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:kyure/main.dart';
+import 'package:kyure/presentation/theme/ky_theme.dart';
 import 'package:vibration/vibration.dart';
 
 class KeyFormOrganism extends StatefulWidget {
@@ -12,13 +13,11 @@ class KeyFormOrganism extends StatefulWidget {
       this.title,
       this.onBackgroundColor = Colors.white,
       required this.onTapEnter,
-      this.error,
       required this.obscureText});
 
   final String? title;
   final Color onBackgroundColor;
-  final Future Function(String key) onTapEnter;
-  final String? error;
+  final Future<Widget?> Function(String key) onTapEnter;
   final bool obscureText;
 
   @override
@@ -28,7 +27,7 @@ class KeyFormOrganism extends StatefulWidget {
 class _KeyFormOrganismState extends State<KeyFormOrganism> {
   bool keyboard = false;
   late final TextEditingController controller;
-  String? error;
+  Widget? message;
   bool loading = false;
   final FocusNode _focusNode = FocusNode();
   double buttonHeight = 60;
@@ -36,7 +35,6 @@ class _KeyFormOrganismState extends State<KeyFormOrganism> {
   @override
   void initState() {
     super.initState();
-    error = widget.error;
     controller = TextEditingController();
     Future.delayed(const Duration(milliseconds: 500)).then((value) {
       if (isPC) {
@@ -58,9 +56,9 @@ class _KeyFormOrganismState extends State<KeyFormOrganism> {
     });
     vibrate();
     String text = controller.text;
-    error = await widget.onTapEnter(text);
-    if (error == null) controller.text = '';
-    if (error != null) {
+    message = await widget.onTapEnter(text);
+    if (message == null) controller.text = '';
+    if (message != null) {
       if (Platform.isAndroid || Platform.isIOS) {
         Vibration.vibrate(duration: 200);
       }
@@ -73,6 +71,7 @@ class _KeyFormOrganismState extends State<KeyFormOrganism> {
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
+    final ktheme = KyTheme.of(context)!;
     buttonHeight = max(screenSize.height * 0.36 * 0.25, 70);
     return Padding(
         padding: const EdgeInsets.only(top: 4, left: 4, right: 4, bottom: 16),
@@ -84,8 +83,8 @@ class _KeyFormOrganismState extends State<KeyFormOrganism> {
                 Text(
                   widget.title!,
                   textAlign: TextAlign.center,
-                  style: TextStyle(
-                      color: widget.onBackgroundColor, fontSize: 16),
+                  style:
+                      TextStyle(color: widget.onBackgroundColor, fontSize: 16),
                 ),
               const SizedBox(height: 16),
               Padding(
@@ -106,6 +105,8 @@ class _KeyFormOrganismState extends State<KeyFormOrganism> {
                           keyboard,
                       cursorColor: widget.onBackgroundColor,
                       decoration: InputDecoration(
+                        fillColor: widget.onBackgroundColor.withOpacity(0.02),
+                          filled: true,
                           contentPadding: EdgeInsets.only(
                               left: isMobile ? 48 : 0,
                               right: 0,
@@ -125,8 +126,7 @@ class _KeyFormOrganismState extends State<KeyFormOrganism> {
                                   ))
                               : isMobile
                                   ? Padding(
-                                      padding:
-                                          const EdgeInsets.only(right: 8),
+                                      padding: const EdgeInsets.only(right: 8),
                                       child: InkWell(
                                           onTap: () {
                                             setState(
@@ -143,38 +143,31 @@ class _KeyFormOrganismState extends State<KeyFormOrganism> {
                                               !keyboard
                                                   ? CupertinoIcons.keyboard
                                                   : CupertinoIcons.number,
-                                              color:
-                                                  widget.onBackgroundColor)))
+                                              color: widget.onBackgroundColor)))
                                   : null,
                           hintText: 'Llave de cifrado',
                           hintStyle: TextStyle(
-                              color:
-                                  widget.onBackgroundColor.withOpacity(0.4)),
+                              color: widget.onBackgroundColor.withOpacity(0.4)),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(16),
                             borderSide:
-                                BorderSide(color: widget.onBackgroundColor),
+                                BorderSide(color: widget.onBackgroundColor.withOpacity(0.2)),
                           ),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(16),
                             borderSide:
-                                BorderSide(color: widget.onBackgroundColor),
+                                BorderSide(color: widget.onBackgroundColor.withOpacity(0.2)),
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(16),
                             borderSide:
-                                BorderSide(color: widget.onBackgroundColor),
+                                BorderSide(color: widget.onBackgroundColor.withOpacity(0.2)),
                           )))),
-              Padding(
-                padding: const EdgeInsets.all(4),
-                child: Text(error ?? '',
-                    style: TextStyle(color: Colors.red.shade200),
-                    textAlign: TextAlign.center),
-              ),
+              message != null
+                  ? Padding(padding: const EdgeInsets.all(4), child: Center(child: message))
+                  : const SizedBox(height: 8),
               if (keyboard || isPC)
-                isPC
-                    ? const SizedBox(height: 200)
-                    : const SizedBox(height: 0),
+                isPC ? const SizedBox(height: 200) : const SizedBox(height: 0),
               if (!keyboard && isMobile)
                 Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -285,13 +278,11 @@ class _KeyFormOrganismState extends State<KeyFormOrganism> {
                                               vibrate();
                                             },
                                             onTap: (text, icon) {
-                                              if (controller
-                                                  .text.isNotEmpty) {
+                                              if (controller.text.isNotEmpty) {
                                                 controller.text =
                                                     controller.text.substring(
                                                         0,
-                                                        controller
-                                                                .text.length -
+                                                        controller.text.length -
                                                             1);
                                                 vibrate();
                                               }

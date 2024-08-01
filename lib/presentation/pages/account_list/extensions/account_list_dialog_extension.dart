@@ -13,7 +13,7 @@ import 'package:kyure/utils/extensions_classes.dart';
 
 import '../account_list_bloc.dart';
 
-extension AccountListViewExtension on AccountListView{
+extension AccountListViewDialogExtension on AccountListView{
   void showSortDialog(BuildContext context) {
     final bloc = BlocProvider.of<AccountListPageBloc>(context);
     context.showOptionListDialog('Ordenamiento', const SizedBox.shrink(), [
@@ -88,12 +88,5 @@ extension AccountListViewExtension on AccountListView{
         ]);
   }
 
-  openAccountDetails(AccountListPageBloc bloc, BuildContext context,
-      Account account, bool editting) async {
-    final updated = await context.pushNamed(KyRoutes.accountEditor.name,
-        queryParameters: {'id': '${account.id}', 'editting': '$editting'});
-    if (updated != null) {
-      bloc.reload(true);
-    }
-  }
+
 }

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:kyure/data/utils/file_utils.dart';
 import 'package:kyure/utils/extensions.dart';
 import 'package:kyure/utils/extensions_classes.dart';
 
@@ -97,53 +98,65 @@ class KiureDrawer extends StatelessWidget {
               Option(
                   'Cambiar clave',
                   const Icon(CupertinoIcons.lock_rotation_open),
-                  () => context.pushNamed(KyRoutes.keyEditor.name)),
+                      () {
+                    context.pop();
+                    context.pushNamed(KyRoutes.keyEditor.name);
+                  }),
               Option(
                   'Sincronizar con archivo',
                   const Icon(CupertinoIcons.arrow_down_doc),
-                  () => listBloc.syncWithFile()),
+                      () {
+                    context.pop();
+                    listBloc.syncWithFile();
+                  }),
               Option('Exportar bóveda', const Icon(CupertinoIcons.share),
-                  () async {
-                String path =
+                      () async {
+                    context.pop();
+                    String path =
                     await context.read<AccountListPageBloc>().exportFile();
-                if (context.mounted) {
-                  showDialog(
-                    context: context,
-                    builder: (context) => AlertDialog(
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16)),
-                      content: Text(
-                          'Tu archivo de cuentas ha sido exportado a: $path'),
-                      actions: [
-                        InkWell(
-                          borderRadius: BorderRadius.circular(16),
-                          child: const Padding(
-                            padding: EdgeInsets.all(12),
-                            child: Text('Copiar directorio'),
-                          ),
-                          onTap: () {
-                            Clipboard.setData(
-                                ClipboardData(text: File(path).parent.path));
-                          },
-                        ),
-                        InkWell(
-                          borderRadius: BorderRadius.circular(16),
-                          child: const Padding(
-                            padding: EdgeInsets.all(12),
-                            child: Text('Compartir'),
-                          ),
-                          onTap: () {
-                            shareFile(path, 'Cuentas Kiure',
-                                'Archivo Encriptado de cuentas de Kiure');
-                          },
-                        )
-                      ],
-                    ),
-                  );
-                }
-              }),
+                    if (context.mounted) {
+                      showDialog(
+                        context: context,
+                        builder: (context) =>
+                            AlertDialog(
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16)),
+                              content: Text(
+                                  'Tu archivo de cuentas ha sido exportado a: $path'),
+                              actions: [
+                                InkWell(
+                                  borderRadius: BorderRadius.circular(16),
+                                  child: const Padding(
+                                    padding: EdgeInsets.all(12),
+                                    child: Text('Copiar directorio'),
+                                  ),
+                                  onTap: () {
+                                    Clipboard.setData(
+                                        ClipboardData(
+                                            text: File(path).parent.path));
+                                  },
+                                ),
+                                InkWell(
+                                  borderRadius: BorderRadius.circular(16),
+                                  child: const Padding(
+                                    padding: EdgeInsets.all(12),
+                                    child: Text('Compartir'),
+                                  ),
+                                  onTap: () {
+                                    shareFile(path, 'Cuentas Kiure',
+                                        'Archivo Encriptado de cuentas de Kiure');
+                                  },
+                                )
+                              ],
+                            ),
+                      );
+                    }
+                  }),
               Option('Eliminar bóveda', const Icon(CupertinoIcons.delete),
-                  () => _showDeleteVaultConfirmDialog(context)),
+                      () {
+                        context.pop();
+                        _showDeleteVaultConfirmDialog(context);
+                      }),
             ]);
           },
         ),
@@ -156,11 +169,10 @@ class KiureDrawer extends StatelessWidget {
     );
   }
 
-  ContextMenuTileMolecule _buildDrawerItem(
-      {required KyTheme kyTheme,
-      required String label,
-      required Widget icon,
-      required Function() onTap}) {
+  ContextMenuTileMolecule _buildDrawerItem({required KyTheme kyTheme,
+    required String label,
+    required Widget icon,
+    required Function() onTap}) {
     return ContextMenuTileMolecule(
         onTap: onTap,
         label: label,
@@ -174,47 +186,48 @@ class KiureDrawer extends StatelessWidget {
     showDialog(
       context: context,
       useSafeArea: true,
-      builder: (context) => AlertDialog(
-          shape:
+      builder: (context) =>
+          AlertDialog(
+              shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const Text(
-                'Eliminar Bóveda',
-                style: TextStyle(fontSize: 18),
-              ),
-              const SizedBox(
-                height: 16,
-              ),
-              const Text(
-                'Si eliminas la bóveda, se perderán todas las cuentas y grupos. ¿Deseas eliminarla?',
-                style: TextStyle(fontSize: 16),
-              ),
-              const SizedBox(
-                height: 16,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  TextButton(
-                      onPressed: () {
-                        context.pop();
-                      },
-                      child: const Text('No')),
-                  TextButton(
-                      onPressed: () {
-                        context.pop();
-                        serviceLocator.getVaultService().deleteVault(false);
-                        context.goNamed(KyRoutes.lockPage.name,
-                            queryParameters: {'blockedByUser': 'true'});
-                      },
-                      child: const Text('Si')),
+                  const Text(
+                    'Eliminar Bóveda',
+                    style: TextStyle(fontSize: 18),
+                  ),
+                  const SizedBox(
+                    height: 16,
+                  ),
+                  const Text(
+                    'Si eliminas la bóveda, se perderán todas las cuentas y grupos. ¿Deseas eliminarla?',
+                    style: TextStyle(fontSize: 16),
+                  ),
+                  const SizedBox(
+                    height: 16,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                          onPressed: () {
+                            context.pop();
+                          },
+                          child: const Text('No')),
+                      TextButton(
+                          onPressed: () {
+                            context.pop();
+                            serviceLocator.getVaultService().deleteVault(false);
+                            context.goNamed(KyRoutes.lockPage.name,
+                                queryParameters: {'blockedByUser': 'true'});
+                          },
+                          child: const Text('Si')),
+                    ],
+                  )
                 ],
-              )
-            ],
-          )),
+              )),
     );
   }
 }

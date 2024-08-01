@@ -114,14 +114,21 @@ class DropboxDataProvider implements RemoteDataProvider {
 
   @override
   Future<Vault?> readVault(
-      EncryptAlgorithm algorithm, String key, String vaultName) async {
-    File? cachedFile = await downloadRemoteVaultFileToCache(vaultName);
+      EncryptAlgorithm algorithm, String key, String vaultName,
+      {Map<String, dynamic>? data}) async {
+    File? cachedFile;
+    if (data != null && data['inRetry'] == true) {
+      cachedFile = File(_getLocalVaultCacheFilePath(vaultName));
+    } else {
+      cachedFile = await downloadRemoteVaultFileToCache(vaultName);
+    }
     if (cachedFile != null) {
       String? text = await cachedFile.readAsString();
       Map<String, dynamic> json = jsonDecode(text);
       Vault vault = Vault.fromJson(json);
-      vault.data = VaultData.fromJson(
-          jsonDecode(EncryptUtils.decrypt(algorithm, key, vault.datacrypt)));
+      String decryptedEncodedDataJson =
+          EncryptUtils.decrypt(algorithm, key, vault.datacrypt);
+      vault.data = VaultData.fromJson(jsonDecode(decryptedEncodedDataJson));
       return vault;
     } else {
       return null;

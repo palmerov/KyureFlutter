@@ -15,7 +15,8 @@ class LocalDataProvider implements DataProvider {
   @override
   Future init(Map<String, dynamic> values) async {
     // init and create root path
-    _rootVaultDir = Directory(concatPath(values['localRootPath'], VAULTS_DIR_NAME));
+    _rootVaultDir =
+        Directory(concatPath(values['localRootPath'], VAULTS_DIR_NAME));
     await _rootVaultDir.create(recursive: true);
 
     // init and create register poth
@@ -86,9 +87,10 @@ class LocalDataProvider implements DataProvider {
     return vaultRegisters;
   }
 
-  Future<File?> tryToImportVaultFromFile(File file)async{
+  Future<File?> tryToImportVaultFromFile(File file) async {
     try {
-      final localFile= await file.copy(concatPath(_rootVaultDir.path, file.path.split('/').last));
+      final localFile = await file
+          .copy(concatPath(_rootVaultDir.path, file.path.split('/').last));
       await _updateRegister();
       return localFile;
     } catch (e) {
@@ -118,7 +120,8 @@ class LocalDataProvider implements DataProvider {
 
   @override
   Future<Vault?> readVault(
-      EncryptAlgorithm algorithm, String key, String vaultName) async {
+      EncryptAlgorithm algorithm, String key, String vaultName,
+      {Map<String, dynamic>? data}) async {
     String? text =
         await (await getVaultFile(vaultName, false)).$1?.readAsString();
     if (text != null) {
