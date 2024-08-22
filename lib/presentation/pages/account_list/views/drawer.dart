@@ -154,9 +154,9 @@ class KiureDrawer extends StatelessWidget {
                   }),
               Option('Eliminar bóveda', const Icon(CupertinoIcons.delete),
                       () {
-                        context.pop();
-                        _showDeleteVaultConfirmDialog(context);
-                      }),
+                    context.pop();
+                    _showDeleteVaultConfirmDialog(context);
+                  }),
             ]);
           },
         ),
@@ -169,17 +169,32 @@ class KiureDrawer extends StatelessWidget {
     );
   }
 
-  ContextMenuTileMolecule _buildDrawerItem({required KyTheme kyTheme,
+  Widget _buildDrawerItem({required KyTheme kyTheme,
     required String label,
     required Widget icon,
     required Function() onTap}) {
-    return ContextMenuTileMolecule(
-        onTap: onTap,
-        label: label,
-        textStyle: TextStyle(color: kyTheme.colorOnBackground, fontSize: 16),
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-        separation: 16,
-        icon: icon);
+    return BlocBuilder<AccountListPageBloc, AccountListPageState>(
+      builder: (context, state) {
+        if(state is AccountListPageStateLoading){
+          return ContextMenuTileMolecule(
+              onTap: null,
+              label: label,
+              textStyle: TextStyle(
+                  color: kyTheme.colorOnBackgroundOpacity30, fontSize: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+              separation: 16,
+              icon: Opacity(opacity: 0.3, child: icon));
+        }
+        return ContextMenuTileMolecule(
+            onTap: onTap,
+            label: label,
+            textStyle: TextStyle(
+                color: kyTheme.colorOnBackground, fontSize: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+            separation: 16,
+            icon: icon);
+      },
+    );
   }
 
   void _showDeleteVaultConfirmDialog(BuildContext context) {

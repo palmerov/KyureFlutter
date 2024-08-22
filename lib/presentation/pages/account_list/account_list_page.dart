@@ -1,38 +1,27 @@
-import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_share/flutter_share.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kyure/config/router_config.dart';
 import 'package:kyure/data/models/vault_data.dart';
-import 'package:kyure/data/utils/dialog_utils.dart';
 import 'package:kyure/main.dart';
 import 'package:kyure/presentation/pages/account_list/account_list_bloc.dart';
 import 'package:kyure/presentation/pages/account_list/extensions/account_list_bloc_listener_extension.dart';
 import 'package:kyure/presentation/pages/account_list/extensions/account_list_dialog_extension.dart';
 import 'package:kyure/presentation/pages/account_list/views/drawer.dart';
-import 'package:kyure/presentation/widgets/atoms/any_image.dart';
 import 'package:kyure/presentation/widgets/molecules/account_group.dart';
 import 'package:kyure/presentation/widgets/molecules/account_group_list_shimmer.dart';
 import 'package:kyure/presentation/widgets/molecules/account_item.dart';
 import 'package:kyure/presentation/widgets/molecules/account_list_shimmer.dart';
 import 'package:kyure/presentation/widgets/molecules/blured_bottom_app_bar/export.dart';
-import 'package:kyure/presentation/widgets/molecules/context_menu_tile.dart';
-import 'package:kyure/presentation/widgets/molecules/image_rounded.dart';
 import 'package:kyure/presentation/widgets/molecules/search_bar.dart';
 import 'package:kyure/presentation/theme/ky_theme.dart';
 import 'package:kyure/presentation/widgets/molecules/svg_icon.dart';
 import 'package:blur/blur.dart';
 import 'package:kyure/services/service_locator.dart';
-import 'package:kyure/services/vault_service.dart';
-import 'package:kyure/utils/extensions.dart';
-import 'package:kyure/utils/extensions_classes.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
-
 import '../../../data/models/sync_result.dart';
-import '../../widgets/molecules/toast_widget.dart';
 
 class AccountListPage extends StatelessWidget {
   const AccountListPage({super.key});
@@ -50,12 +39,17 @@ class AccountListView extends StatelessWidget {
   AccountListView({super.key}) {
     _keyScaffold = GlobalKey<ScaffoldState>();
     _pageController = PageController();
+    if (isPC) {
+      Future.delayed(const Duration(milliseconds: 100), () {
+        searchBarFocusNode.requestFocus();
+      });
+    }
   }
 
   late final GlobalKey<ScaffoldState> _keyScaffold;
   late final PageController _pageController;
   final ItemScrollController _itemScrollController = ItemScrollController();
-  final FocusNode _searchBarFocusNode = FocusNode();
+  final FocusNode searchBarFocusNode = FocusNode();
 
   @override
   Widget build(BuildContext context) {
@@ -197,7 +191,7 @@ class AccountListView extends StatelessWidget {
                       builder: (context, state) {
                         return SearchBarMolecule(
                           hintText: 'Buscar',
-                          focusNode: _searchBarFocusNode,
+                          focusNode: searchBarFocusNode,
                           enabled: state is! AccountListPageStateLoading,
                           onSearchChanged: (text) => bloc.filter(text),
                           onLeadingTap: () {
@@ -258,7 +252,7 @@ class AccountListView extends StatelessWidget {
               ])),
           BlocBuilder<AccountListPageBloc, AccountListPageState>(
             builder: (context, state) {
-              if(state is AccountListPageStateLoading){
+              if (state is AccountListPageStateLoading) {
                 return const SizedBox.shrink();
               }
               return Positioned(
@@ -281,7 +275,7 @@ class AccountListView extends StatelessWidget {
                         icon: Icon(CupertinoIcons.search,
                             color: kyTheme.colorOnBackgroundOpacity60),
                         text: 'Buscar',
-                        onTap: () => _searchBarFocusNode.requestFocus()),
+                        onTap: () => searchBarFocusNode.requestFocus()),
                     BottomItemActionMolecule(
                         icon: Icon(CupertinoIcons.rectangle_on_rectangle_angled,
                             color: kyTheme.colorOnBackgroundOpacity60),

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:kyure/config/router_config.dart';
 import 'package:kyure/data/models/sync_result.dart';
 import 'package:kyure/data/utils/dialog_utils.dart';
+import 'package:kyure/main.dart';
 import 'package:kyure/presentation/pages/account_list/account_list_bloc.dart';
 import 'package:kyure/presentation/pages/account_list/account_list_page.dart';
 import 'package:kyure/presentation/theme/ky_theme.dart';
@@ -13,6 +14,9 @@ import 'package:kyure/services/version/vault_version_system_service.dart';
 extension AccountListListenerExtension on AccountListView {
   void listenToBloc(BuildContext context, AccountListPageBloc bloc,
       AccountListPageState state) async {
+    if(isPC){
+      searchBarFocusNode.requestFocus();
+    }
     final kyTheme = KyTheme.of(context)!;
     if (state.alertMessage != null) {
       context.showQuickAlertDialog(state.alertMessage!);
