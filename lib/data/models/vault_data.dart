@@ -1,6 +1,8 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:kyure/data/utils/url_utils.dart';
 
 part 'vault_data.freezed.dart';
+
 part 'vault_data.g.dart';
 
 @unfreezed
@@ -42,6 +44,7 @@ class Account with _$Account {
     @JsonKey(name: 'name') required String name,
     @JsonKey(name: 'modif_date') required DateTime modifDate,
     @JsonKey(name: 'image') required ImageSource image,
+    @Default(null) @JsonKey(name: 'url') AccountField? fieldUrl,
     @JsonKey(name: 'username') required AccountField fieldUsername,
     @JsonKey(name: 'password') required AccountField fieldPassword,
     @JsonKey(name: 'fields') List<AccountField>? fieldList,
@@ -73,11 +76,34 @@ class ImageSource with _$ImageSource {
       _$ImageSourceFromJson(json);
 }
 
+extension AccountExt on Account {
+  AccountField? getURLField() {
+    if (fieldUrl != null) return fieldUrl;
+    if (fieldList?.isNotEmpty ?? false) {
+      for (AccountField field in fieldList!) {
+        if (field.name.isNotEmpty && field.visible && isURL(field.data)) {
+          String name = field.name.trim().toLowerCase();
+          if (name.contains('url') ||
+              name.contains('link') ||
+              name.contains('web') ||
+              name.contains('uri')) {
+            fieldUrl = field;
+            return fieldUrl;
+          }
+        }
+      }
+    }
+    fieldUrl = null;
+    return null;
+  }
+}
+
 enum LifeStatus {
   active(1),
   deleted(2);
 
   const LifeStatus(this.value);
+
   final int value;
 
   factory LifeStatus.fromJson(int json) {
@@ -99,6 +125,7 @@ enum SortBy {
   modifDateDesc(-2);
 
   const SortBy(this.value);
+
   final int value;
 
   factory SortBy.fromJson(int value) {
@@ -119,6 +146,7 @@ enum ImageSourceType {
   file('file');
 
   const ImageSourceType(this.value);
+
   final String value;
 
   factory ImageSourceType.fromJson(String json) {

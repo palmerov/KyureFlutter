@@ -68,6 +68,9 @@ _$AccountImpl _$$AccountImplFromJson(Map<String, dynamic> json) =>
       name: json['name'] as String,
       modifDate: DateTime.parse(json['modif_date'] as String),
       image: ImageSource.fromJson(json['image'] as Map<String, dynamic>),
+      fieldUrl: json['url'] == null
+          ? null
+          : AccountField.fromJson(json['url'] as Map<String, dynamic>),
       fieldUsername:
           AccountField.fromJson(json['username'] as Map<String, dynamic>),
       fieldPassword:
@@ -85,6 +88,7 @@ Map<String, dynamic> _$$AccountImplToJson(_$AccountImpl instance) =>
       'name': instance.name,
       'modif_date': instance.modifDate.toIso8601String(),
       'image': instance.image,
+      'url': instance.fieldUrl,
       'username': instance.fieldUsername,
       'password': instance.fieldPassword,
       'fields': instance.fieldList,

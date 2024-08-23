@@ -103,7 +103,7 @@ class _LockView extends StatelessWidget {
                                             crossAxisAlignment:
                                                 CrossAxisAlignment.center,
                                             children: [
-                                          const SizedBox(height: 60),
+                                          const SizedBox(height: 30),
                                           Image.asset(
                                               'assets/app_icons/kiure_icon_name_dark.png',
                                               width: 60),
@@ -125,22 +125,21 @@ class _LockView extends StatelessWidget {
                                         builder: (context, state) {
                                       if (state is LockPageCreatingVaultState) {
                                         if (state.valid) {
-                                          return Expanded(
-                                              child: KeyFormOrganism(
-                                                  title:
-                                                      'Crea una llave para tu bóveda',
-                                                  obscureText: false,
-                                                  onTapEnter: (key) async {
-                                                    final error = await bloc
-                                                        .createNewVault(key);
-                                                    return error != null
-                                                        ? Text(error,
-                                                            style: TextStyle(
-                                                                color: ktheme
-                                                                    .colorError,
-                                                                fontSize: 14))
-                                                        : null;
-                                                  }));
+                                          return KeyFormOrganism(
+                                              title:
+                                                  'Crea una llave para tu bóveda',
+                                              obscureText: false,
+                                              onTapEnter: (key) async {
+                                                final error = await bloc
+                                                    .createNewVault(key);
+                                                return error != null
+                                                    ? Text(error,
+                                                        style: TextStyle(
+                                                            color: ktheme
+                                                                .colorError,
+                                                            fontSize: 14))
+                                                    : null;
+                                              });
                                         } else {
                                           return Expanded(
                                               child: VaultCreationName(
@@ -467,7 +466,7 @@ class OptionButton extends StatelessWidget {
           onPressed: onTap,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               icon,
               const SizedBox(height: 8),

@@ -1,6 +1,9 @@
+import 'dart:math';
+
 import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kyure/clipboard_utils.dart';
@@ -14,10 +17,15 @@ import 'package:kyure/services/service_locator.dart';
 
 class AccountItemMolecule extends StatelessWidget {
   const AccountItemMolecule(
-      {super.key, required this.account, this.onTap, this.onLongTap});
+      {super.key,
+      required this.account,
+      this.onTap,
+      this.onLongTap,
+      this.onImageTap});
 
   final Account account;
   final Function()? onTap;
+  final Function()? onImageTap;
   final Function()? onLongTap;
 
   copyValue(
@@ -125,6 +133,7 @@ class AccountItemMolecule extends StatelessWidget {
       onSecondaryTap: onLongTap,
       splashColor: kyTheme.colorPrimarySmooth,
       highlightColor: kyTheme.colorPrimarySmooth,
+      mouseCursor: SystemMouseCursors.basic,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 18),
         child: Row(
@@ -138,19 +147,44 @@ class AccountItemMolecule extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    account.name,
-                    style: TextStyle(
-                        color: kyTheme.colorOnBackground,
-                        fontWeight: FontWeight.w300,
-                        fontSize: 18),
-                  ),
+                  if (account.getURLField() != null)
+                    InkWell(
+                      onTap: onImageTap,
+                      borderRadius: BorderRadius.circular(8),
+                      child: RichText(
+                          text: TextSpan(
+                              text: account.name,
+                              style: TextStyle(
+                                  color: kyTheme.colorPrimary,
+                                  fontWeight: FontWeight.w300,
+                                  fontSize: 18),
+                              children: [
+                            WidgetSpan(
+                                child: Padding(
+                              padding:
+                                  const EdgeInsets.only(left: 2, bottom: 2),
+                              child: Transform.rotate(
+                                angle: -pi / 4,
+                                child: Icon(Icons.link,
+                                    size: 14, color: kyTheme.colorPrimary),
+                              ),
+                            ))
+                          ])),
+                    ),
+                  if (account.getURLField() == null)
+                    Text(account.name,
+                        style: TextStyle(
+                            color: kyTheme.colorOnBackground,
+                            fontWeight: FontWeight.w300,
+                            fontSize: 18)),
+                  const SizedBox(height: 4),
                   Text(
                     account.fieldUsername.data,
                     softWrap: false,
                     maxLines: 1,
                     overflow: TextOverflow.fade,
-                    style: TextStyle(color: kyTheme.colorHint, fontWeight: FontWeight.w300),
+                    style: TextStyle(
+                        color: kyTheme.colorHint, fontWeight: FontWeight.w300),
                   )
                 ],
               ),

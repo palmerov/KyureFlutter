@@ -580,6 +580,10 @@ mixin _$Account {
   ImageSource get image => throw _privateConstructorUsedError;
   @JsonKey(name: 'image')
   set image(ImageSource value) => throw _privateConstructorUsedError;
+  @JsonKey(name: 'url')
+  AccountField? get fieldUrl => throw _privateConstructorUsedError;
+  @JsonKey(name: 'url')
+  set fieldUrl(AccountField? value) => throw _privateConstructorUsedError;
   @JsonKey(name: 'username')
   AccountField get fieldUsername => throw _privateConstructorUsedError;
   @JsonKey(name: 'username')
@@ -611,11 +615,13 @@ abstract class $AccountCopyWith<$Res> {
       @JsonKey(name: 'name') String name,
       @JsonKey(name: 'modif_date') DateTime modifDate,
       @JsonKey(name: 'image') ImageSource image,
+      @JsonKey(name: 'url') AccountField? fieldUrl,
       @JsonKey(name: 'username') AccountField fieldUsername,
       @JsonKey(name: 'password') AccountField fieldPassword,
       @JsonKey(name: 'fields') List<AccountField>? fieldList});
 
   $ImageSourceCopyWith<$Res> get image;
+  $AccountFieldCopyWith<$Res>? get fieldUrl;
   $AccountFieldCopyWith<$Res> get fieldUsername;
   $AccountFieldCopyWith<$Res> get fieldPassword;
 }
@@ -639,6 +645,7 @@ class _$AccountCopyWithImpl<$Res, $Val extends Account>
     Object? name = null,
     Object? modifDate = null,
     Object? image = null,
+    Object? fieldUrl = freezed,
     Object? fieldUsername = null,
     Object? fieldPassword = null,
     Object? fieldList = freezed,
@@ -668,6 +675,10 @@ class _$AccountCopyWithImpl<$Res, $Val extends Account>
           ? _value.image
           : image // ignore: cast_nullable_to_non_nullable
               as ImageSource,
+      fieldUrl: freezed == fieldUrl
+          ? _value.fieldUrl
+          : fieldUrl // ignore: cast_nullable_to_non_nullable
+              as AccountField?,
       fieldUsername: null == fieldUsername
           ? _value.fieldUsername
           : fieldUsername // ignore: cast_nullable_to_non_nullable
@@ -688,6 +699,18 @@ class _$AccountCopyWithImpl<$Res, $Val extends Account>
   $ImageSourceCopyWith<$Res> get image {
     return $ImageSourceCopyWith<$Res>(_value.image, (value) {
       return _then(_value.copyWith(image: value) as $Val);
+    });
+  }
+
+  @override
+  @pragma('vm:prefer-inline')
+  $AccountFieldCopyWith<$Res>? get fieldUrl {
+    if (_value.fieldUrl == null) {
+      return null;
+    }
+
+    return $AccountFieldCopyWith<$Res>(_value.fieldUrl!, (value) {
+      return _then(_value.copyWith(fieldUrl: value) as $Val);
     });
   }
 
@@ -722,12 +745,15 @@ abstract class _$$AccountImplCopyWith<$Res> implements $AccountCopyWith<$Res> {
       @JsonKey(name: 'name') String name,
       @JsonKey(name: 'modif_date') DateTime modifDate,
       @JsonKey(name: 'image') ImageSource image,
+      @JsonKey(name: 'url') AccountField? fieldUrl,
       @JsonKey(name: 'username') AccountField fieldUsername,
       @JsonKey(name: 'password') AccountField fieldPassword,
       @JsonKey(name: 'fields') List<AccountField>? fieldList});
 
   @override
   $ImageSourceCopyWith<$Res> get image;
+  @override
+  $AccountFieldCopyWith<$Res>? get fieldUrl;
   @override
   $AccountFieldCopyWith<$Res> get fieldUsername;
   @override
@@ -751,6 +777,7 @@ class __$$AccountImplCopyWithImpl<$Res>
     Object? name = null,
     Object? modifDate = null,
     Object? image = null,
+    Object? fieldUrl = freezed,
     Object? fieldUsername = null,
     Object? fieldPassword = null,
     Object? fieldList = freezed,
@@ -780,6 +807,10 @@ class __$$AccountImplCopyWithImpl<$Res>
           ? _value.image
           : image // ignore: cast_nullable_to_non_nullable
               as ImageSource,
+      fieldUrl: freezed == fieldUrl
+          ? _value.fieldUrl
+          : fieldUrl // ignore: cast_nullable_to_non_nullable
+              as AccountField?,
       fieldUsername: null == fieldUsername
           ? _value.fieldUsername
           : fieldUsername // ignore: cast_nullable_to_non_nullable
@@ -806,6 +837,7 @@ class _$AccountImpl implements _Account {
       @JsonKey(name: 'name') required this.name,
       @JsonKey(name: 'modif_date') required this.modifDate,
       @JsonKey(name: 'image') required this.image,
+      @JsonKey(name: 'url') this.fieldUrl = null,
       @JsonKey(name: 'username') required this.fieldUsername,
       @JsonKey(name: 'password') required this.fieldPassword,
       @JsonKey(name: 'fields') this.fieldList});
@@ -832,6 +864,9 @@ class _$AccountImpl implements _Account {
   @JsonKey(name: 'image')
   ImageSource image;
   @override
+  @JsonKey(name: 'url')
+  AccountField? fieldUrl;
+  @override
   @JsonKey(name: 'username')
   AccountField fieldUsername;
   @override
@@ -843,7 +878,7 @@ class _$AccountImpl implements _Account {
 
   @override
   String toString() {
-    return 'Account(id: $id, groupId: $groupId, status: $status, name: $name, modifDate: $modifDate, image: $image, fieldUsername: $fieldUsername, fieldPassword: $fieldPassword, fieldList: $fieldList)';
+    return 'Account(id: $id, groupId: $groupId, status: $status, name: $name, modifDate: $modifDate, image: $image, fieldUrl: $fieldUrl, fieldUsername: $fieldUsername, fieldPassword: $fieldPassword, fieldList: $fieldList)';
   }
 
   @JsonKey(ignore: true)
@@ -868,6 +903,7 @@ abstract class _Account implements Account {
       @JsonKey(name: 'name') required String name,
       @JsonKey(name: 'modif_date') required DateTime modifDate,
       @JsonKey(name: 'image') required ImageSource image,
+      @JsonKey(name: 'url') AccountField? fieldUrl,
       @JsonKey(name: 'username') required AccountField fieldUsername,
       @JsonKey(name: 'password') required AccountField fieldPassword,
       @JsonKey(name: 'fields') List<AccountField>? fieldList}) = _$AccountImpl;
@@ -904,6 +940,11 @@ abstract class _Account implements Account {
   ImageSource get image;
   @JsonKey(name: 'image')
   set image(ImageSource value);
+  @override
+  @JsonKey(name: 'url')
+  AccountField? get fieldUrl;
+  @JsonKey(name: 'url')
+  set fieldUrl(AccountField? value);
   @override
   @JsonKey(name: 'username')
   AccountField get fieldUsername;

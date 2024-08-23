@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kyure/config/router_config.dart';
 import 'package:kyure/data/models/vault_data.dart';
+import 'package:kyure/data/utils/url_utils.dart';
 import 'package:kyure/main.dart';
 import 'package:kyure/presentation/pages/account_list/account_list_bloc.dart';
 import 'package:kyure/presentation/pages/account_list/extensions/account_list_bloc_listener_extension.dart';
@@ -161,6 +162,18 @@ class AccountListView extends StatelessWidget {
                                                           bloc,
                                                           context,
                                                           account),
+                                                  onImageTap: () async {
+                                                    if (!await launchAnyURL(
+                                                        account
+                                                            .getURLField()
+                                                            ?.data)) {
+                                                      openAccountDetails(
+                                                          bloc,
+                                                          context,
+                                                          account,
+                                                          false);
+                                                    }
+                                                  },
                                                 );
                                               },
                                               itemCount: pageAccounts.length,

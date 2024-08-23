@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kyure/data/models/vault_data.dart';
+import 'package:kyure/data/utils/url_utils.dart';
 import 'package:kyure/main.dart';
 import 'package:kyure/presentation/pages/account_details/bloc/account_details_bloc.dart';
 import 'package:kyure/presentation/theme/ky_theme.dart';
@@ -14,6 +15,7 @@ import 'package:kyure/presentation/widgets/molecules/svg_icon.dart';
 import 'package:kyure/presentation/widgets/organisms/account_form_data.dart';
 import 'package:kyure/presentation/widgets/organisms/global_image_selector.dart';
 import 'package:kyure/services/service_locator.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 class AccountDetailsPage extends StatelessWidget {
   const AccountDetailsPage(
@@ -92,7 +94,8 @@ class _AccountDetailsView extends StatelessWidget {
                 const EdgeInsets.only(left: 16, right: 16, bottom: 16, top: 4),
             child: Center(
               child: ConstrainedBox(
-                constraints: BoxConstraints(maxWidth: isPC ? 500 : double.infinity),
+                constraints:
+                    BoxConstraints(maxWidth: isPC ? 500 : double.infinity),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
@@ -119,7 +122,8 @@ class _AccountDetailsView extends StatelessWidget {
                                       AccountDetailsState>(
                                     bloc: bloc,
                                     buildWhen: (previous, current) =>
-                                        previous.imagePath != current.imagePath ||
+                                        previous.imagePath !=
+                                            current.imagePath ||
                                         previous.imageSourceType !=
                                             current.imageSourceType,
                                     builder: (context, state) {
@@ -134,8 +138,8 @@ class _AccountDetailsView extends StatelessWidget {
                         ),
                         const SizedBox(width: 8),
                         Expanded(
-                          child:
-                              BlocBuilder<AccountDetailsBloc, AccountDetailsState>(
+                          child: BlocBuilder<AccountDetailsBloc,
+                              AccountDetailsState>(
                             buildWhen: (previous, current) =>
                                 previous.editting != current.editting,
                             builder: (context, state) {
@@ -158,25 +162,26 @@ class _AccountDetailsView extends StatelessWidget {
                                       decoration: InputDecoration(
                                           alignLabelWithHint: true,
                                           isDense: true,
-                                          label: const Text('Nombre de la cuenta'),
+                                          label:
+                                              const Text('Nombre de la cuenta'),
                                           enabledBorder: OutlineInputBorder(
-                                              borderRadius: const BorderRadius.all(
-                                                  Radius.circular(12)),
+                                              borderRadius:
+                                                  const BorderRadius.all(
+                                                      Radius.circular(12)),
                                               borderSide: BorderSide(
                                                   color: kytheme
                                                       .colorOnBackgroundOpacity30)),
                                           focusedBorder: OutlineInputBorder(
-                                              borderRadius: const BorderRadius.all(
-                                                  Radius.circular(12)),
+                                              borderRadius:
+                                                  const BorderRadius.all(
+                                                      Radius.circular(12)),
                                               borderSide: BorderSide(
                                                   color: kytheme
                                                       .colorOnBackgroundOpacity50)),
                                           border: OutlineInputBorder(
                                               borderSide: BorderSide(
-                                                  color: kytheme
-                                                      .colorOnBackgroundOpacity30),
-                                              borderRadius:
-                                                  const BorderRadius.all(Radius.circular(12)))),
+                                                  color: kytheme.colorOnBackgroundOpacity30),
+                                              borderRadius: const BorderRadius.all(Radius.circular(12)))),
                                     ),
                                   ),
                                   const SizedBox(
@@ -203,7 +208,8 @@ class _AccountDetailsView extends StatelessWidget {
                                                   height: 44,
                                                   width: 140,
                                                   child: Row(children: [
-                                                    SvgIcon(svgAsset: e.iconName),
+                                                    SvgIcon(
+                                                        svgAsset: e.iconName),
                                                     const SizedBox(
                                                       width: 12,
                                                     ),
@@ -221,11 +227,12 @@ class _AccountDetailsView extends StatelessWidget {
                                           return AccountGroupMolecule(
                                             radius: 12,
                                             icon: SvgIcon(
-                                                svgAsset:
-                                                    state.selectedGroup.iconName),
+                                                svgAsset: state
+                                                    .selectedGroup.iconName),
                                             text: state.selectedGroup.name,
                                             color: state.editting
-                                                ? Color(state.selectedGroup.color)
+                                                ? Color(
+                                                    state.selectedGroup.color)
                                                 : kytheme.colorSeparatorLine,
                                             paddingHorizontal: 0,
                                             selected: true,
@@ -288,6 +295,30 @@ class _AccountDetailsView extends StatelessWidget {
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
+                            if (!editting && bloc.account.getURLField() != null)
+                              OutlinedButton(
+                                  onPressed: () => launchAnyURL(
+                                      bloc.account.getURLField()!.data),
+                                  style: ButtonStyle(
+                                      shape: MaterialStateProperty.all(
+                                          RoundedRectangleBorder(
+                                              side: BorderSide(
+                                                  color: kytheme
+                                                      .colorSeparatorLine,
+                                                  width: 1),
+                                              borderRadius:
+                                                  BorderRadius.circular(12)))),
+                                  child: const Padding(
+                                      padding: EdgeInsets.all(8.0),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Icon(Icons.open_in_new_rounded),
+                                          SizedBox(width: 12),
+                                          Text('Ir al sitio')
+                                        ],
+                                      ))),
                             if (editting)
                               OutlinedButton(
                                   onPressed: () {
@@ -297,20 +328,23 @@ class _AccountDetailsView extends StatelessWidget {
                                         data: '',
                                         visible: true);
                                     bloc.accountCopy!.fieldList!.add(field);
-                                    keyAccountForm.currentState?.addField(field);
+                                    keyAccountForm.currentState
+                                        ?.addField(field);
                                   },
                                   style: ButtonStyle(
                                       shape: MaterialStateProperty.all(
                                           RoundedRectangleBorder(
                                               side: BorderSide(
-                                                  color: kytheme.colorSeparatorLine,
+                                                  color: kytheme
+                                                      .colorSeparatorLine,
                                                   width: 1),
                                               borderRadius:
                                                   BorderRadius.circular(12)))),
                                   child: const Padding(
                                     padding: EdgeInsets.all(8.0),
                                     child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
                                       children: [
                                         Icon(Icons.add),
                                         SizedBox(width: 12),
@@ -339,8 +373,8 @@ class _AccountDetailsView extends StatelessWidget {
                                   }
                                 },
                                 icon: Icon(editting ? Icons.save : Icons.edit),
-                                label:
-                                    Text(editting ? 'Guardar cuenta' : 'Editar')),
+                                label: Text(
+                                    editting ? 'Guardar cuenta' : 'Editar')),
                           ],
                         );
                       },
