@@ -92,12 +92,12 @@ class AccountFormDataOrganismState extends State<AccountFormDataOrganism> {
       padding: const EdgeInsets.only(bottom: 4),
       child: AccountFieldMolecule(
         onCopy: () => serviceLocator.getKiureService().addToRecents(account),
-        editting: widget.editting,
+        editing: widget.editting,
         accountField: accountField.accountField,
-        onFieldChanged: (String name, String data, bool visible) {
+        onFieldChanged: (String name, String data, AccountFieldType type) {
           accountField.accountField.name = name;
           accountField.accountField.data = data;
-          accountField.accountField.visible = visible;
+          accountField.accountField.type = type;
         },
         onTapDelete: index > 1
             ? () {
@@ -115,7 +115,7 @@ class AccountFormDataOrganismState extends State<AccountFormDataOrganism> {
                     duration: const Duration(milliseconds: 300));
               }
             : null,
-        editableVisibility: accountField.editableVisibility,
+        isTypeEditable: accountField.editableVisibility,
       ),
     );
   }

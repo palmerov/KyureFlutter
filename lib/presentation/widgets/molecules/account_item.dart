@@ -8,35 +8,37 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kyure/clipboard_utils.dart';
 import 'package:kyure/data/models/vault_data.dart';
+import 'package:kyure/data/utils/url_utils.dart';
 import 'package:kyure/presentation/widgets/atoms/any_image.dart';
+import 'package:kyure/presentation/widgets/molecules/account_field_type_icon.dart';
 import 'package:kyure/presentation/widgets/molecules/copy_area.dart';
 import 'package:kyure/presentation/theme/ky_theme.dart';
 import 'package:kyure/presentation/widgets/molecules/image_rounded.dart';
 import 'package:kyure/presentation/widgets/molecules/toast_widget.dart';
 import 'package:kyure/services/service_locator.dart';
+import 'package:kyure/utils/extensions.dart';
 
 class AccountItemMolecule extends StatelessWidget {
   const AccountItemMolecule(
-      {super.key,
-      required this.account,
-      this.onTap,
-      this.onLongTap,
-      this.onImageTap});
+      {super.key, required this.account, this.onTap, this.onLongTap});
 
   final Account account;
   final Function()? onTap;
-  final Function()? onImageTap;
   final Function()? onLongTap;
 
   copyValue(
       BuildContext context, CopyAreaMoleculeState state, AccountField? field) {
     final kyTheme = KyTheme.of(context)!;
     if (field == null) {
-      final fields = getFieldList(true);
+      final fields = account.fieldsToCopy(false);
       if (fields.length == 1) {
         return copyValue(context, state, fields.first);
       }
-      showCopyBottomSheet(context, state, fields);
+      showValuesBottomSheet(
+          context: context,
+          fields: fields,
+          title: 'Copiar valor',
+          onTap: (field) => copyValue(context, state, field));
       return;
     }
     ClipboardUtils.copy(field.data);
@@ -55,11 +57,15 @@ class AccountItemMolecule extends StatelessWidget {
   copyPassword(
       BuildContext context, CopyAreaMoleculeState state, AccountField? field) {
     if (field == null) {
-      final fields = getFieldList(false);
+      final fields = account.fieldsToCopy(true);
       if (fields.length == 1) {
         return copyValue(context, state, fields.first);
       }
-      showCopyBottomSheet(context, state, fields);
+      showValuesBottomSheet(
+          context: context,
+          fields: fields,
+          title: 'Copiar clave',
+          onTap: (field) => copyValue(context, state, field));
       return;
     }
     final kyTheme = KyTheme.of(context)!;
@@ -75,23 +81,58 @@ class AccountItemMolecule extends StatelessWidget {
     serviceLocator.getKiureService().addToRecents(account);
   }
 
-  List<AccountField> getFieldList(bool visible) {
-    if (account.fieldList?.isNotEmpty ?? false) {
-      return [
-        visible ? account.fieldUsername : account.fieldPassword,
-        ...account.fieldList!
-            .where((element) =>
-                element.visible == visible && element.data.isNotEmpty)
-            .toList()
-      ];
-    } else {
-      return visible ? [account.fieldUsername] : [account.fieldPassword];
+  showQR(BuildContext context) {
+    final fields = account.fieldsByType(AccountFieldType.qr);
+    if (fields.isEmpty) return;
+    if (fields.length == 1) {
+      context.showQRDialog(fields.first.data, fields.first.name, true);
+      return;
     }
+    showValuesBottomSheet(
+        context: context,
+        fields: fields,
+        title: 'Mostrar QR',
+        onTap: (field) => context.showQRDialog(field.data, field.name, true));
   }
 
-  showCopyBottomSheet(BuildContext context, CopyAreaMoleculeState state,
-      List<AccountField> fields) {
-    final kyTheme = KyTheme.of(context)!;
+  launchURL(BuildContext context) {
+    final fields = account.fieldsByType(AccountFieldType.url);
+    if (fields.isEmpty) return;
+    if (fields.length == 1) {
+      launchAnyURL(fields.first.data);
+      return;
+    }
+    showValuesBottomSheet(
+        context: context,
+        fields: fields,
+        title: 'Abrir URL',
+        onTap: (field) => launchAnyURL(field.data));
+  }
+
+  showValuesBottomSheet({
+    required BuildContext context,
+    required List<AccountField> fields,
+    required Function(AccountField field) onTap,
+    required String title,
+  }) {
+    if (fields.isEmpty) {
+      showModalBottomSheet(
+          context: context,
+          builder: (context) => const Padding(
+                padding: EdgeInsets.all(16),
+                child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.info_outline, size: 48, color: Colors.grey),
+                      SizedBox(height: 16),
+                      Text('No hay valores para mostrar',
+                          style: TextStyle(fontSize: 18, color: Colors.grey),
+                          textAlign: TextAlign.center),
+                    ]),
+              ));
+      return;
+    }
     showModalBottomSheet(
         context: context,
         builder: (context) {
@@ -101,19 +142,18 @@ class AccountItemMolecule extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Text('Copiar el valor de:',
-                    style: TextStyle(fontSize: 18)),
+                Text(title, style: const TextStyle(fontSize: 18)),
                 const SizedBox(height: 16),
                 Expanded(
-                  child: ListView.builder(
-                      shrinkWrap: true,
-                      itemCount: fields.length,
-                      itemBuilder: (context, index) => FieldValueItem(
-                          field: fields[index],
-                          onTap: (field) {
-                            copyValue(context, state, field);
-                          })),
-                ),
+                    child: ListView.builder(
+                        shrinkWrap: true,
+                        itemCount: fields.length,
+                        itemBuilder: (context, index) => FieldValueItem(
+                            field: fields[index],
+                            onTap: (field) {
+                              context.pop();
+                              onTap(field);
+                            })))
               ],
             ),
           );
@@ -125,8 +165,7 @@ class AccountItemMolecule extends StatelessWidget {
     final kyTheme = KyTheme.of(context)!;
     Widget? image = AnyImage(
         source: AnyImageSource.fromJson(account.image.source.toJson()),
-        image: account.image.path);
-
+        image: account.image.data);
     return InkWell(
       onTap: onTap,
       onLongPress: onLongTap,
@@ -139,17 +178,38 @@ class AccountItemMolecule extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Hero(
-                tag: '@${account.id}:${account.name}',
-                child: ImageRounded(image: image)),
+            InkWell(
+              onTap: () => showQR(context),
+              mouseCursor: account.firstFieldByType(AccountFieldType.qr) == null
+                  ? SystemMouseCursors.basic
+                  : null,
+              child: Stack(children: [
+                Hero(
+                    tag: '@${account.id}:${account.name}',
+                    child: ImageRounded(image: image)),
+                if (account.firstFieldByType(AccountFieldType.qr) != null)
+                  Positioned(
+                      right: 2,
+                      bottom: 2,
+                      child: Container(
+                        decoration: BoxDecoration(
+                            color: kyTheme.colorBackground.withOpacity(0.6),
+                            borderRadius: BorderRadius.circular(4)),
+                        padding: const EdgeInsets.all(0.5),
+                        child: Icon(CupertinoIcons.qrcode,
+                            size: 14,
+                            color: kyTheme.colorOnBackgroundOpacity80),
+                      ))
+              ]),
+            ),
             const SizedBox(width: 10),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (account.getURLField() != null)
+                  if (account.firstFieldByType(AccountFieldType.url) != null)
                     InkWell(
-                      onTap: onImageTap,
+                      onTap: () => launchURL(context),
                       borderRadius: BorderRadius.circular(8),
                       child: RichText(
                           text: TextSpan(
@@ -171,7 +231,7 @@ class AccountItemMolecule extends StatelessWidget {
                             ))
                           ])),
                     ),
-                  if (account.getURLField() == null)
+                  if (account.firstFieldByType(AccountFieldType.url) == null)
                     Text(account.name,
                         style: TextStyle(
                             color: kyTheme.colorOnBackground,
@@ -240,25 +300,16 @@ class _FieldValueItemState extends State<FieldValueItem> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       horizontalTitleGap: 12,
       contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
-      leading: SvgPicture.asset(
-          widget.field.visible
-              ? 'assets/svg_icons/badge_24dp_E8EAED_FILL0_wght300_GRAD0_opsz24.svg'
-              : 'assets/svg_icons/key.svg',
-          height: 30,
-          width: 30,
-          colorFilter: ColorFilter.mode(
-              widget.field.visible
-                  ? kyTheme.colorAccount
-                  : kyTheme.colorPassword,
-              BlendMode.srcIn)),
+      leading:
+          AccountFieldIconButtonMolecule(type: widget.field.type, size: 28),
       title: Text(widget.field.name,
           style: const TextStyle(fontWeight: FontWeight.w400)),
       subtitle: Text(
-          widget.field.visible || visible
+          !widget.field.isPassword || visible
               ? widget.field.data
               : widget.field.data.replaceAll(RegExp(r'.'), '*'),
           style: const TextStyle(fontWeight: FontWeight.w300)),
-      trailing: !widget.field.visible
+      trailing: widget.field.isPassword
           ? IconButton(
               icon: Icon(!visible
                   ? Icons.visibility_off_outlined

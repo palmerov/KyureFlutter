@@ -84,17 +84,25 @@ Detalles del error ${exception.toString()}."""));
         vaultNames: vaultService.localVaultNames, selectedVault: vaultName));
   }
 
-  createVault() {
-    emit(LockPageCreatingVaultState(message: null, valid: false));
+  createVault(bool createToSync) {
+    emit(LockPageCreatingVaultState(
+        message: null, valid: false, createToSync: createToSync));
   }
 
   validateName(String vaultName) {
     vaultNameCreated = vaultName;
-    if (vaultService.existVaultInLocal(vaultName)) {
-      emit(LockPageCreatingVaultState(
-          message: 'Ya existe una bóveda con ese nombre', valid: false));
-    } else {
-      emit(LockPageCreatingVaultState(message: null, valid: true));
+    if (state is LockPageCreatingVaultState) {
+      if (vaultService.existVaultInLocal(vaultName)) {
+        emit(LockPageCreatingVaultState(
+            message: 'Ya existe una bóveda con ese nombre en este dispositivo.',
+            valid: false,
+            createToSync: (state as LockPageCreatingVaultState).createToSync));
+      } else {
+        emit(LockPageCreatingVaultState(
+            message: null,
+            valid: true,
+            createToSync: (state as LockPageCreatingVaultState).createToSync));
+      }
     }
   }
 
@@ -136,9 +144,11 @@ class LockPageLoginState extends LockPageState {
 }
 
 class LockPageCreatingVaultState extends LockPageState {
-  LockPageCreatingVaultState({required this.message, required this.valid})
+  LockPageCreatingVaultState(
+      {required this.message, required this.valid, required this.createToSync})
       : super(vaultNames: const []);
   final String? message;
+  final bool createToSync;
   final bool valid;
 
   @override

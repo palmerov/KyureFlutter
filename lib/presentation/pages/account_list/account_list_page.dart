@@ -131,53 +131,18 @@ class AccountListView extends StatelessWidget {
                                         List<Account> pageAccounts =
                                             bloc.getAccountsFromGroupIndex(
                                                 groupIndex);
-                                        return RefreshIndicator(
-                                            onRefresh: () async {
-                                              syncVault(context);
-                                            },
-                                            edgeOffset: 120,
-                                            strokeWidth: 2,
-                                            triggerMode:
-                                                RefreshIndicatorTriggerMode
-                                                    .onEdge,
-                                            child: ListView.builder(
-                                              physics:
-                                                  const BouncingScrollPhysics(),
-                                              padding: const EdgeInsets.only(
-                                                  top: 100, bottom: 60),
-                                              itemBuilder:
-                                                  (context, accountIndex) {
-                                                Account account =
-                                                    pageAccounts[accountIndex];
-                                                return AccountItemMolecule(
-                                                  account: account,
-                                                  onTap: () =>
-                                                      openAccountDetails(
-                                                          bloc,
-                                                          context,
-                                                          account,
-                                                          false),
-                                                  onLongTap: () =>
-                                                      showAccountContextMenuDialog(
-                                                          bloc,
-                                                          context,
-                                                          account),
-                                                  onImageTap: () async {
-                                                    if (!await launchAnyURL(
-                                                        account
-                                                            .getURLField()
-                                                            ?.data)) {
-                                                      openAccountDetails(
-                                                          bloc,
-                                                          context,
-                                                          account,
-                                                          false);
-                                                    }
-                                                  },
-                                                );
-                                              },
-                                              itemCount: pageAccounts.length,
-                                            ));
+                                        if (pageAccounts.isEmpty) {
+                                          return const AccountListEmptyViewPage();
+                                        } else {
+                                          return AccountListViewPage(
+                                              pageAccounts: pageAccounts,
+                                              onTapAccount: (account) =>
+                                                  openAccountDetails(bloc,
+                                                      context, account, false),
+                                              onLongTapAccount: (account) =>
+                                                  showAccountContextMenuDialog(
+                                                      bloc, context, account));
+                                        }
                                       })))));
                 }
               }),
@@ -324,20 +289,95 @@ class AccountListView extends StatelessWidget {
   }
 
   openAccountDetails(AccountListPageBloc bloc, BuildContext context,
-      Account account, bool editting) async {
+      Account account, bool editing) async {
     final updated = await context.pushNamed(KyRoutes.accountEditor.name,
-        queryParameters: {'id': '${account.id}', 'editting': '$editting'});
+        queryParameters: {'id': '${account.id}', 'editing': '$editing'});
     if (updated != null) {
       bloc.reload(true);
     }
   }
+}
 
-  void syncVault(BuildContext context,
-      [KeyConflictResolver? keyConflictResolver]) async {
-    if (serviceLocator.getKiureService().remoteSettings != null) {
-      context.read<AccountListPageBloc>().syncVault(keyConflictResolver);
-    } else {
-      context.pushNamed(KyRoutes.cloudSettings.name);
-    }
+class AccountListEmptyViewPage extends StatelessWidget {
+  const AccountListEmptyViewPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final kyTheme = KyTheme.of(context)!;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Image.asset(
+              'assets/images/empty_box_light.png',
+              width: 100),
+          const SizedBox(height: 8),
+          Text('El baúl está vacío.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                  color: kyTheme.colorOnBackgroundOpacity80, fontSize: 16)),
+          const SizedBox(height: 20),
+          Text('¿Tienes cuentas en la nube?\nDescárgalas ahora:',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                  color: kyTheme.colorOnBackgroundOpacity80, fontSize: 16)),
+          const SizedBox(height: 4),
+          TextButton(
+              onPressed: () =>
+                syncVault(context),
+              child: const Row(mainAxisSize: MainAxisSize.min, children: [
+                Icon(CupertinoIcons.cloud),
+                SizedBox(width: 10),
+                Text('Sincronizar con la nube'),
+              ])),
+        ],
+      ),
+    );
+  }
+}
+
+class AccountListViewPage extends StatelessWidget {
+  final List<Account> pageAccounts;
+  final Function(Account account) onTapAccount, onLongTapAccount;
+
+  const AccountListViewPage({
+    super.key,
+    required this.pageAccounts,
+    required this.onTapAccount,
+    required this.onLongTapAccount,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return RefreshIndicator(
+        onRefresh: () async {
+          syncVault(context);
+        },
+        edgeOffset: 120,
+        strokeWidth: 2,
+        triggerMode: RefreshIndicatorTriggerMode.onEdge,
+        child: ListView.builder(
+          physics: const BouncingScrollPhysics(),
+          padding: const EdgeInsets.only(top: 100, bottom: 60),
+          itemBuilder: (context, accountIndex) {
+            Account account = pageAccounts[accountIndex];
+            return AccountItemMolecule(
+                account: account,
+                onTap: () => onTapAccount(account),
+                onLongTap: () => onLongTapAccount(account));
+          },
+          itemCount: pageAccounts.length,
+        ));
+  }
+}
+
+void syncVault(BuildContext context,
+    [KeyConflictResolver? keyConflictResolver]) async {
+  if (serviceLocator.getKiureService().remoteSettings != null) {
+    context.read<AccountListPageBloc>().syncVault(keyConflictResolver);
+  } else {
+    context.pushNamed(KyRoutes.cloudSettings.name);
   }
 }

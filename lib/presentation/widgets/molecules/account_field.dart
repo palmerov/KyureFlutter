@@ -1,48 +1,57 @@
 import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
 import 'package:kyure/clipboard_utils.dart';
 import 'package:kyure/data/models/vault_data.dart';
+import 'package:kyure/data/utils/url_utils.dart';
 import 'package:kyure/main.dart';
 import 'package:kyure/presentation/theme/ky_theme.dart';
+import 'package:kyure/presentation/widgets/molecules/account_field_type_icon.dart';
+import 'package:kyure/presentation/widgets/molecules/autocomplete_password_generator.dart';
 import 'package:kyure/presentation/widgets/molecules/copy_area.dart';
 import 'package:kyure/presentation/widgets/molecules/toast_widget.dart';
+import 'package:kyure/utils/extensions.dart';
+import 'package:kyure/utils/extensions_classes.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 import 'package:random_password_generator/random_password_generator.dart';
 
 class AccountFieldMolecule extends StatefulWidget {
   const AccountFieldMolecule(
       {super.key,
-      required this.editting,
+      required this.editing,
       required this.accountField,
       this.nameEditable = true,
       this.onTapDelete,
       this.onFieldChanged,
       required this.onCopy,
-      required this.editableVisibility});
+      required this.isTypeEditable});
 
   final Function() onCopy;
-  final bool editting;
+  final bool editing;
   final bool nameEditable;
   final AccountField accountField;
-  final bool editableVisibility;
+  final bool isTypeEditable;
   final Function()? onTapDelete;
-  final Function(String name, String data, bool visible)? onFieldChanged;
+  final Function(String name, String data, AccountFieldType type)?
+      onFieldChanged;
 
   @override
   State<AccountFieldMolecule> createState() => _AccountFieldMoleculeState();
 }
 
 class _AccountFieldMoleculeState extends State<AccountFieldMolecule> {
-  bool visible = true;
+  bool obscureText = false;
   TextEditingController? controllerField;
   TextEditingController? controllerLabel;
-  late RandomPasswordGenerator passwordGenerator;
+  AccountFieldType type = AccountFieldType.text;
 
   @override
   void initState() {
     super.initState();
-    visible = widget.accountField.visible;
-    passwordGenerator = RandomPasswordGenerator();
+    obscureText = widget.accountField.isPassword;
+    type = widget.accountField.type;
   }
 
   void _copyData(BuildContext context) {
@@ -61,203 +70,277 @@ class _AccountFieldMoleculeState extends State<AccountFieldMolecule> {
   AccountField getEditingData() {
     String data = controllerField!.text;
     String name = controllerLabel!.text;
-    return AccountField(
-        name: name, data: data, visible: widget.accountField.visible);
+    return AccountField(name: name, data: data, type: type);
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final kyTheme = KyTheme.of(context)!;
+  Widget getFieldWidget(BuildContext context, KyTheme kyTheme) {
     Widget field;
-    if (widget.editting && !visible) {
-      controllerLabel = TextEditingController(text: widget.accountField.name);
-      controllerLabel!.text = widget.accountField.name;
-      field = Autocomplete<String>(
-        optionsViewBuilder: (context, Function(String) onSelected, options) {
-          if (options.isEmpty) return const SizedBox.shrink();
-          return Align(
-              alignment: Alignment.topLeft,
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 280),
-                child: SizedBox(
-                  width: 280,
-                  child: Material(
-                    child: InkWell(
-                      onTap: () => onSelected(options.first),
-                      borderRadius: BorderRadius.circular(12),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Row(
-                          children: [
-                            Icon(CupertinoIcons.lock,
-                                size: 20, color: kyTheme.colorPassword),
-                            const SizedBox(width: 8),
-                            Text(options.first,
-                                style: TextStyle(
-                                    fontSize: 16,
-                                    color: kyTheme.colorPassword)),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ));
-        },
+    if (widget.editing && widget.accountField.isPassword) {
+      field = AutocompletePasswordGenerator(
         fieldViewBuilder:
             (context, textEditingController, focusNode, onFieldSubmitted) {
           controllerField = textEditingController;
           controllerField!.text = widget.accountField.data;
           return _buildTextField(kyTheme, focusNode);
         },
-        optionsBuilder: (textEditingValue) {
-          return textEditingValue.text.isEmpty
-              ? ['Generar contraseña segura']
-              : [];
+        onPasswordGenerated: (password) {
+          controllerField!.text = password;
+          widget.onFieldChanged?.call(controllerLabel!.text, password, type);
         },
-        onSelected: (option) {
-          final text = passwordGenerator.randomPassword(
-              letters: true,
-              numbers: true,
-              specialChar: true,
-              uppercase: true,
-              passwordLength: 16);
-          controllerField!.text = text;
-          widget.onFieldChanged?.call(controllerLabel!.text, text, visible);
-        },
+        key: UniqueKey(),
       );
     } else {
       controllerField = TextEditingController(text: widget.accountField.data);
       controllerField!.text = widget.accountField.data;
-      controllerLabel = TextEditingController(text: widget.accountField.name);
-      controllerLabel!.text = widget.accountField.name;
       field = _buildTextField(kyTheme, null);
     }
+    return field;
+  }
 
+  @override
+  Widget build(BuildContext context) {
+    final kyTheme = KyTheme.of(context)!;
+    controllerLabel = TextEditingController(text: widget.accountField.name);
+    controllerLabel!.text = widget.accountField.name;
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         Padding(
           padding: const EdgeInsets.only(left: 8),
           child: TextFormField(
-            onChanged: (value) => widget.onFieldChanged?.call(
-                controllerLabel!.text,
-                controllerField!.text,
-                widget.accountField.visible),
-            controller: controllerLabel,
-            textAlignVertical: TextAlignVertical.center,
-            readOnly: !widget.editting,
-            style: TextStyle(fontSize: 14, color: kyTheme.colorHint),
-            decoration: InputDecoration(
-                hintText: 'Field name',
-                border: const UnderlineInputBorder(borderSide: BorderSide.none),
-                contentPadding:
-                    isPC ? const EdgeInsets.all(4) : const EdgeInsets.all(1),
-                isDense: true),
-          ),
+              onChanged: (value) => widget.onFieldChanged?.call(
+                  controllerLabel!.text,
+                  controllerField!.text,
+                  widget.accountField.type),
+              controller: controllerLabel,
+              textAlignVertical: TextAlignVertical.center,
+              readOnly: !widget.editing,
+              style: TextStyle(fontSize: 14, color: kyTheme.colorHint),
+              decoration: InputDecoration(
+                  hintText: 'Field name',
+                  border:
+                      const UnderlineInputBorder(borderSide: BorderSide.none),
+                  contentPadding:
+                      isPC ? const EdgeInsets.all(4) : const EdgeInsets.all(1),
+                  isDense: true)),
         ),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(child: field),
-            if (!widget.editting || widget.onTapDelete != null)
+            Expanded(child: getFieldWidget(context, kyTheme)),
+            if (!widget.editing || widget.onTapDelete != null)
               Padding(
-                padding: const EdgeInsets.only(left: 8),
-                child: CopyAreaMolecule(
-                  icon:
-                      Icon(widget.editting ? CupertinoIcons.delete : Icons.copy,
-                          size: 20,
-                          color: widget.editting
-                              ? widget.onTapDelete != null
-                                  ? Colors.red
-                                  : kyTheme.colorHint
-                              : kyTheme.colorPassword),
-                  animate: !widget.editting,
-                  padding: const EdgeInsets.all(8),
-                  color: kyTheme.colorPassword,
-                  onTap: widget.editting && widget.onTapDelete == null
-                      ? null
-                      : (_, __) {
-                          if (!widget.editting) {
-                            _copyData(context);
-                          } else {
-                            widget.onTapDelete!();
-                          }
-                        },
-                ),
-              )
+                  padding: const EdgeInsets.only(left: 8),
+                  child: CopyAreaMolecule(
+                    icon: Icon(
+                        widget.editing ? CupertinoIcons.delete : Icons.copy,
+                        size: 20,
+                        color: widget.editing
+                            ? widget.onTapDelete != null
+                                ? Colors.red
+                                : kyTheme.colorHint
+                            : kyTheme.colorPassword),
+                    animate: !widget.editing,
+                    padding: const EdgeInsets.all(8),
+                    color: kyTheme.colorPassword,
+                    onTap: widget.editing && widget.onTapDelete == null
+                        ? null
+                        : (_, __) {
+                            if (!widget.editing) {
+                              _copyData(context);
+                            } else {
+                              widget.onTapDelete!();
+                            }
+                          },
+                  ))
           ],
         )
       ],
     );
   }
 
-  TextFormField _buildTextField(KyTheme kyTheme, FocusNode? focusNode) {
+  TextInputType getTextInputType(AccountFieldType type) {
+    switch (type) {
+      case AccountFieldType.text:
+        return TextInputType.text;
+      case AccountFieldType.password:
+        return TextInputType.visiblePassword;
+      case AccountFieldType.url:
+        return TextInputType.url;
+      case AccountFieldType.phone:
+        return TextInputType.phone;
+      case AccountFieldType.email:
+        return TextInputType.emailAddress;
+      case AccountFieldType.number:
+        return TextInputType.number;
+      case AccountFieldType.qr:
+        return TextInputType.multiline;
+    }
+  }
+
+  updateObscureText() {
+    obscureText = type == AccountFieldType.password && !widget.editing;
+  }
+
+  void _showAccountFieldTypeChooserDialog(BuildContext context) {
+    context.showOptionListDialog(
+        'Tipo de campo', const Icon(CupertinoIcons.textbox), [
+      Option('Texto', const Icon(CupertinoIcons.textformat, size: 20), () {
+        updateObscureText();
+        setState(() => type = AccountFieldType.text);
+        widget.onFieldChanged
+            ?.call(controllerLabel!.text, controllerField!.text, type);
+        context.pop();
+      }),
+      Option('Contraseña', const Icon(CupertinoIcons.lock, size: 20), () {
+        updateObscureText();
+        setState(() => type = AccountFieldType.password);
+        widget.onFieldChanged
+            ?.call(controllerLabel!.text, controllerField!.text, type);
+        context.pop();
+      }),
+      Option('Email', const Icon(CupertinoIcons.mail, size: 20), () {
+        updateObscureText();
+        setState(() => type = AccountFieldType.email);
+        widget.onFieldChanged
+            ?.call(controllerLabel!.text, controllerField!.text, type);
+        context.pop();
+      }),
+      Option('Link', const Icon(CupertinoIcons.link, size: 20), () {
+        updateObscureText();
+        setState(() => type = AccountFieldType.url);
+        widget.onFieldChanged
+            ?.call(controllerLabel!.text, controllerField!.text, type);
+        context.pop();
+      }),
+      Option('Teléfono', const Icon(CupertinoIcons.phone, size: 20), () {
+        updateObscureText();
+        setState(() => type = AccountFieldType.phone);
+        widget.onFieldChanged
+            ?.call(controllerLabel!.text, controllerField!.text, type);
+        context.pop();
+      }),
+      Option('Número', const Icon(CupertinoIcons.number, size: 20), () {
+        updateObscureText();
+        setState(() => type = AccountFieldType.number);
+        widget.onFieldChanged
+            ?.call(controllerLabel!.text, controllerField!.text, type);
+        context.pop();
+      }),
+      Option('QR', const Icon(CupertinoIcons.qrcode, size: 20), () {
+        updateObscureText();
+        setState(() => type = AccountFieldType.qr);
+        widget.onFieldChanged
+            ?.call(controllerLabel!.text, controllerField!.text, type);
+        context.pop();
+      })
+    ]);
+  }
+
+  Widget? _buildSuffixIcon(BuildContext context, KyTheme kyTheme) {
+    if (widget.editing) {
+      if (widget.isTypeEditable) {
+        return AccountFieldIconButtonMolecule(
+            type: type,
+            color: kyTheme.colorOnBackgroundOpacity60,
+            onPressed: () => _showAccountFieldTypeChooserDialog(context));
+      }
+      return null;
+    } else {
+      switch (type) {
+        case AccountFieldType.password:
+          return AccountFieldIconButtonMolecule(
+              color: kyTheme.colorOnBackgroundOpacity60,
+              onPressed: () => setState(() {
+                    obscureText = !obscureText;
+                    if (widget.editing) {
+                      widget.onFieldChanged?.call(
+                          controllerLabel!.text, controllerField!.text, type);
+                    }
+                  }),
+              icon:
+                  obscureText ? CupertinoIcons.eye : CupertinoIcons.eye_slash);
+        case AccountFieldType.url:
+          return AccountFieldIconButtonMolecule(
+              color: kyTheme.colorOnBackgroundOpacity60,
+              icon: Icons.open_in_new_rounded,
+              onPressed: () => launchAnyURL(widget.accountField.data));
+        case AccountFieldType.qr:
+          return null;
+        default:
+          return AccountFieldIconButtonMolecule(
+              color: kyTheme.colorOnBackgroundOpacity60,
+              icon: CupertinoIcons.qrcode,
+              onPressed: () => context.showQRDialog(
+                  widget.accountField.data, widget.accountField.name));
+      }
+    }
+  }
+
+  int getMaxLineCount(){
+    if(widget.accountField.isPassword || obscureText){
+      return 1;
+    }
+    switch(type){
+      case AccountFieldType.url:
+      case AccountFieldType.phone:
+      case AccountFieldType.email:
+        return 1;
+      case AccountFieldType.password:
+        return 1;
+      case AccountFieldType.text:
+      case AccountFieldType.number:
+      case AccountFieldType.qr:
+        return 100;
+    }
+  }
+
+  Widget _buildTextField(KyTheme kyTheme, FocusNode? focusNode) {
+    if (type == AccountFieldType.qr && !widget.editing) {
+      return Container(
+        decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: kyTheme.colorOnBackgroundOpacity30),
+            color: Colors.white),
+        padding: const EdgeInsets.all(4),
+        child: QrImageView(data: widget.accountField.data, size: 200),
+      );
+    }
     return TextFormField(
       focusNode: focusNode,
-      onChanged: (value) => widget.onFieldChanged?.call(controllerLabel!.text,
-          controllerField!.text, widget.accountField.visible),
-      readOnly: !widget.editting,
+      onChanged: (value) => widget.onFieldChanged
+          ?.call(controllerLabel!.text, controllerField!.text, type),
+      readOnly: !widget.editing,
       controller: controllerField,
       minLines: 1,
-      maxLines: widget.accountField.visible ? 100 : 1,
+      maxLines: getMaxLineCount(),
       style: TextStyle(
-          color: widget.editting
+          color: widget.editing
               ? kyTheme.colorOnBackground
               : kyTheme.colorOnBackgroundOpacity80),
-      keyboardType: widget.accountField.visible
-          ? TextInputType.text
-          : TextInputType.visiblePassword,
-      obscureText: !visible && !widget.editting,
+      keyboardType: getTextInputType(type),
+      obscureText: obscureText && !widget.editing,
       decoration: InputDecoration(
-        suffixIcon: widget.editting && !widget.editableVisibility
-            ? const SizedBox.shrink()
-            : !widget.accountField.visible || widget.editting
-                ? InkWell(
-                    customBorder: const CircleBorder(),
-                    onTap: () {
-                      setState(() {
-                        visible = !visible;
-                        if (widget.editting) {
-                          widget.onFieldChanged?.call(controllerLabel!.text,
-                              controllerField!.text, visible);
-                        }
-                      });
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.only(right: 4),
-                      child: Icon(
-                          size: 20,
-                          widget.editting
-                              ? (visible
-                                  ? CupertinoIcons.lock_open
-                                  : CupertinoIcons.lock)
-                              : (visible
-                                  ? CupertinoIcons.eye
-                                  : CupertinoIcons.eye_slash),
-                          color: kyTheme.colorOnBackgroundOpacity60),
-                    ),
-                  )
-                : null,
+        suffixIcon: _buildSuffixIcon(context, kyTheme),
         contentPadding: const EdgeInsets.all(14),
         focusedBorder: OutlineInputBorder(
             borderSide: BorderSide(
                 width: 1.5,
-                color: widget.editting
+                color: widget.editing
                     ? kyTheme.colorPrimary
                     : kyTheme.colorSeparatorLine),
             borderRadius: const BorderRadius.all(Radius.circular(12)),
             gapPadding: 4),
         enabledBorder: OutlineInputBorder(
             borderSide: BorderSide(
-                color: widget.editting
+                color: widget.editing
                     ? kyTheme.colorOnBackgroundOpacity50
                     : kyTheme.colorSeparatorLine),
             borderRadius: const BorderRadius.all(Radius.circular(12)),
             gapPadding: 4),
         border: OutlineInputBorder(
             borderSide: BorderSide(
-                color: widget.editting
+                color: widget.editing
                     ? kyTheme.colorOnBackgroundOpacity50
                     : kyTheme.colorSeparatorLine),
             borderRadius: const BorderRadius.all(Radius.circular(12)),

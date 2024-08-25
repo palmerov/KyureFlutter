@@ -70,7 +70,7 @@ extension AccountListViewDialogExtension on AccountListView{
             radius: 8,
             image: AnyImage(
                 source: AnyImageSource.fromJson(account.image.source.toJson()),
-                image: account.image.path),
+                image: account.image.data),
             size: 24),
         [
           Option('Editar', const Icon(Icons.edit), () {

@@ -9,6 +9,7 @@ import 'package:kyure/main.dart';
 import 'package:kyure/presentation/pages/account_details/bloc/account_details_bloc.dart';
 import 'package:kyure/presentation/theme/ky_theme.dart';
 import 'package:kyure/presentation/widgets/atoms/any_image.dart';
+import 'package:kyure/presentation/widgets/atoms/page_body_constraint.dart';
 import 'package:kyure/presentation/widgets/molecules/account_group.dart';
 import 'package:kyure/presentation/widgets/molecules/image_rounded.dart';
 import 'package:kyure/presentation/widgets/molecules/svg_icon.dart';
@@ -28,10 +29,8 @@ class AccountDetailsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) =>
-          AccountDetailsBloc(account: account, editting: editing),
-      child: _AccountDetailsView(
-        account: account,
-      ),
+          AccountDetailsBloc(account: account, editing: editing),
+      child: _AccountDetailsView(account: account),
     );
   }
 }
@@ -93,9 +92,7 @@ class _AccountDetailsView extends StatelessWidget {
             padding:
                 const EdgeInsets.only(left: 16, right: 16, bottom: 16, top: 4),
             child: Center(
-              child: ConstrainedBox(
-                constraints:
-                    BoxConstraints(maxWidth: isPC ? 500 : double.infinity),
+              child: PageBodyConstraintAtom(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
@@ -109,7 +106,7 @@ class _AccountDetailsView extends StatelessWidget {
                               borderRadius: BorderRadius.circular(12)),
                           child: InkWell(
                             onTap: () {
-                              if (bloc.state.editting) {
+                              if (bloc.state.editing) {
                                 _showImageSelectorBottomSheet(bloc, context);
                               }
                             },
@@ -141,7 +138,7 @@ class _AccountDetailsView extends StatelessWidget {
                           child: BlocBuilder<AccountDetailsBloc,
                               AccountDetailsState>(
                             buildWhen: (previous, current) =>
-                                previous.editting != current.editting,
+                                previous.editing != current.editing,
                             builder: (context, state) {
                               return Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
@@ -152,7 +149,7 @@ class _AccountDetailsView extends StatelessWidget {
                                     child: TextFormField(
                                       key: keyNameField,
                                       controller: tecName,
-                                      readOnly: !state.editting,
+                                      readOnly: !state.editing,
                                       validator: (value) {
                                         if (value == null || value.isEmpty) {
                                           return 'El nombre no puede estar vacío';
@@ -190,7 +187,7 @@ class _AccountDetailsView extends StatelessWidget {
                                   SizedBox(
                                     height: 40,
                                     child: PopupMenuButton<AccountGroup>(
-                                      enabled: state.editting,
+                                      enabled: state.editing,
                                       onSelected: (value) =>
                                           bloc.selectGroup(value),
                                       offset: const Offset(0, 36),
@@ -230,7 +227,7 @@ class _AccountDetailsView extends StatelessWidget {
                                                 svgAsset: state
                                                     .selectedGroup.iconName),
                                             text: state.selectedGroup.name,
-                                            color: state.editting
+                                            color: state.editing
                                                 ? Color(
                                                     state.selectedGroup.color)
                                                 : kytheme.colorSeparatorLine,
@@ -253,7 +250,7 @@ class _AccountDetailsView extends StatelessWidget {
                     ),
                     BlocBuilder<AccountDetailsBloc, AccountDetailsState>(
                       buildWhen: (previous, current) =>
-                          previous.editting != current.editting,
+                          previous.editing != current.editing,
                       builder: (context, state) {
                         return Expanded(
                             child: AccountFormDataOrganism(
@@ -263,14 +260,12 @@ class _AccountDetailsView extends StatelessWidget {
                             bloc.accountCopy!.fieldList!.removeAt(index);
                           },
                           account:
-                              state.editting ? bloc.accountCopy! : bloc.account,
-                          editting: state.editting,
+                              state.editing ? bloc.accountCopy! : bloc.account,
+                          editting: state.editing,
                         ));
                       },
                     ),
-                    const SizedBox(
-                      height: 8,
-                    ),
+                    const SizedBox(height: 8),
                     BlocConsumer<AccountDetailsBloc, AccountDetailsState>(
                       listenWhen: (previous, current) =>
                           current is ErrorSavingState,
@@ -289,16 +284,19 @@ class _AccountDetailsView extends StatelessWidget {
                         );
                       },
                       buildWhen: (previous, current) =>
-                          previous.editting != current.editting,
+                          previous.editing != current.editing,
                       builder: (context, state) {
-                        final editting = state.editting;
+                        final editting = state.editing;
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            if (!editting && bloc.account.getURLField() != null)
+                            if (!editting &&
+                                bloc.account.firstFieldByType(AccountFieldType.url) !=
+                                    null)
                               OutlinedButton(
-                                  onPressed: () => launchAnyURL(
-                                      bloc.account.getURLField()!.data),
+                                  onPressed: () => launchAnyURL(bloc.account
+                                      .firstFieldByType(AccountFieldType.url)
+                                      ?.data),
                                   style: ButtonStyle(
                                       shape: MaterialStateProperty.all(
                                           RoundedRectangleBorder(
@@ -311,22 +309,18 @@ class _AccountDetailsView extends StatelessWidget {
                                   child: const Padding(
                                       padding: EdgeInsets.all(8.0),
                                       child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Icon(Icons.open_in_new_rounded),
-                                          SizedBox(width: 12),
-                                          Text('Ir al sitio')
-                                        ],
-                                      ))),
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            Icon(Icons.open_in_new_rounded),
+                                            SizedBox(width: 12),
+                                            Text('Ir al sitio')
+                                          ]))),
                             if (editting)
                               OutlinedButton(
                                   onPressed: () {
                                     bloc.accountCopy!.fieldList ??= [];
                                     final field = AccountField(
-                                        name: 'Nombre del campo',
-                                        data: '',
-                                        visible: true);
+                                        name: 'Nombre del campo', data: '');
                                     bloc.accountCopy!.fieldList!.add(field);
                                     keyAccountForm.currentState
                                         ?.addField(field);

@@ -33,7 +33,12 @@ class AccountListPageBloc extends Cubit<AccountListPageState> {
       List<Account> accounts = vaultService.accounts!
           .where((account) => (filter.apply(account.name) ||
               filter.apply(account.fieldUsername.data) ||
-              filter.apply(account.fieldPassword.data)))
+              filter.apply(account.fieldUsername.name) ||
+              filter.apply(account.fieldPassword.data) ||
+              filter.apply(account.fieldPassword.name) ||
+              (account.fieldList?.any((field) =>
+                      filter.apply(field.data) || filter.apply(field.name)) ??
+                  false)))
           .toList();
       if (accounts.length != state.accounts.length) {
         AccountGroup searchGroup = vaultService.groups![0].copyWith(

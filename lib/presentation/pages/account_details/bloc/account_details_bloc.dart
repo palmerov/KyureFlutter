@@ -9,23 +9,23 @@ class AccountDetailsBloc extends Cubit<AccountDetailsState> {
   Account? accountCopy;
   bool isNewAccount;
 
-  AccountDetailsBloc({required this.account, required bool editting})
+  AccountDetailsBloc({required this.account, required bool editing})
       : isNewAccount = account.id < 0,
         super(AccountDetailsInitial(
-            editting: editting,
-            imagePath: account.image.path,
+            editing: editing,
+            imagePath: account.image.data,
             imageSourceType: account.image.source,
             selectedGroup: serviceLocator
                     .getVaultService()
                     .findGroupById(account.groupId) ??
                 GROUP_ALL)) {
-    if (editting) {
+    if (editing) {
       edit();
     }
   }
 
   void selectImage(String image, ImageSourceType source) {
-    accountCopy!.image = ImageSource(path: image, source: source);
+    accountCopy!.image = ImageSource(data: image, source: source);
     emit(state.copyWith(imagePath: image, imageSourceType: source));
   }
 
@@ -50,16 +50,16 @@ class AccountDetailsBloc extends Cubit<AccountDetailsState> {
         fieldPassword: AccountField(
             name: account.fieldPassword.name,
             data: account.fieldPassword.data,
-            visible: account.fieldPassword.visible),
+            type: account.fieldPassword.type),
         fieldUsername: AccountField(
             name: account.fieldUsername.name,
             data: account.fieldUsername.data,
-            visible: account.fieldUsername.visible),
+            type: account.fieldUsername.type),
         fieldList: account.fieldList
             ?.map((e) =>
-                AccountField(name: e.name, data: e.data, visible: e.visible))
+                AccountField(name: e.name, data: e.data, type: e.type))
             .toList());
-    emit(state.copyWith(editting: true));
+    emit(state.copyWith(editing: true));
   }
 
   save(String name, List<AccountField> fields) async {
@@ -77,7 +77,7 @@ class AccountDetailsBloc extends Cubit<AccountDetailsState> {
             dateTime: DateTime.now(),
             error:
                 'Ya tienes una cuenta llamada "${accountCopy!.name}" y con nombre de usuario "${accountCopy!.fieldUsername.data}". Debes cambiar alguno de los dos campos.',
-            editting: true,
+            editing: true,
             imagePath: state.imagePath,
             imageSourceType: state.imageSourceType,
             selectedGroup: state.selectedGroup));
@@ -92,44 +92,44 @@ class AccountDetailsBloc extends Cubit<AccountDetailsState> {
       account.fieldUsername = accountCopy!.fieldUsername;
       account.fieldList = accountCopy!.fieldList;
     }
-    emit(state.copyWith(editting: false));
+    emit(state.copyWith(editing: false));
   }
 }
 
 class AccountDetailsState extends Equatable {
   const AccountDetailsState({
     required this.selectedGroup,
-    required this.editting,
+    required this.editing,
     required this.imagePath,
     required this.imageSourceType,
   });
 
   final AccountGroup selectedGroup;
-  final bool editting;
+  final bool editing;
   final String imagePath;
   final ImageSourceType imageSourceType;
 
   @override
   List<Object?> get props =>
-      [selectedGroup.name, editting, imagePath, imageSourceType];
+      [selectedGroup.name, editing, imagePath, imageSourceType];
 
   //copy with
   AccountDetailsState copyWith(
       {AccountGroup? selectedGroup,
-      bool? editting,
+      bool? editing,
       String? imagePath,
       ImageSourceType? imageSourceType}) {
     return AccountDetailsState(
         imageSourceType: imageSourceType ?? this.imageSourceType,
         imagePath: imagePath ?? this.imagePath,
         selectedGroup: selectedGroup ?? this.selectedGroup,
-        editting: editting ?? this.editting);
+        editing: editing ?? this.editing);
   }
 }
 
 class AccountDetailsInitial extends AccountDetailsState {
   const AccountDetailsInitial({
-    required super.editting,
+    required super.editing,
     required super.imagePath,
     required super.imageSourceType,
     required super.selectedGroup,
@@ -140,7 +140,7 @@ class ErrorSavingState extends AccountDetailsState {
   const ErrorSavingState({
     required this.dateTime,
     required this.error,
-    required super.editting,
+    required super.editing,
     required super.imagePath,
     required super.imageSourceType,
     required super.selectedGroup,

@@ -31,11 +31,11 @@ class _GlobalImageSelectorOrganismState
   @override
   void initState() {
     super.initState();
-    path = widget.image.path;
+    path = widget.image.data;
     imageSourceType = widget.image.source;
     textEdController = TextEditingController(
         text: (widget.image.source == ImageSourceType.network)
-            ? widget.image.path
+            ? widget.image.data
             : '');
     initAssetImages();
   }

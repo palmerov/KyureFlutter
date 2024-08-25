@@ -126,7 +126,7 @@ class VaultService {
 
   File getVaultFile() {
     return File(concatPath(
-        localDataProvider.rootVaultDir.path,
+        localDataProvider.rootVaultDir.data,
         _localVaultRegisters
             .firstWhere((element) => element.name == _vaultName)
             .path));
@@ -405,7 +405,7 @@ class VaultService {
     account.fieldPassword.data = '';
     account.fieldPassword.name = '';
     account.name = '';
-    account.image = ImageSource(path: '', source: ImageSourceType.asset);
+    account.image = ImageSource(data: '', source: ImageSourceType.asset);
     _vaultData!.accounts.remove(account.id);
     _vaultData!.deletedAccounts[account.id] = account;
     _accounts!

@@ -33,7 +33,7 @@ class KyTheme extends InheritedWidget {
           surface: Colors.black,
           onSurface: Color.fromARGB(255, 230, 230, 230)));
 
-  bool get dark => theme.brightness == Brightness.light;
+  bool get dark => theme.brightness == Brightness.dark;
   final Color _colorPrimarySmoothDark =
       const Color.fromARGB(255, 192, 214, 226);
 

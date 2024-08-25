@@ -33,6 +33,7 @@ class DropboxApiService {
     if (authorizationCode == null) {
       throw Exception('Authorization code is null');
     }
+    init();
     final apiResponse = await _dio.post(
       DropboxValues.oauthTokenUrl,
       options: Options(contentType: HttpContentType.xWwwFormUrlencoded.value),

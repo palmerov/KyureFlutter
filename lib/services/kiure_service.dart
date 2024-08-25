@@ -139,6 +139,7 @@ class KiureService {
   List<Account> get vaultRecentAccounts => _vaultRecentAccounts;
 
   addToRecents(Account account) async {
+    if(vaultName == null) return;
     if (_recentAccountIds.containsKey(vaultName!)) {
       int index = _vaultRecentAccounts
           .indexWhere((element) => element.id == account.id);

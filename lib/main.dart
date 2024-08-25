@@ -125,7 +125,7 @@ class ApplicationBloc extends Cubit<ApplicationState> {
             SubMenu(
                 label: e.name,
                 image: e.image.source == ImageSourceType.asset
-                    ? e.image.path
+                    ? e.image.data
                     : null,
                 children: [
                   MenuItemLabel(

@@ -47,18 +47,18 @@ final routerConfig = GoRouter(navigatorKey: kiureNavigatorKey, routes: [
             name: KyRoutes.accountEditor.name,
             pageBuilder: (context, state) {
               int id = int.parse(state.uri.queryParameters['id'] ?? '-1');
-              bool? editting =
-                  state.uri.queryParameters['editting'] == 'true' ? true : null;
+              bool? editing =
+                  state.uri.queryParameters['editing'] == 'true' ? true : null;
               int groupId =
                   int.parse(state.uri.queryParameters['groupId'] ?? '-1');
               return MaterialPage(
                   child: AccountDetailsPage(
-                      editing: editting ?? id < 0,
+                      editing: editing ?? id < 0,
                       account: id > 0
                           ? serviceLocator
                               .getVaultService()
                               .findAccountById(id)!
-                          : AccountUtils.generateEmptyAccount(groupId)));
+                          : Account.emptyWith(groupId: groupId)));
             }),
         GoRoute(
             path: KyRoutes.groupEditor.name,

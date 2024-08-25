@@ -60,19 +60,4 @@ class AccountUtils {
         .replaceAll('ü', 'u')
         .replaceAll('ñ', 'n');
   }
-
-  static Account generateEmptyAccount(int groupId) {
-    return Account(
-        id: -1,
-        groupId: groupId,
-        modifDate: DateTime.now(),
-        status: LifeStatus.active,
-        name: '',
-        image: ImageSource(
-            source: ImageSourceType.asset,
-            path: 'assets/web_icons/squared.png'),
-        fieldUsername: AccountField(name: 'Nombre de usuario', data: ''),
-        fieldPassword:
-            AccountField(name: 'Contraseña', data: '', visible: false));
-  }
 }

@@ -123,9 +123,8 @@ class CloudView extends StatelessWidget {
                     ],
                     if (state.waitingForToken) ...[
                       FilledButton(
-                          onPressed: () {
-                            bloc.setupDropBoxToken(_textController.text);
-                          },
+                          onPressed: () =>
+                              bloc.setupDropBoxToken(_textController.text),
                           child: const Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
